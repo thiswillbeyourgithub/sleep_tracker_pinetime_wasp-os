@@ -25,3 +25,5 @@
 **misc**
 * turn off the Bluetooth connection when no phone is connected
 * turn off the screen during the night
+* make sure to not use more than X% of the battery in all cases
+* make sure to turn off if sleep lasts more than 12h (in which case the user forgot to disable it)
