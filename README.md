@@ -1,5 +1,5 @@
-# sleep_tracker_pinetime_wasp-os
-A project of sleep tracker for the [pinetime smartwatch](https://pine64.com/product/pinetime-smartwatch-sealed/) by Pine64, on python, to run on [wasp-os](https://github.com/daniel-thompson/wasp-os).
+# Waspos Sleep Tracker
+**Goal:** sleep tracker for the [pinetime smartwatch](https://pine64.com/product/pinetime-smartwatch-sealed/) by Pine64, on python, to run on [wasp-os](https://github.com/daniel-thompson/wasp-os).
 
 ## Note to reader:
 * I'm starting the project around January 2022
