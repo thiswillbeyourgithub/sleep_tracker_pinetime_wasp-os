@@ -28,3 +28,4 @@
 * make sure to not use more than X% of the battery in all cases
 * make sure to turn off if sleep lasts more than 12h (in which case the user forgot to disable it)
 * ability to send in real time to Bluetooth device the current sleep stage you're probably in. For use in Targeted Memory Reactivation.
+* hardcode limits to avoid issues if heart rate is suddenly found to be through the roof or something
