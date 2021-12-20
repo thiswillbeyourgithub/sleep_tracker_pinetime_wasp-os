@@ -20,11 +20,11 @@
 
 **settings panel**
 * to specify how early the watch can wake you
-* to specify a battery threshold under which it sould not keep tracking sleep, to make sure you don't drain the battery and end up missing the alarm clock
+* to specify a battery threshold under which it should not keep tracking sleep, to make sure you don't drain the battery and end up missing the alarm clock
 
 **misc**
 * turn off the Bluetooth connection when no phone is connected
 * turn off the screen during the night
 * make sure to not use more than X% of the battery in all cases
 * make sure to turn off if sleep lasts more than 12h (in which case the user forgot to disable it)
-* ability to send in real time to bluetooth device the current sleep stage you're probably in. For use in Targeted Memory Reactivation.
+* ability to send in real time to Bluetooth device the current sleep stage you're probably in. For use in Targeted Memory Reactivation.
