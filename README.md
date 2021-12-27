@@ -6,7 +6,10 @@
 * I created this repository before even receiving my pine time and despite a very busy schedule to make sure no one else starts a similar project and end up duplicating efforts for nothing :)
 * If you're interested or have any kind of things to say about this, **please** open an issue and tell me all about it :)
 
-## Currently planned features:
+## Roadmap / Currently planned features:
+**First step**
+* focus on logging your sleep to accumulate data and share it on github. The more data you have the easier it will be to calibrate the algorithm.
+
 **sleep tracking**
 * tracks sleep using wrist motion data and occasional heart rate monitoring
     * each night is recorded in a file that can be easily sent back to the phone
