@@ -18,7 +18,7 @@
     * if you actually use the watch during the night, make sure to count it as wakefulness
 
 **alarm clock**
-* setting up an alarm should suggest the most appropriate sleep duration like what [sleepyti.me](http://sleepyti.me) does
+* setting up an alarm should suggest the most appropriate sleep duration like what [sleepyti.me](http://sleepyti.me) does, so either sleep duration or by wake up time
 * try to optimize the wake up time based on inferred sleep stage
 
 **settings panel**
