@@ -32,6 +32,7 @@
 * make sure to turn off if sleep lasts more than 12h (in which case the user forgot to disable it)
 * ability to send in real time to Bluetooth device the current sleep stage you're probably in. For use in Targeted Memory Reactivation.
 * hardcode limits to avoid issues if heart rate is suddenly found to be through the roof or something
+* maybe the least cpu intensive way to compute optimal wake up time would be to compute least square difference with sinusoidal with varying periods and phases.
 
 **Features that I'm note sure yet**
 * should the watch ask you after waking up to rate your sleep on a simple scale?
