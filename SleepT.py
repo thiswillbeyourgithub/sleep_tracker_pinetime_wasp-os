@@ -18,8 +18,8 @@ import watch
 import widgets
 
 
-class SleepTrackerApp():
-    NAME = 'ST'
+class SleepTApp():
+    NAME = 'SleepT'
 
     def __init__(self):
         self.filep = "sleep_tracking.txt"
