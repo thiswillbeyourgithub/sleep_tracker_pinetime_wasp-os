@@ -27,7 +27,7 @@ class SleepTApp():
 
     def __init__(self):
         self.filep = "sleep_tracking.txt"
-        self.freq = 5  # poll accelerometer data every X minutes
+        self.freq = 60  # poll accelerometer data every X seconds
         assert self.freq < 60
         try:
             f = open(self.filep, "r")
@@ -54,16 +54,8 @@ class SleepTApp():
         """
         adds an alarm to the next 5 minutes to log the accelerometer data
         once
-        In the current implementation, time.mktime takes care of the modulo
-        if for example the next alarm is at 4h65minutes
         """
-        now = watch.rtc.get_localtime()
-        yyyy = now[0]
-        mm = now[1]
-        dd = now[2]
-        hh = now[3]
-        mn = now[4] + self.freq
-        self.next_al = time.mktime((yyyy, mm, dd, hh, mn, 0, 0, 0, 0))
+        self.next_al = time.mktime(watch.rtc.get_localtime()) + self.freq
         wasp.system.set_alarm(self.next_al, self._trackOnce)
 
     def touch(self, event):
