@@ -99,15 +99,15 @@ class SleepTApp():
         draw.fill(0)
         draw.string("Sleep Tracker", 40, 0)
         if self._tracking is None:
-            self.btn_on = widgets.Button(x=50, y=120, w=100, h=100, label="On")
+            self.btn_on = widgets.Button(x=0, y=170, w=240, h=69, label="On")
             self.btn_on.draw()
             self.btn_off = None
         else:
-            self.btn_off = widgets.Button(x=50, y=120, w=100, h=100, label="Off")
+            self.btn_off = widgets.Button(x=0, y=170, w=240, h=69, label="Off")
             h = str(self._tracking[0])
             m = str(self._tracking[1])
             draw.string('Started at', 50, 70)
-            draw.string(h + "h" + m + "m", 50, 80)
+            draw.string(h + "h" + m + "m", 50, 90)
             self.btn_off.draw()
             self.btn_on = None
         wasp.system.bar.clock = True
