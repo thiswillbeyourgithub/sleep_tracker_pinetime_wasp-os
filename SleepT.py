@@ -13,6 +13,7 @@ during the night. It can also compute the best time to wake you up, up to
 """
 
 import wasp
+import time
 import watch
 import widgets
 
@@ -64,7 +65,7 @@ class SleepTrackerApp():
         if hh >= 24:
             hh -= 24
             dd += 1
-        self.next_al = (yyyy, mm, dd, hh, mn, 0, 0, 0, 0)
+        self.next_al = time.mktime((yyyy, mm, dd, hh, mn, 0, 0, 0, 0))
         wasp.system.set_alarm(self.next_al, self._trackOnce)
 
     def touch(self, event):
