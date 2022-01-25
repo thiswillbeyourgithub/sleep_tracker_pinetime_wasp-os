@@ -54,8 +54,8 @@ class SleepTApp():
         """
         adds an alarm to the next 5 minutes to log the accelerometer data
         once
-        In the current implementation, if the night starts on the last day of
-        the month, it will probably create a bug.
+        In the current implementation, time.mktime takes care of the modulo
+        if for example the next alarm is at 4h65minutes
         """
         now = watch.rtc.get_localtime()
         yyyy = now[0]
@@ -63,12 +63,6 @@ class SleepTApp():
         dd = now[2]
         hh = now[3]
         mn = now[4] + self.freq
-        if mn >= 60:
-            mn -= 60
-            hh += 1
-        if hh >= 24:
-            hh -= 24
-            dd += 1
         self.next_al = time.mktime((yyyy, mm, dd, hh, mn, 0, 0, 0, 0))
         wasp.system.set_alarm(self.next_al, self._trackOnce)
 
