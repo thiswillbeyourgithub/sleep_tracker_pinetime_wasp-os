@@ -17,6 +17,10 @@ import time
 import watch
 import widgets
 
+# TODO : 
+# * use one file per recording
+# * handle last time of the month issue
+# * 
 
 class SleepTApp():
     NAME = 'SleepT'
