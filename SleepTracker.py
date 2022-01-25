@@ -18,10 +18,12 @@ import widgets
 
 
 class SleepTrackerApp():
-    NAME = 'SleepT'
+    NAME = 'ST'
 
     def __init__(self):
         self.filep = "sleep_tracking.txt"
+        self.freq = 5  # poll accelerometer data every X minutes
+        assert self.freq < 60
         try:
             f = open(self.filep, "r")
             f.close()
@@ -43,24 +45,50 @@ class SleepTrackerApp():
         f.close()
         return True
 
+    def _add_alarm(self):
+        """
+        adds an alarm to the next 5 minutes to log the accelerometer data
+        once
+        In the current implementation, if the night starts on the last day of
+        the month, it will probably create a bug.
+        """
+        now = watch.rtc.get_localtime()
+        yyyy = now[0]
+        mm = now[1]
+        dd = now[2]
+        hh = now[3]
+        mn = now[4] + self.freq
+        if mn >= 60:
+            mn -= 60
+            hh += 1
+        if hh >= 24:
+            hh -= 24
+            dd += 1
+        self.next_al = (yyyy, mm, dd, hh, mn, 0, 0, 0, 0)
+        wasp.system.set_alarm(self.next_al, self._trackOnce)
+
     def touch(self, event):
         if self.btn_on:
             if self.btn_on.touch(event):
                 self._tracking = watch.rtc.get_time()
-                wasp.system.request_tick(300000)  # every 5 minutes
+                # add data point every self.freq minutes
+                self._add_alarm()
         else:
             if self.btn_off.touch(event):
                 self._tracking = None
+                wasp.system.cancel_alarm(self.next_al, self._trackOnce)
+                self._periodicSave()
         self._draw()
 
-    def tick(self, ticks):
+    def _trackOnce(self):
         if self._tracking is not None:
             acc = [str(x) for x in watch.accel.read_xyz()]
             self.buff += "\n" + watch.rtc.time() + ",".join(acc)
+            self._add_alarm()
             self._periodicSave()
 
     def _periodicSave(self):
-        if len(self.buff.split("\n")) > 30:
+        if len(self.buff.split("\n")) > self.freq:
             f = open(self.filep, "a")
             f.write(self.buff)
             self.buff = ""
