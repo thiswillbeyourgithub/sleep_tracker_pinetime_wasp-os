@@ -56,12 +56,13 @@ class SleepTApp():
                 self._tracking = watch.rtc.get_time()
                 # add data point every self.freq minutes
                 self._add_accel_alar()
+                self._draw()
         else:
             if self.btn_off.touch(event):
                 self._tracking = None
                 wasp.system.cancel_alarm(self.next_al, self._trackOnce)
                 self._periodicSave(force_save=True)
-        self._draw()
+                self._draw()
 
     def _trackOnce(self):
         """get one data point of accelerometer
