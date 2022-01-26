@@ -71,7 +71,7 @@ class SleepTApp():
     def _trackOnce(self):
         if self._tracking is not None:
             acc = [str(x) for x in watch.accel.read_xyz()]
-            self.buff += "\n" + str(int(watch.rtc.time())) + "," + ",".join(acc)
+            self.buff += str(int(watch.rtc.time())) + "," + ",".join(acc) + "\n"
             self._add_alarm()
             print(self.buff)
             self._periodicSave()
