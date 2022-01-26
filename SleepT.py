@@ -16,6 +16,7 @@ import wasp
 import time
 import watch
 import widgets
+import os
 
 # TODO : 
 # * 
@@ -26,6 +27,8 @@ class SleepTApp():
     def __init__(self):
         self.freq = 60  # poll accelerometer data every X seconds
         self._tracking = None  # None = not tracking, else = start timestamp
+        if not os.path.exists("sleep_accel_data"):
+            os.makedirs("sleep_accel_data")
 
     def foreground(self):
         self._draw()
@@ -52,7 +55,7 @@ class SleepTApp():
                 self.buff = ""  # accel data not yet written to disk
                 # create one file for each run
                 tod = [str(x) for x in watch.rtc.get_localtime()[0:5]]
-                self.filep = "sleep_data_" + "_".join(tod) + ".txt"
+                self.filep = "sleep_accel_data/" + "_".join(tod) + ".txt"
                 self._tracking = watch.rtc.get_time()
                 # add data point every self.freq minutes
                 self._add_accel_alar()
