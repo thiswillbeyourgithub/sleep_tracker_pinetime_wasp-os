@@ -60,7 +60,7 @@ class SleepTApp():
             if self.btn_off.touch(event):
                 self._tracking = None
                 wasp.system.cancel_alarm(self.next_al, self._trackOnce)
-                self._periodicSave()
+                self._periodicSave(force_save=True)
         self._draw()
 
     def _trackOnce(self):
@@ -72,8 +72,7 @@ class SleepTApp():
             self._add_accel_alar()
             self._periodicSave()
 
-    def _periodicSave(self):
-        if len(self.buff.split("\n")) > self.freq:
+    def _periodicSave(self, force_save=False):
         "save data to file only every few checks"
         if len(self.buff.split("\n")) > 20 or force_save:
             f = open(self.filep, "a")
