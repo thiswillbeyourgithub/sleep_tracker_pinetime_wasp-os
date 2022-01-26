@@ -19,7 +19,7 @@ import wasp
 import time
 import watch
 import widgets
-import os
+from shell import mkdir
 
 # TODO : 
 # * 
@@ -30,8 +30,7 @@ class SleepTApp():
     def __init__(self):
         self.freq = 60  # poll accelerometer data every X seconds
         self._tracking = None  # None = not tracking, else = start timestamp
-        if not os.path.exists("sleep_accel_data"):
-            os.makedirs("sleep_accel_data")
+        mkdir("sleep_accel_data")
 
     def foreground(self):
         self._draw()
