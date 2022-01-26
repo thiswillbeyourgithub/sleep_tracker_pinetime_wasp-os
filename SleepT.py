@@ -38,7 +38,7 @@ class SleepTApp():
             self.buff = ""
             f.close()
 
-    def _add_alarm(self):
+    def _add_accel_alar(self):
         """
         adds an alarm to the next 5 minutes to log the accelerometer data
         once
@@ -54,7 +54,7 @@ class SleepTApp():
                 self.filep = "sleep_data_" + "_".join(tod) + ".txt"
                 self._tracking = watch.rtc.get_time()
                 # add data point every self.freq minutes
-                self._add_alarm()
+                self._add_accel_alar()
                 self.buff = ""  # accel data not yet written to disk
         else:
             if self.btn_off.touch(event):
@@ -67,8 +67,7 @@ class SleepTApp():
         if self._tracking is not None:
             acc = [str(x) for x in watch.accel.read_xyz()]
             self.buff += str(int(watch.rtc.time())) + "," + ",".join(acc) + "\n"
-            self._add_alarm()
-            print(self.buff)
+            self._add_accel_alar()
             self._periodicSave()
 
     def _periodicSave(self):
