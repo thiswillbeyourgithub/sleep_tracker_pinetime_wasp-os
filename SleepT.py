@@ -18,7 +18,7 @@ import watch
 import widgets
 
 # TODO : 
-# * use one file per recording
+# * 
 
 class SleepTApp():
     NAME = 'SleepT'
