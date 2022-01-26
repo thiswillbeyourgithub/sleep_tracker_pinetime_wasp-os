@@ -49,13 +49,13 @@ class SleepTApp():
     def touch(self, event):
         if self.btn_on:
             if self.btn_on.touch(event):
+                self.buff = ""  # accel data not yet written to disk
                 # create one file for each run
                 tod = [str(x) for x in watch.rtc.get_localtime()[0:5]]
                 self.filep = "sleep_data_" + "_".join(tod) + ".txt"
                 self._tracking = watch.rtc.get_time()
                 # add data point every self.freq minutes
                 self._add_accel_alar()
-                self.buff = ""  # accel data not yet written to disk
         else:
             if self.btn_off.touch(event):
                 self._tracking = None
