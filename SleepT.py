@@ -30,7 +30,10 @@ class SleepTApp():
     def __init__(self):
         self.freq = 60  # poll accelerometer data every X seconds
         self._tracking = None  # None = not tracking, else = start timestamp
-        mkdir("sleep_accel_data")
+        try:
+            mkdir("sleep_accel_data")
+        except FileExistsError:
+            pass
 
     def foreground(self):
         self._draw()
