@@ -32,11 +32,11 @@ class SleepTApp():
         wasp.system.request_event(wasp.EventMask.TOUCH)
 
     def background(self):
-        f = open(self.filep, "a")
-        f.write(self.buff)
-        self.buff = ""
-        f.close()
-        return True
+        if self._tracking is not None:
+            f = open(self.filep, "a")
+            f.write(self.buff)
+            self.buff = ""
+            f.close()
 
     def _add_alarm(self):
         """
