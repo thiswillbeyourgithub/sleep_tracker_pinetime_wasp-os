@@ -10,6 +10,9 @@ End goal:
 This app is designed to track accelerometer and heart rate data periodically
 during the night. It can also compute the best time to wake you up, up to
 30 minutes before the alarm you set up manually.
+
+Current state:
+Trying to log my sleep data for a few days prior to working on the algorithm
 """
 
 import wasp
