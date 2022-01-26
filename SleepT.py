@@ -26,7 +26,6 @@ class SleepTApp():
     def __init__(self):
         self.filep = "sleep_tracking.txt"
         self.freq = 60  # poll accelerometer data every X seconds
-        assert self.freq < 60
         try:
             f = open(self.filep, "r")
             f.close()
