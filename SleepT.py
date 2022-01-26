@@ -24,16 +24,7 @@ class SleepTApp():
     NAME = 'SleepT'
 
     def __init__(self):
-        self.filep = "sleep_tracking.txt"
         self.freq = 60  # poll accelerometer data every X seconds
-        try:
-            f = open(self.filep, "r")
-            f.close()
-        except FileNotFoundError:
-            f = open(self.filep, "w")
-            f.write("")
-            f.close()
-        self.buff = ""  # accel data not yet written to disk
         self._tracking = None  # None = not tracking, else = start timestamp
 
     def foreground(self):
@@ -58,9 +49,13 @@ class SleepTApp():
     def touch(self, event):
         if self.btn_on:
             if self.btn_on.touch(event):
+                # create one file for each run
+                tod = [str(x) for x in watch.rtc.get_localtime()[0:5]]
+                self.filep = "sleep_data_" + "_".join(tod) + ".txt"
                 self._tracking = watch.rtc.get_time()
                 # add data point every self.freq minutes
                 self._add_alarm()
+                self.buff = ""  # accel data not yet written to disk
         else:
             if self.btn_off.touch(event):
                 self._tracking = None
