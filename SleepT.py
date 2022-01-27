@@ -21,8 +21,6 @@ import watch
 import widgets
 from shell import mkdir
 
-# TODO : 
-# * 
 
 class SleepTApp():
     NAME = 'SleepT'

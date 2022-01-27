@@ -15,7 +15,7 @@
 
 ## Roadmap / Currently planned features:
 **First step**
-* focus on logging your sleep to accumulate data and share it on github. The more data you have the easier it will be to calibrate the algorithm.
+* ~~focus on logging your sleep to accumulate data and share it on github~~DONE. The more data you have the easier it will be to calibrate the algorithm.
 
 **sleep tracking**
 * tracks sleep using wrist motion data and occasional heart rate monitoring
