@@ -24,7 +24,7 @@ import fonts
 
 
 class SleepTApp():
-    NAME = 'SleepT'
+    NAME = 'ZzzTrck'
 
     def __init__(self):
         self.freq = 300  # poll accelerometer data every X seconds
