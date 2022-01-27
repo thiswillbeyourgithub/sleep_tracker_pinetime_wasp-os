@@ -20,6 +20,7 @@ import time
 import watch
 import widgets
 import shell
+import fonts
 
 
 class SleepTApp():
@@ -28,6 +29,7 @@ class SleepTApp():
     def __init__(self):
         self.freq = 300  # poll accelerometer data every X seconds
         self._tracking = False  # False = not tracking, True = currently tracking
+        self.font = fonts.sans18
         try:
             shell.mkdir("sleep_accel_data")
         except:  # file exists
@@ -85,19 +87,21 @@ class SleepTApp():
         """GUI"""
         draw = wasp.watch.drawable
         draw.fill(0)
-        wasp.system.bar.clock = True
-        wasp.system.bar.battery = True
-        draw.string("Sleep Tracker", 40, 0)
+        draw.set_font(self.font)
         if self._tracking:
-            self.btn_off = widgets.Button(x=0, y=170, w=240, h=69, label="Off")
+            self.btn_off = widgets.Button(x=0, y=170, w=240, h=69, label="Stop tracking")
+            self.btn_off.draw()
             h = str(self._start_t[0])
             m = str(self._start_t[1])
             draw.string('Started at ' + h + ":" + m, 0, 70)
             draw.string("data:" + str(self._data_point_nb), 0, 90)
-            draw.string("bat:" + str(watch.battery.level()) + "%", 0, 110)
-            self.btn_off.draw()
             self.btn_on = None
         else:
-            self.btn_on = widgets.Button(x=0, y=170, w=240, h=69, label="On")
+            draw.string('Track your sleep' , 0, 70)
+            self.btn_on = widgets.Button(x=0, y=170, w=240, h=69, label="Start tracking")
             self.btn_on.draw()
             self.btn_off = None
+        self.cl = widgets.Clock(True)
+        self.cl.draw()
+        bat = widgets.BatteryMeter()
+        bat.draw()
