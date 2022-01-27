@@ -9,8 +9,8 @@
     * **Instructions**: (with modified wasp-os that exposes accel data)
         * get the latest python file : SleepT.py
         * compile it : `./micropython/mpy-cross/mpy-cross -mno-unicode -march=armv7m SleepT.py`
-        * send compiled : `./tools/wasptool --verbose --upload SleepT.mpy --binary`
-        * register compiled : `./tools/wasptool --verbose --eval "wasp.system.register('SleepT.SleepTApp')`
+        * send compiled : `./tools/wasptool --verbose --upload SleepT.mpy --as apps/SleepT.mpy --binary`
+        * register compiled : `./tools/wasptool --verbose --eval "wasp.system.register('apps.SleepT.SleepTApp')`
         * run it!
 
 ## Roadmap / Currently planned features:
