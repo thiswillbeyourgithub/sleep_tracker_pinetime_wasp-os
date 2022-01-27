@@ -26,7 +26,7 @@ class SleepTApp():
     NAME = 'SleepT'
 
     def __init__(self):
-        self.freq = 60  # poll accelerometer data every X seconds
+        self.freq = 300  # poll accelerometer data every X seconds
         self._tracking = None  # None = not tracking, else = start timestamp
         try:
             shell.mkdir("sleep_accel_data")
