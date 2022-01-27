@@ -31,7 +31,7 @@ class ZzzTrackerApp():
         self._tracking = False  # False = not tracking, True = currently tracking
         self.font = fonts.sans18
         try:
-            shell.mkdir("sleep_accel_data")
+            shell.mkdir("logs/sleep/")
         except:  # file exists
             pass
 
@@ -54,7 +54,7 @@ class ZzzTrackerApp():
                 self._start_t = watch.rtc.get_time()
 
                 # create one file per recording session:
-                self.filep = "sleep_accel_data/" + "_".join(map(str, watch.rtc.get_localtime()[0:5])) + ".csv"
+                self.filep = "logs/sleep/" + "_".join(map(str, watch.rtc.get_localtime()[0:5])) + ".csv"
                 self._add_accel_alar()
         else:
             if self.btn_off.touch(event):
