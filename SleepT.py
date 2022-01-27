@@ -47,10 +47,8 @@ class SleepTApp():
             f.close()
 
     def _add_accel_alar(self):
-        """
-        set an alarm, due in self.freq minutes, to log the accelerometer data
-        once
-        """
+        """set an alarm, due in self.freq minutes, to log the accelerometer data
+        once"""
         self.next_al = time.mktime(watch.rtc.get_localtime()) + self.freq
         wasp.system.set_alarm(self.next_al, self._trackOnce)
 
@@ -82,7 +80,7 @@ class SleepTApp():
             self._periodicSave()
 
     def _periodicSave(self, force_save=False):
-        "save data to file only every few checks"
+        """save data to file only every few checks"""
         if len(self.buff.split("\n")) > 20 or force_save:
             f = open(self.filep, "a")
             f.write(self.buff)
@@ -90,7 +88,7 @@ class SleepTApp():
             f.close()
 
     def _draw(self):
-        "GUI"
+        """GUI"""
         draw = wasp.watch.drawable
         draw.fill(0)
         draw.string("Sleep Tracker", 40, 0)
