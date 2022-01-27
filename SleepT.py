@@ -68,7 +68,7 @@ class SleepTApp():
         if self._tracking:
             acc = [str(x) for x in watch.accel.read_xyz()]
             self._data_point_nb += 1
-            self.buff += str(self._data_point_nb) + "," + str(int(watch.rtc.time())) + "," + ",".join(acc) + "\n"
+            self.buff += str(self._data_point_nb) + "," + str(int(watch.rtc.time())) + "," + ",".join(acc) + "," + str(watch.battery.level()) + "\n"
             self._add_accel_alar()
             self._periodicSave(force_save=True)
 
