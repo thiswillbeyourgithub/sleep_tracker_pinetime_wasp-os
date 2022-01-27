@@ -61,14 +61,13 @@ class SleepTApp():
                 # create one file per recording session:
                 self.filep = "sleep_accel_data/" + "_".join(map(str, watch.rtc.get_localtime()[0:5])) + ".csv"
                 self._add_accel_alar()
-                self._draw()
         else:
             if self.btn_off.touch(event):
                 self._tracking = False
                 self.start_t = None
                 wasp.system.cancel_alarm(self.next_al, self._trackOnce)
                 self._periodicSave(force_save=True)
-                self._draw()
+        self._draw()
 
     def _trackOnce(self):
         """get one data point of accelerometer
@@ -78,20 +77,23 @@ class SleepTApp():
             self._data_point_nb += 1
             self.buff += str(self._data_point_nb) + "," + str(int(watch.rtc.time())) + "," + ",".join(acc) + "\n"
             self._add_accel_alar()
-            self._periodicSave()
+            self._periodicSave(force_save=True)
 
     def _periodicSave(self, force_save=False):
         """save data to file only every few checks"""
-        if len(self.buff.split("\n")) > 20 or force_save:
+        if len(self.buff.split("\n")) > 5 or force_save:
             f = open(self.filep, "a")
             f.write(self.buff)
             self.buff = ""
             f.close()
+            wasp.gc.collect()
 
     def _draw(self):
         """GUI"""
         draw = wasp.watch.drawable
         draw.fill(0)
+        wasp.system.bar.clock = True
+        wasp.system.bar.battery = True
         draw.string("Sleep Tracker", 40, 0)
         if self._tracking:
             self.btn_off = widgets.Button(x=0, y=170, w=240, h=69, label="Off")
