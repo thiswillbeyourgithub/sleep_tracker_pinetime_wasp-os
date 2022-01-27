@@ -37,13 +37,6 @@ class SleepTApp():
         self._draw()
         wasp.system.request_event(wasp.EventMask.TOUCH)
 
-    def background(self):
-        if self._tracking is not None:
-            f = open(self.filep, "a")
-            f.write(self.buff)
-            self.buff = ""
-            f.close()
-
     def _add_accel_alar(self):
         """set an alarm, due in self.freq minutes, to log the accelerometer data
         once"""
