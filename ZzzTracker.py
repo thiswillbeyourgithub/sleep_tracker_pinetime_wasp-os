@@ -16,12 +16,16 @@ Trying to log my sleep data for a few days prior to working on the algorithm
 """
 
 import wasp
-from math import atan, pi
+from math import atan, pi, pow
 import time
 import watch
 import widgets
 from shell import mkdir
 import fonts
+from micropython import const
+
+_RAD = 180/pi
+_OFFSET = const(1600000000)
 
 
 class ZzzTrackerApp():
@@ -75,21 +79,23 @@ class ZzzTrackerApp():
 
     def _trackOnce(self):
         """get one data point of accelerometer
-        this function is called every self.freq seconds"""
+        this function is called every self.freq seconds
+        I kept only the first 5 digits of some values to save space"""
         if self._tracking:
             acc = watch.accel.read_xyz()
             self._data_point_nb += 1
-            angle = atan(acc[2] / (acc[0]**2 + acc[1]**2 + 0.00001)) * 180 / pi
+            # formula from https://www.nature.com/articles/s41598-018-31266-z
+            angle = atan(acc[2] / (pow(acc[0], 2) + pow(acc[1], 2) + 0.0000001)) * _RAD
 
             val = []
-            val.append(self._data_point_nb)
-            val.append(int(watch.rtc.time() - 1600000000))
-            val.extend([x*180/pi for x in acc])
-            val.append(angle)
-            val.append(watch.battery.level())
-            print(val)
+            val.append(str(self._data_point_nb))
+            val.append(str(int(watch.rtc.time() - _OFFSET)))  # more compact
+            val.extend([str(x * _RAD)[0:5] for x in acc])
+            val.append(str(angle)[0:5])
+            val.append(str(watch.battery.level()))
+            #print(val)
 
-            self.buff += ",".join([str(x) for x in val]) + "\n"
+            self.buff += ",".join(val) + "\n"
             self._add_accel_alar()
             self._periodicSave(force_save=True)
 
