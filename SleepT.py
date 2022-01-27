@@ -19,7 +19,7 @@ import wasp
 import time
 import watch
 import widgets
-from shell import mkdir
+import shell
 
 
 class SleepTApp():
@@ -29,8 +29,8 @@ class SleepTApp():
         self.freq = 60  # poll accelerometer data every X seconds
         self._tracking = None  # None = not tracking, else = start timestamp
         try:
-            mkdir("sleep_accel_data")
-        except FileExistsError:
+            shell.mkdir("sleep_accel_data")
+        except:  # file exists
             pass
 
     def foreground(self):
