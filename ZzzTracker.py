@@ -31,8 +31,12 @@ class ZzzTrackerApp():
         self._tracking = False  # False = not tracking, True = currently tracking
         self.font = fonts.sans18
         try:
-            shell.mkdir("logs/sleep/")
-        except:  # file exists
+            shell.mkdir("logs/")
+        except:  # folder already exists
+            pass
+        try:
+            shell.mkdir("logs/sleep")
+        except:  # folder exists
             pass
 
     def foreground(self):
