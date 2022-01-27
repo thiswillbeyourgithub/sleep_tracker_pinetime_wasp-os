@@ -43,6 +43,9 @@ class ZzzTrackerApp():
         self._draw()
         wasp.system.request_event(wasp.EventMask.TOUCH)
 
+    def sleep(self):
+        """keep running in the background"""
+        return False
 
     def touch(self, event):
         if self.btn_on:
