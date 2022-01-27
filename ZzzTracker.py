@@ -23,7 +23,7 @@ import shell
 import fonts
 
 
-class SleepTApp():
+class ZzzTrackerApp():
     NAME = 'ZzzTrck'
 
     def __init__(self):

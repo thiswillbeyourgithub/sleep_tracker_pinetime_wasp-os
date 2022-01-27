@@ -7,10 +7,10 @@
 * Status:
     * Currently a sleep logger app, this will help run code on the simulator
     * **Instructions**: (with modified wasp-os that exposes accel data)
-        * get the latest python file : SleepT.py
-        * compile it : `./micropython/mpy-cross/mpy-cross -mno-unicode -march=armv7m SleepT.py`
-        * send compiled : `./tools/wasptool --verbose --upload SleepT.mpy --as apps/SleepT.mpy --binary`
-        * register compiled : `./tools/wasptool --verbose --eval "wasp.system.register('apps.SleepT.SleepTApp')`
+        * get the latest python file : ZzzTracker.py
+        * compile it : `./micropython/mpy-cross/mpy-cross -mno-unicode -march=armv7m ZzzTracker.py`
+        * send compiled : `./tools/wasptool --verbose --upload ZzzTracker.mpy --as apps/ZzzTracker.mpy --binary`
+        * register compiled : `./tools/wasptool --verbose --eval "wasp.system.register('apps.ZzzTracker.ZzzTracker')`
         * run it!
 
 ## Roadmap / Currently planned features:
