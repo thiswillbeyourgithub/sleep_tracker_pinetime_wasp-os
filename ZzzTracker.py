@@ -43,11 +43,6 @@ class ZzzTrackerApp():
         self._draw()
         wasp.system.request_event(wasp.EventMask.TOUCH)
 
-    def _add_accel_alar(self):
-        """set an alarm, due in self.freq minutes, to log the accelerometer data
-        once"""
-        self.next_al = time.mktime(watch.rtc.get_localtime()) + self.freq
-        wasp.system.set_alarm(self.next_al, self._trackOnce)
 
     def touch(self, event):
         if self.btn_on:
@@ -67,6 +62,12 @@ class ZzzTrackerApp():
                 wasp.system.cancel_alarm(self.next_al, self._trackOnce)
                 self._periodicSave(force_save=True)
         self._draw()
+
+    def _add_accel_alar(self):
+        """set an alarm, due in self.freq minutes, to log the accelerometer data
+        once"""
+        self.next_al = time.mktime(watch.rtc.get_localtime()) + self.freq
+        wasp.system.set_alarm(self.next_al, self._trackOnce)
 
     def _trackOnce(self):
         """get one data point of accelerometer
