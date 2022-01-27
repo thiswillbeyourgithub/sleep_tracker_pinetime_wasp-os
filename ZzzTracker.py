@@ -89,10 +89,10 @@ class ZzzTrackerApp():
             angle = atan(acc[2] / (pow(acc[0], 2) + pow(acc[1], 2) + 0.0000001)) * _RAD
 
             val = []
-            val.append(str(self._data_point_nb))
+            #val.append(str(self._data_point_nb))
             val.append(str(int(watch.rtc.time() - _OFFSET)))  # more compact
-            val.extend([str(x * _RAD)[0:5] for x in acc])
-            val.append(str(angle)[0:5])
+            #val.extend([str(x * _RAD)[0:5] for x in acc])
+            val.append(str(angle)[0:6])
             val.append(str(watch.battery.level()))
             #print(val)
 
