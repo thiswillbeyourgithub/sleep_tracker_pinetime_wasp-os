@@ -16,6 +16,7 @@ Trying to log my sleep data for a few days prior to working on the algorithm
 """
 
 import wasp
+from math import atan, pi
 import time
 import watch
 import widgets
@@ -76,9 +77,19 @@ class ZzzTrackerApp():
         """get one data point of accelerometer
         this function is called every self.freq seconds"""
         if self._tracking:
-            acc = [str(x) for x in watch.accel.read_xyz()]
+            acc = watch.accel.read_xyz()
             self._data_point_nb += 1
-            self.buff += str(self._data_point_nb) + "," + str(int(watch.rtc.time())) + "," + ",".join(acc) + "," + str(watch.battery.level()) + "\n"
+            angle = atan(acc[2] / (acc[0]**2 + acc[1]**2 + 0.00001)) * 180 / pi
+
+            val = []
+            val.append(self._data_point_nb)
+            val.append(int(watch.rtc.time() - 1600000000))
+            val.extend([x*180/pi for x in acc])
+            val.append(angle)
+            val.append(watch.battery.level())
+            print(val)
+
+            self.buff += ",".join([str(x) for x in val]) + "\n"
             self._add_accel_alar()
             self._periodicSave(force_save=True)
 
