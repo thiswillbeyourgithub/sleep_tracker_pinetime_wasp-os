@@ -10,7 +10,7 @@
         * get the latest python file : ZzzTracker.py
         * compile it : `./micropython/mpy-cross/mpy-cross -mno-unicode -march=armv7m ZzzTracker.py`
         * send compiled : `./tools/wasptool --verbose --upload ZzzTracker.mpy --as apps/ZzzTracker.mpy --binary`
-        * register compiled : `./tools/wasptool --verbose --eval "wasp.system.register('apps.ZzzTracker.ZzzTracker')`
+        * register compiled : `./tools/wasptool --verbose --eval "wasp.system.register('apps.ZzzTracker.ZzzTrackerApp')`
         * run it!
 
 ## Roadmap / Currently planned features:
