@@ -27,7 +27,7 @@ class SleepTApp():
 
     def __init__(self):
         self.freq = 300  # poll accelerometer data every X seconds
-        self._tracking = None  # None = not tracking, else = start timestamp
+        self._tracking = False  # False = not tracking, True = currently tracking
         try:
             shell.mkdir("sleep_accel_data")
         except:  # file exists
@@ -53,17 +53,20 @@ class SleepTApp():
     def touch(self, event):
         if self.btn_on:
             if self.btn_on.touch(event):
+                self._tracking = True
                 self.buff = ""  # accel data not yet written to disk
                 # create one file for each run
                 tod = [str(x) for x in watch.rtc.get_localtime()[0:5]]
                 self.filep = "sleep_accel_data/" + "_".join(tod) + ".txt"
-                self._tracking = watch.rtc.get_time()
                 # add data point every self.freq minutes
+                self._data_point_nb = 0  # tracks number of data_points so far
+                self._start_t = watch.rtc.get_time()
                 self._add_accel_alar()
                 self._draw()
         else:
             if self.btn_off.touch(event):
-                self._tracking = None
+                self._tracking = False
+                self.start_t = None
                 wasp.system.cancel_alarm(self.next_al, self._trackOnce)
                 self._periodicSave(force_save=True)
                 self._draw()
@@ -71,9 +74,10 @@ class SleepTApp():
     def _trackOnce(self):
         """get one data point of accelerometer
         this function is called every self.freq seconds"""
-        if self._tracking is not None:
+        if self._tracking:
             acc = [str(x) for x in watch.accel.read_xyz()]
-            self.buff += str(int(watch.rtc.time())) + "," + ",".join(acc) + "\n"
+            self._data_point_nb += 1
+            self.buff += str(self._data_point_nb) + "," + str(int(watch.rtc.time())) + "," + ",".join(acc) + "\n"
             self._add_accel_alar()
             self._periodicSave()
 
@@ -90,17 +94,16 @@ class SleepTApp():
         draw = wasp.watch.drawable
         draw.fill(0)
         draw.string("Sleep Tracker", 40, 0)
-        if self._tracking is None:
+        if self._tracking:
+            self.btn_off = widgets.Button(x=0, y=170, w=240, h=69, label="Off")
+            h = str(self._start_t[0])
+            m = str(self._start_t[1])
+            draw.string('Started at ' + h + ":" + m, 0, 70)
+            draw.string("data:" + str(self._data_point_nb), 0, 90)
+            draw.string("bat:" + str(watch.battery.level()) + "%", 0, 110)
+            self.btn_off.draw()
+            self.btn_on = None
+        else:
             self.btn_on = widgets.Button(x=0, y=170, w=240, h=69, label="On")
             self.btn_on.draw()
             self.btn_off = None
-        else:
-            self.btn_off = widgets.Button(x=0, y=170, w=240, h=69, label="Off")
-            h = str(self._tracking[0])
-            m = str(self._tracking[1])
-            draw.string('Started at', 50, 70)
-            draw.string(h + "h" + m + "m", 50, 90)
-            self.btn_off.draw()
-            self.btn_on = None
-        wasp.system.bar.clock = True
-        wasp.system.bar.battery = True
