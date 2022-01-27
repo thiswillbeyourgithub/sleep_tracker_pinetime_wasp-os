@@ -15,6 +15,7 @@ Current state:
 Trying to log my sleep data for a few days prior to working on the algorithm
 """
 
+from os import stat
 import wasp
 from math import atan, pi, pow
 import time
@@ -120,6 +121,10 @@ class ZzzTrackerApp():
             m = str(self._start_t[1])
             draw.string('Started at ' + h + ":" + m, 0, 70)
             draw.string("data:" + str(self._data_point_nb), 0, 90)
+            try:
+                draw.string("size:" + str(stat(self.filep)[6]), 0, 110)
+            except:
+                pass
             self.btn_on = None
         else:
             draw.string('Track your sleep' , 0, 70)
