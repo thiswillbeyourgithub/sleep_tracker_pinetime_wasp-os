@@ -55,12 +55,11 @@ class SleepTApp():
             if self.btn_on.touch(event):
                 self._tracking = True
                 self.buff = ""  # accel data not yet written to disk
-                # create one file for each run
-                tod = [str(x) for x in watch.rtc.get_localtime()[0:5]]
-                self.filep = "sleep_accel_data/" + "_".join(tod) + ".txt"
-                # add data point every self.freq minutes
                 self._data_point_nb = 0  # tracks number of data_points so far
                 self._start_t = watch.rtc.get_time()
+
+                # create one file per recording session:
+                self.filep = "sleep_accel_data/" + "_".join(map(str, watch.rtc.get_localtime()[0:5])) + ".csv"
                 self._add_accel_alar()
                 self._draw()
         else:
