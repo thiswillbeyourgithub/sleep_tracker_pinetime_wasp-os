@@ -4,9 +4,14 @@
 ## Note to reader:
 * I created this repository before even receiving my pine time and despite a very busy schedule to make sure no one else starts a similar project and end up duplicating efforts for nothing :)
 * If you're interested or have any kind of things to say about this, **please** open an issue and tell me all about it :)
-
-## Status:
-* **trying to create a sleep logger app, this will help run code on the simulator**
+* Status:
+    * Currently a sleep logger app, this will help run code on the simulator
+    * **Instructions**: (with modified wasp-os that exposes accel data)
+        * get the latest python file : SleepT.py
+        * compile it : `./micropython/mpy-cross/mpy-cross -mno-unicode -march=armv7m SleepT.py`
+        * send compiled : `./tools/wasptool --verbose --upload SleepT.mpy --binary`
+        * register compiled : `./tools/wasptool --verbose --eval "wasp.system.register('SleepT.SleepTApp')`
+        * run it!
 
 ## Roadmap / Currently planned features:
 **First step**
