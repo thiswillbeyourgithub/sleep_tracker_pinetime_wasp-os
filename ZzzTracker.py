@@ -19,7 +19,7 @@ import wasp
 import time
 import watch
 import widgets
-import shell
+from shell import mkdir
 import fonts
 
 
@@ -31,11 +31,11 @@ class ZzzTrackerApp():
         self._tracking = False  # False = not tracking, True = currently tracking
         self.font = fonts.sans18
         try:
-            shell.mkdir("logs/")
+            mkdir("logs/")
         except:  # folder already exists
             pass
         try:
-            shell.mkdir("logs/sleep")
+            mkdir("logs/sleep")
         except:  # folder exists
             pass
 
