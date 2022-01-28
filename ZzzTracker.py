@@ -26,7 +26,6 @@ import fonts
 from micropython import const
 
 _RAD = 180/pi
-_OFFSET = const(1600000000)
 
 
 class ZzzTrackerApp():
@@ -36,6 +35,7 @@ class ZzzTrackerApp():
         self.freq = 300  # poll accelerometer data every X seconds
         self._tracking = False  # False = not tracking, True = currently tracking
         self.font = fonts.sans18
+        self.offset = None
         try:
             mkdir("logs/")
         except:  # folder already exists
@@ -60,12 +60,14 @@ class ZzzTrackerApp():
                 self.buff = ""  # accel data not yet written to disk
                 self._data_point_nb = 0  # tracks number of data_points so far
                 self._start_t = watch.rtc.get_time()
+                self.offset = int(watch.rtc.time())
 
                 # create one file per recording session:
-                self.filep = "logs/sleep/" + "_".join(map(str, watch.rtc.get_localtime()[0:5])) + ".csv"
+                self.filep = "logs/sleep/" + str(self.offset)) + ".csv"
                 self._add_accel_alar()
         else:
             if self.btn_off.touch(event):
+                self.offset = None
                 self._tracking = False
                 self.start_t = None
                 wasp.system.cancel_alarm(self.next_al, self._trackOnce)
@@ -90,7 +92,7 @@ class ZzzTrackerApp():
 
             val = []
             #val.append(str(self._data_point_nb))
-            val.append(str(int(watch.rtc.time() - _OFFSET)))  # more compact
+            val.append(str(int(watch.rtc.time() - self.offset)))  # more compact
             #val.extend([str(x * _RAD)[0:5] for x in acc])
             val.append(str(angle)[0:6])
             val.append(str(watch.battery.level()))
