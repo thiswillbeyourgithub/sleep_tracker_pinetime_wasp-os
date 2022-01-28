@@ -17,33 +17,38 @@ Trying to log my sleep data for a few days prior to working on the algorithm
 
 from os import stat
 import wasp
-from math import atan, pi, pow
+from math import atan, pow, degrees
 import time
 import watch
 import widgets
-from shell import mkdir
+from shell import mkdir, cd
 import fonts
 from micropython import const
 
-_RAD = 180/pi
+# SETTINGS:
+_POLLFREQ = const(15)  # poll accelerometer data every X seconds, they will be averaged
+_WIN_L = const(300)  # number of seconds between writing average accel values
 
+
+# not settings:
+_RATIO = const(_WIN_L / _POLLFREQ)  # save data every X data points
+_FONT = fonts.sans18
 
 class ZzzTrackerApp():
     NAME = 'ZzzTrck'
 
     def __init__(self):
-        self.freq = 300  # poll accelerometer data every X seconds
         self._tracking = False  # False = not tracking, True = currently tracking
-        self.font = fonts.sans18
-        self.offset = None
         try:
             mkdir("logs/")
         except:  # folder already exists
             pass
+        cd("logs")
         try:
-            mkdir("logs/sleep")
-        except:  # folder exists
+            mkdir("sleep")
+        except:  # folder already exists
             pass
+        cd("..")
 
     def foreground(self):
         self._draw()
@@ -54,68 +59,83 @@ class ZzzTrackerApp():
         return False
 
     def touch(self, event):
+        """either start trackign or disable it, draw the screen in all cases"""
         if self.btn_on:
             if self.btn_on.touch(event):
                 self._tracking = True
-                self.buff = ""  # accel data not yet written to disk
-                self._data_point_nb = 0  # tracks number of data_points so far
-                self._start_t = watch.rtc.get_time()
-                self.offset = int(watch.rtc.time())
+                # accel data not yet written to disk:
+                self.buff_x = 0
+                self.buff_y = 0
+                self.buff_z = 0
+                self._data_point_nb = 0  # total number of data points so far
+                self._last_checkpoint = 0  # to know when to save to file
+                self._start_t = watch.rtc.get_time()  # to display when recording started on screen
+                self.offset = const(int(watch.rtc.time()))  # makes output more compact
 
                 # create one file per recording session:
-                self.filep = "logs/sleep/" + str(self.offset)) + ".csv"
+                self.filep = "logs/sleep/" + str(self.offset) + ".csv"
                 self._add_accel_alar()
         else:
             if self.btn_off.touch(event):
-                self.offset = None
                 self._tracking = False
                 self.start_t = None
                 wasp.system.cancel_alarm(self.next_al, self._trackOnce)
-                self._periodicSave(force_save=True)
+                self._periodicSave()
+                self.offset = None
+                self._last_checkpoint = 0
         self._draw()
 
     def _add_accel_alar(self):
-        """set an alarm, due in self.freq minutes, to log the accelerometer data
+        """set an alarm, due in _POLLFREQ minutes, to log the accelerometer data
         once"""
-        self.next_al = time.mktime(watch.rtc.get_localtime()) + self.freq
+        self.next_al = time.mktime(watch.rtc.get_localtime()) + _POLLFREQ
         wasp.system.set_alarm(self.next_al, self._trackOnce)
 
     def _trackOnce(self):
-        """get one data point of accelerometer
-        this function is called every self.freq seconds
-        I kept only the first 5 digits of some values to save space"""
+        """get one data point of accelerometer every _POLLFREQ seconds and
+        they are then averaged and stored every _WIN_L seconds"""
         if self._tracking:
             acc = watch.accel.read_xyz()
+            self.buff_x += acc[0]
+            self.buff_y += acc[1]
+            self.buff_z += acc[2]
             self._data_point_nb += 1
+            self._add_accel_alar()
+            self._periodicSave()
+
+    def _periodicSave(self):
+        """save data after averageing over a window to file"""
+        n = self._data_point_nb - self._last_checkpoint
+        if n >= _RATIO:
+            x_avg = self.buff_x / n
+            y_avg = self.buff_y / n
+            z_avg = self.buff_z / n
+            self.buff_x = 0
+            self.buff_y = 0
+            self.buff_z = 0
+
             # formula from https://www.nature.com/articles/s41598-018-31266-z
-            angle = atan(acc[2] / (pow(acc[0], 2) + pow(acc[1], 2) + 0.0000001)) * _RAD
+            angl_avg = degrees(atan(z_avg / (pow(x_avg, 2) + pow(y_avg, 2) + 0.0000001)))
 
             val = []
-            #val.append(str(self._data_point_nb))
-            val.append(str(int(watch.rtc.time() - self.offset)))  # more compact
-            #val.extend([str(x * _RAD)[0:5] for x in acc])
-            val.append(str(angle)[0:6])
+            val.append(str(int(watch.rtc.time() - self.offset)))
+            val.append(str(x_avg)[0:6])
+            val.append(str(y_avg)[0:6])
+            val.append(str(z_avg)[0:6])
+            val.append(str(angl_avg)[0:6])
             val.append(str(watch.battery.level()))
-            #print(val)
 
-            self.buff += ",".join(val) + "\n"
-            self._add_accel_alar()
-            self._periodicSave(force_save=True)
-
-    def _periodicSave(self, force_save=False):
-        """save data to file only every few checks"""
-        if len(self.buff.split("\n")) > 5 or force_save:
             f = open(self.filep, "a")
-            f.write(self.buff)
-            self.buff = ""
+            f.write(",".join(val) + "\n")
             f.close()
+            self._last_checkpoint = self._data_point_nb
             wasp.gc.collect()
 
     def _draw(self):
         """GUI"""
         draw = wasp.watch.drawable
         draw.fill(0)
-        draw.set_font(self.font)
+        draw.set_font(_FONT)
         if self._tracking:
             self.btn_off = widgets.Button(x=0, y=170, w=240, h=69, label="Stop tracking")
             self.btn_off.draw()
