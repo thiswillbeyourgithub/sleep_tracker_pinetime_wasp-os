@@ -25,13 +25,10 @@ from shell import mkdir, cd
 import fonts
 from micropython import const
 
-# SETTINGS:
+
 _POLLFREQ = const(15)  # poll accelerometer data every X seconds, they will be averaged
 _WIN_L = const(300)  # number of seconds between writing average accel values
-
-
-# not settings:
-_RATIO = const(_WIN_L / _POLLFREQ)  # save data every X data points
+_RATIO = const(20)  # must be _WIN_L / _POLLFREQ, means that data will be written every X data points
 _FONT = fonts.sans18
 
 class ZzzTrackerApp():
