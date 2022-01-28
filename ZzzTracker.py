@@ -17,18 +17,27 @@ Trying to log my sleep data for a few days prior to working on the algorithm
 
 from os import stat
 from wasp import watch, system, EventMask, gc
-from math import atan, pow, degrees
 from time import mktime
+
 from watch import rtc, battery, accel
 from widgets import Clock, BatteryMeter, Button
 from shell import mkdir, cd
 from fonts import sans18
+
+from math import atan, pow, degrees, sqrt
 from micropython import const
+from array import array
 
 
-_POLLFREQ = const(15)  # poll accelerometer data every X seconds, they will be averaged
+_POLLFREQ = const(10)  # poll accelerometer data every X seconds, they will be averaged
 _WIN_L = const(300)  # number of seconds between writing average accel values
-_RATIO = const(20)  # must be _WIN_L / _POLLFREQ, means that data will be written every X data points
+_RATIO = const(30)  # must be _WIN_L / _POLLFREQ, means that data will be written every X data points
+
+_WU_ON = False  # True to activate wake up alarm, False to disable
+_WU_LAT = const(28800)  # maximum seconds of sleep before waking you up, default 28800 = 8h, will compute best wake up time from _WU_LAT - _WU_ANTICIP seconds
+_WU_ANT_ON = False
+_WU_ANTICIP = const(1800)  # default 1800 = 30 minutes
+
 _FONT = sans18
 
 class ZzzTrackerApp():
@@ -36,6 +45,7 @@ class ZzzTrackerApp():
 
     def __init__(self):
         self._tracking = False  # False = not tracking, True = currently tracking
+        self._WakingUp = False  # when True, watch is currently vibrating to wake you up
         try:
             mkdir("logs/")
         except:  # folder already exists
@@ -61,31 +71,53 @@ class ZzzTrackerApp():
             if self.btn_on.touch(event):
                 self._tracking = True
                 # accel data not yet written to disk:
-                self.buff_x = 0
-                self.buff_y = 0
-                self.buff_z = 0
+                self._buff_x = 0
+                self._buff_y = 0
+                self._buff_z = 0
                 self._data_point_nb = 0  # total number of data points so far
                 self._last_checkpoint = 0  # to know when to save to file
-                self._start_t = rtc.get_time()  # to display when recording started on screen
-                self.offset = const(int(rtc.time()))  # makes output more compact
+                self._offset = int(rtc.time())  # makes output more compact
 
                 # create one file per recording session:
-                self.filep = "logs/sleep/" + str(self.offset) + ".csv"
+                self.filep = "logs/sleep/" + str(self._offset) + ".csv"
                 self._add_accel_alar()
-        else:
+
+                # alarm in _WU_LAT seconds after tracking started to wake you up
+                if _WU_ON:
+                    self._WU_t = self._offset + _WU_LAT
+                    system.set_alarm(self._WU_t, self._listen_to_ticks)
+
+                    # alarm in _WU_ANTICIP less seconds to compute best wake up time
+                    if _WU_ANT_ON:
+                        self._WU_a = self._WU_t - _WU_ANTICIP
+                        system.set_alarm(self._WU_a, self._compute_best_WU)
+        elif self.btn_off:
             if self.btn_off.touch(event):
-                self._tracking = False
-                self.start_t = None
-                system.cancel_alarm(self.next_al, self._trackOnce)
-                self._periodicSave()
-                self.offset = None
-                self._last_checkpoint = 0
+                self._disable_tracking()
+        elif self.btn_al:
+            if self.btn_al.touch(event):
+                self._WakingUp = False
+                self._disable_tracking()
         self._draw()
+
+    def _disable_tracking(self):
+        """called by touching "STOP TRACKING" or when computing best alarm time
+        to wake up you
+        disables tracking features and alarms"""
+        self._tracking = False
+        system.cancel_alarm(self.next_al, self._trackOnce)
+        if _WU_ON:
+            system.cancel_alarm(self._WU_t, self._listen_to_ticks)
+            if _WU_ANT_ON:
+                system.cancel_alarm(self._WU_a, self._compute_best_WU)
+        self._periodicSave()
+        self._offset = None
+        self._last_checkpoint = 0
 
     def _add_accel_alar(self):
         """set an alarm, due in _POLLFREQ minutes, to log the accelerometer data
         once"""
-        self.next_al = mktime(rtc.get_localtime()) + _POLLFREQ
+        self.next_al = watch.rtc.time() + _POLLFREQ
         system.set_alarm(self.next_al, self._trackOnce)
 
     def _trackOnce(self):
@@ -93,9 +125,10 @@ class ZzzTrackerApp():
         they are then averaged and stored every _WIN_L seconds"""
         if self._tracking:
             acc = accel.read_xyz()
-            self.buff_x += acc[0]
-            self.buff_y += acc[1]
-            self.buff_z += acc[2]
+            self._buff_x += acc[0]
+            self._buff_y += acc[1]
+            self._buff_z += acc[2]
+            del acc
             self._data_point_nb += 1
             self._add_accel_alar()
             self._periodicSave()
@@ -104,18 +137,18 @@ class ZzzTrackerApp():
         """save data after averageing over a window to file"""
         n = self._data_point_nb - self._last_checkpoint
         if n >= _RATIO:
-            x_avg = self.buff_x / n
-            y_avg = self.buff_y / n
-            z_avg = self.buff_z / n
-            self.buff_x = 0
-            self.buff_y = 0
-            self.buff_z = 0
+            x_avg = self._buff_x / n
+            y_avg = self._buff_y / n
+            z_avg = self._buff_z / n
+            self._buff_x = 0
+            self._buff_y = 0
+            self._buff_z = 0
 
             # formula from https://www.nature.com/articles/s41598-018-31266-z
             angl_avg = degrees(atan(z_avg / (pow(x_avg, 2) + pow(y_avg, 2) + 0.0000001)))
 
             val = []
-            val.append(str(int(rtc.time() - self.offset)))
+            val.append(str(int(rtc.time() - self._offset)))
             val.append(str(x_avg)[0:6])
             val.append(str(y_avg)[0:6])
             val.append(str(z_avg)[0:6])
@@ -125,32 +158,91 @@ class ZzzTrackerApp():
             f = open(self.filep, "a")
             f.write(",".join(val) + "\n")
             f.close()
+
             self._last_checkpoint = self._data_point_nb
-            gc.collect()
+            del x_avg, y_avg, z_avg, angl_avg, n, val
+        gc.collect()
 
     def _draw(self):
         """GUI"""
         draw = watch.drawable
         draw.fill(0)
         draw.set_font(_FONT)
-        if self._tracking:
+        if self._WakingUp:
+            self.btn_al = Button(x=0, y=170, w=240, h=69, label="STOP")
+            self.btn_al.draw()
+            self.btn_on = None
+            self.btn_off = None
+        elif self._tracking:
             self.btn_off = Button(x=0, y=170, w=240, h=69, label="Stop tracking")
             self.btn_off.draw()
-            h = str(self._start_t[0])
-            m = str(self._start_t[1])
+            h = str(watch.time.localtime(self._offset)[3])
+            m = str(watch.time.localtime(self._offset)[4])
             draw.string('Started at ' + h + ":" + m, 0, 70)
             draw.string("data:" + str(self._data_point_nb), 0, 90)
             try:
                 draw.string("size:" + str(stat(self.filep)[6]), 0, 110)
             except:
                 pass
+            if _WU_ON:
+                h = str(watch.time.localtime(self._offset + _WU_LAT)[3])
+                m = str(watch.time.localtime(self._offset + _WU_LAT)[4])
+                if _WU_ANT_ON:
+                    word = " bef. "
+                else:
+                    word = " at "
+                draw.string("Wake up" + word + h + ":" + m, 0, 130)
             self.btn_on = None
+            self.btn_al = None
         else:
-            draw.string('Track your sleep' , 0, 70)
+            draw.string('Sleep tracker' , 0, 70)
             self.btn_on = Button(x=0, y=170, w=240, h=69, label="Start tracking")
             self.btn_on.draw()
             self.btn_off = None
+            self.btn_al = None
         self.cl = Clock(True)
         self.cl.draw()
         bat = BatteryMeter()
         bat.draw()
+
+    def _compute_best_WU(self):
+        """computes best wake up time from sleep data"""
+        return True  # disabled for now
+        # stop tracking to save memory
+        self._disable_tracking()
+        gc.collect()
+
+        # get angle over time
+        data = array("f")
+        f = open(self.filep, "r")
+        data.extend([float(line.split(",")[4]) for line in f.readlines()])
+        f.close()
+        del f
+
+        # center and scale
+        data2 = array("f")
+        data2.extend([x**2 for x in data])
+        mean = sum(data) / len(data)
+        std = sqrt((sum(data2) / len(data2)) - pow(mean, 2))
+        del data2
+        for i in range(len(data)):
+            data[i] = (data[i] - mean) / std
+
+        # find most appropriate cosine
+        # TODO
+
+        gc.collect()
+
+    def _listen_to_ticks(self):
+        """listen to ticks every second, telling the watch to vibrate"""
+        self._WakingUp = True
+        system.wake()
+        system.switch(self)
+        self._draw()
+        system.request_tick(1000)
+
+    def tick(self, ticks):
+        """vibrate to wake you up"""
+        if self._WakingUp:
+            watch.vibrator.pulse(duty=50, ms=500)
+            system.keep_awake()
