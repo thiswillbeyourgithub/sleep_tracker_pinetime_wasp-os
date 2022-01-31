@@ -96,7 +96,8 @@ class ZzzTrackerApp():
         elif self.btn_al:
             if self.btn_al.touch(event):
                 self._WakingUp = False
-                self._disable_tracking()
+                if self._tracking:
+                    self._disable_tracking()
         self._draw()
 
     def _disable_tracking(self):
