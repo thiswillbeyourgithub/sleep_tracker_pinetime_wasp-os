@@ -33,9 +33,9 @@ _POLLFREQ = const(10)  # poll accelerometer data every X seconds, they will be a
 _WIN_L = const(300)  # number of seconds between writing average accel values
 _RATIO = const(30)  # must be _WIN_L / _POLLFREQ, means that data will be written every X data points
 
-_WU_ON = False  # True to activate wake up alarm, False to disable
+_WU_ON = const(0)  # const(1) to activate wake up alarm, const(0) to disable
 _WU_LAT = const(28800)  # maximum seconds of sleep before waking you up, default 28800 = 8h, will compute best wake up time from _WU_LAT - _WU_ANTICIP seconds
-_WU_ANT_ON = False
+_WU_ANT_ON = const(0)
 _WU_ANTICIP = const(1800)  # default 1800 = 30 minutes
 
 _FONT = sans18
@@ -139,16 +139,16 @@ class ZzzTrackerApp():
             # formula from https://www.nature.com/articles/s41598-018-31266-z
             angl_avg = degrees(atan(z_avg / (pow(x_avg, 2) + pow(y_avg, 2) + 0.0000001)))
 
-            val = []
-            val.append(str(int(rtc.time() - self._offset)))
-            val.append(str(x_avg)[0:6])
-            val.append(str(y_avg)[0:6])
-            val.append(str(z_avg)[0:6])
-            val.append(str(angl_avg)[0:6])
-            val.append(str(battery.level()))
+            val = array("f")
+            val.append(int(rtc.time() - self._offset))
+            val.append(x_avg)
+            val.append(y_avg)
+            val.append(z_avg)
+            val.append(angl_avg)
+            val.append(battery.level())
 
             f = open(self.filep, "a")
-            f.write(",".join(val) + "\n")
+            f.write(",".join([str(x)[0:8] for x in val]) + "\n")
             f.close()
 
             self._last_checkpoint = self._data_point_nb
@@ -168,22 +168,18 @@ class ZzzTrackerApp():
         elif self._tracking:
             self.btn_off = Button(x=0, y=170, w=240, h=69, label="Stop tracking")
             self.btn_off.draw()
-            h = str(watch.time.localtime(self._offset)[3])
-            m = str(watch.time.localtime(self._offset)[4])
-            draw.string('Started at ' + h + ":" + m, 0, 70)
+            draw.string('Started at ' + str(watch.time.localtime(self._offset)[3]) + ":" + str(watch.time.localtime(self._offset)[4]) , 0, 70)
             draw.string("data:" + str(self._data_point_nb), 0, 90)
             try:
                 draw.string("size:" + str(stat(self.filep)[6]), 0, 110)
             except:
                 pass
             if _WU_ON:
-                h = str(watch.time.localtime(self._offset + _WU_LAT)[3])
-                m = str(watch.time.localtime(self._offset + _WU_LAT)[4])
                 if _WU_ANT_ON:
                     word = " bef. "
                 else:
                     word = " at "
-                draw.string("Wake up" + word + h + ":" + m, 0, 130)
+                draw.string("Wake up" + word + str(watch.time.localtime(self._offset + _WU_LAT)[3]) + ":" + str(watch.time.localtime(self._offset + _WU_LAT)[4]), 0, 130)
             self.btn_on = None
             self.btn_al = None
         else:
@@ -212,9 +208,8 @@ class ZzzTrackerApp():
         del f
 
         # center and scale
-        data2 = array("f")
-        data2.extend([x**2 for x in data])
         mean = sum(data) / len(data)
+        data2 = array("f", [x**2 for x in data])
         std = sqrt((sum(data2) / len(data2)) - pow(mean, 2))
         del data2
         for i in range(len(data)):
