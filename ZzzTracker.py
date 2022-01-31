@@ -218,6 +218,8 @@ class ZzzTrackerApp():
 
         # find most appropriate cosine
         # TODO
+        best_offset = 0
+        system.set_alarm(self._WU_t + best_offset, self._listen_to_ticks)
 
         gc.collect()
 
