@@ -5,8 +5,8 @@
 * I created this repository before even receiving my pine time and despite a very busy schedule to make sure no one else starts a similar project and end up duplicating efforts for nothing :)
 * If you're interested or have any kind of things to say about this, **please** open an issue and tell me all about it :)
 * Status:
-    * Currently a sleep logger app, this will help run code on the simulator
-    * **Instructions**: (with modified wasp-os that exposes accel data)
+    * Currently building a sleep logger app, this will help run code on the simulator
+    * **Instructions**: (with a forked wasp-os that exposes accel data : [link](https://github.com/thiswillbeyourgithub/wasp-os))
         * get the latest python file : ZzzTracker.py
         * compile it : `./micropython/mpy-cross/mpy-cross -mno-unicode -march=armv7m ZzzTracker.py`
         * send compiled : `./tools/wasptool --verbose --upload ZzzTracker.mpy --as apps/ZzzTracker.mpy --binary`
