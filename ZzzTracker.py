@@ -234,5 +234,6 @@ class ZzzTrackerApp():
     def tick(self, ticks):
         """vibrate to wake you up"""
         if self._WakingUp:
-            watch.vibrator.pulse(duty=50, ms=500)
+            system.switch(self)
             system.keep_awake()
+            watch.vibrator.pulse(duty=50, ms=500)
