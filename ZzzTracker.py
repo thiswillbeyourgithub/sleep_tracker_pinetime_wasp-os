@@ -71,7 +71,7 @@ class ZzzTrackerApp():
             if self.btn_on.touch(event):
                 self._tracking = True
                 # accel data not yet written to disk:
-                self._buff = array("l")
+                self._buff = array("f")
                 self._data_point_nb = 0  # total number of data points so far
                 self._last_checkpoint = 0  # to know when to save to file
                 self._offset = int(rtc.time())  # makes output more compact
