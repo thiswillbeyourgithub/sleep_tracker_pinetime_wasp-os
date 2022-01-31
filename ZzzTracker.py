@@ -198,7 +198,6 @@ class ZzzTrackerApp():
 
     def _compute_best_WU(self):
         """computes best wake up time from sleep data"""
-        return True  # disabled for now
         # stop tracking to save memory
         self._disable_tracking()
         gc.collect()
@@ -221,8 +220,8 @@ class ZzzTrackerApp():
 
         # find most appropriate cosine
         # TODO
-        best_offset = 0
-        system.set_alarm(self._WU_t + best_offset, self._listen_to_ticks)
+        self._earlier = 0
+        system.set_alarm(self._WU_t + self._earlier, self._listen_to_ticks)
 
         gc.collect()
 
