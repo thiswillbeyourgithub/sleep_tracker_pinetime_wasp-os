@@ -162,14 +162,12 @@ class ZzzTrackerApp():
         draw.fill(0)
         draw.set_font(_FONT)
         if self._WakingUp:
-            self.btn_al = Button(x=0, y=170, w=240, h=69, label="STOP")
-            self.btn_al.draw()
             self.btn_on = None
             self.btn_off = None
+            self.btn_al = Button(x=0, y=170, w=240, h=69, label="STOP")
+            self.btn_al.draw()
         elif self._tracking:
-            self.btn_off = Button(x=0, y=170, w=240, h=69, label="Stop tracking")
-            self.btn_off.draw()
-            draw.string('Started at ' + str(watch.time.localtime(self._offset)[3]) + ":" + str(watch.time.localtime(self._offset)[4]) , 0, 70)
+            draw.string('Started at ' + ":".join([str(x) for x in watch.time.localtime(self._offset)[3:5]]), 0, 70)
             draw.string("data:" + str(self._data_point_nb), 0, 90)
             try:
                 draw.string("size:" + str(stat(self.filep)[6]), 0, 110)
@@ -177,18 +175,20 @@ class ZzzTrackerApp():
                 pass
             if _WU_ON:
                 if _WU_ANT_ON:
-                    word = " bef. "
+                    word = " before "
                 else:
                     word = " at "
-                draw.string("Wake up" + word + str(watch.time.localtime(self._offset + _WU_LAT)[3]) + ":" + str(watch.time.localtime(self._offset + _WU_LAT)[4]), 0, 130)
+                draw.string("Wake up" + word + ":".join([str(x) for x in watch.time.localtime(self._offset + _WU_LAT)[3:5]]), 0, 130)
             self.btn_on = None
             self.btn_al = None
+            self.btn_off = Button(x=0, y=170, w=240, h=69, label="Stop tracking")
+            self.btn_off.draw()
         else:
             draw.string('Sleep tracker' , 0, 70)
-            self.btn_on = Button(x=0, y=170, w=240, h=69, label="Start tracking")
-            self.btn_on.draw()
             self.btn_off = None
             self.btn_al = None
+            self.btn_on = Button(x=0, y=170, w=240, h=69, label="Start tracking")
+            self.btn_on.draw()
         self.cl = Clock(True)
         self.cl.draw()
         bat = BatteryMeter()
