@@ -91,7 +91,8 @@ class ZzzTrackerApp():
                         system.set_alarm(self._WU_a, self._compute_best_WU)
         elif self.btn_off:
             if self.btn_off.touch(event):
-                self._disable_tracking()
+                if self._tracking:
+                    self._disable_tracking()
         elif self.btn_al:
             if self.btn_al.touch(event):
                 self._WakingUp = False
