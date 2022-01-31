@@ -204,11 +204,12 @@ class ZzzTrackerApp():
         gc.collect()
 
         # get angle over time
-        data = array("f")
         f = open(self.filep, "r")
-        data.extend([float(line.split(",")[4]) for line in f.readlines()])
+        lines = f.readlines()
         f.close()
-        del f
+        if len(lines) == 1:
+            lines = lines[0].split("\n")
+        data = array("f", [float(line.split(",")[4]) for line in lines])
 
         # center and scale
         mean = sum(data) / len(data)
