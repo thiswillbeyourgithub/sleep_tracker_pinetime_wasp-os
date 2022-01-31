@@ -165,13 +165,14 @@ class ZzzTrackerApp():
         if self._WakingUp:
             self.btn_on = None
             self.btn_off = None
+            draw.string('WAKE UP', 0, 70)
             self.btn_al = Button(x=0, y=170, w=240, h=69, label="STOP")
             self.btn_al.draw()
         elif self._tracking:
             draw.string('Started at ' + ":".join([str(x) for x in watch.time.localtime(self._offset)[3:5]]), 0, 70)
-            draw.string("data:" + str(self._data_point_nb), 0, 90)
+            draw.string("data points:" + str(self._data_point_nb), 0, 90)
             try:
-                draw.string("size:" + str(stat(self.filep)[6]), 0, 110)
+                draw.string("file size:" + str(stat(self.filep)[6]), 0, 110)
             except:
                 pass
             if _WU_ON:
