@@ -71,7 +71,7 @@ class ZzzTrackerApp():
             if self.btn_on.touch(event):
                 self._tracking = True
                 # accel data not yet written to disk:
-                self._buff = []
+                self._buff = array("l")
                 self._data_point_nb = 0  # total number of data points so far
                 self._last_checkpoint = 0  # to know when to save to file
                 self._offset = int(rtc.time())  # makes output more compact
@@ -122,7 +122,7 @@ class ZzzTrackerApp():
         """get one data point of accelerometer every _POLLFREQ seconds and
         they are then averaged and stored every _WIN_L seconds"""
         if self._tracking:
-            self._buff.append(accel.read_xyz())
+            self._buff.extend(accel.read_xyz())
             self._data_point_nb += 1
             self._add_accel_alar()
             self._periodicSave()
@@ -131,10 +131,10 @@ class ZzzTrackerApp():
         """save data after averageing over a window to file"""
         n = self._data_point_nb - self._last_checkpoint
         if n >= _RATIO:
-            x_avg = sum([x[0] for x in self._buff]) / n
-            y_avg = sum([x[1] for x in self._buff]) / n
-            z_avg = sum([x[2] for x in self._buff]) / n
-            self._buff = []
+            x_avg = sum(self._buff[0::3]) / n
+            y_avg = sum(self._buff[1::3]) / n
+            z_avg = sum(self._buff[2::3]) / n
+            del self._buff[:]
 
             # formula from https://www.nature.com/articles/s41598-018-31266-z
             angl_avg = degrees(atan(z_avg / (pow(x_avg, 2) + pow(y_avg, 2) + 0.0000001)))
