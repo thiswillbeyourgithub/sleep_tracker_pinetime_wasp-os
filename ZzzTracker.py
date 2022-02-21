@@ -49,11 +49,11 @@ if not _DEBUGGING:
     # default 1800 = 30 minutes
 else:
     _POLLFREQ = const(5)
-    _WIN_L = const(20)
-    _RATIO = const(4)
+    _WIN_L = const(10)
+    _RATIO = const(2)
     _WU_ON = const(1)
     _WU_LAT = const(600)
-    _WU_ANT_ON = const(1)
+    _WU_ANT_ON = const(0)
     _WU_ANTICIP = const(30)
 
 
