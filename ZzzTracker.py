@@ -248,7 +248,7 @@ class ZzzTrackerApp():
         system.wake()
         system.switch(self)
         self._draw()
-        system.request_tick(1000)
+        system.request_tick(period_ms=1001)
 
     def tick(self, ticks):
         """vibrate to wake you up"""
