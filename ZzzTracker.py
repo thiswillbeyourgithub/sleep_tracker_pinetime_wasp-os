@@ -124,7 +124,7 @@ class ZzzTrackerApp():
         """get one data point of accelerometer every _POLLFREQ seconds and
         they are then averaged and stored every _WIN_L seconds"""
         if self._tracking:
-            self._buff.extend(accel.read_xyz())
+            [self._buff.append(x) for x in accel.read_xyz()]
             self._data_point_nb += 1
             self._add_accel_alar()
             self._periodicSave()
@@ -133,10 +133,10 @@ class ZzzTrackerApp():
         """save data after averageing over a window to file"""
         n = self._data_point_nb - self._last_checkpoint
         if n >= _RATIO:
-            x_avg = sum(self._buff[0::3]) / n
-            y_avg = sum(self._buff[1::3]) / n
-            z_avg = sum(self._buff[2::3]) / n
-            del self._buff[:]
+            x_avg = sum([self._buff[i] for i in range(0, len(self._buff), 3)]) / n
+            y_avg = sum([self._buff[i] for i in range(1, len(self._buff), 3)]) / n
+            z_avg = sum([self._buff[i] for i in range(2, len(self._buff), 3)]) / n
+            self._buff = array("f")
 
             # formula from https://www.nature.com/articles/s41598-018-31266-z
             angl_avg = degrees(atan(z_avg / (pow(x_avg, 2) + pow(y_avg, 2) + 0.0000001)))
