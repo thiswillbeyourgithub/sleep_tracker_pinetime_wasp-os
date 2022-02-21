@@ -27,34 +27,32 @@ from math import atan, pow, degrees, sqrt
 from micropython import const
 from array import array
 
-
 _FONT = sans18
-_DEBUGGING = const(0)
-if not _DEBUGGING:
-    _POLLFREQ = const(10)
-    # poll accelerometer data every X seconds, they will be averaged
-    _WIN_L = const(300)
-    # number of seconds between writing average accel values
-    _RATIO = const(30)
-    # must be _WIN_L / _POLLFREQ, meaning data will be written every X points
 
-    _WU_ON = const(1)
-    # const(1) to activate wake up alarm, const(0) to disable
-    _WU_LAT = const(28800)
-    # maximum seconds of sleep before waking you up, default 28800 = 8h, will
-    # compute best wake up time from _WU_LAT - _WU_ANTICIP seconds
-    _WU_ANT_ON = const(0)
-    # const(1) to activate waking up before normal time
-    _WU_ANTICIP = const(1800)
-    # default 1800 = 30 minutes
-else:
-    _POLLFREQ = const(5)
-    _WIN_L = const(10)
-    _RATIO = const(2)
-    _WU_ON = const(1)
-    _WU_LAT = const(600)
-    _WU_ANT_ON = const(0)
-    _WU_ANTICIP = const(30)
+# DEBUG MODE : comment the next paragraph and uncomment DEBUG BLOCK
+
+_POLLFREQ = const(10)  # poll accelerometer data every X seconds, they will
+# be averaged
+_WIN_L = const(300)  # number of seconds between writing average accel values
+_RATIO = const(30)  # must be _WIN_L / _POLLFREQ, meaning data will be
+# written every X points
+
+_WU_ON = const(1)  # const(1) to activate wake up alarm, const(0) to disable
+_WU_LAT = const(28800)  # maximum seconds of sleep before waking you up,
+# default 28800 = 8h, will compute best wake up time
+# from _WU_LAT - _WU_ANTICIP seconds
+_WU_ANT_ON = const(0)  # const(1) to activate waking up before normal time
+_WU_ANTICIP = const(1800)  # default 1800 = 30 minutes
+
+
+# DEBUG BLOCK:
+#_POLLFREQ = const(5)
+#_WIN_L = const(10)
+#_RATIO = const(2)
+#_WU_ON = const(1)
+#_WU_LAT = const(600)
+#_WU_ANT_ON = const(0)
+#_WU_ANTICIP = const(30)
 
 
 class ZzzTrackerApp():
