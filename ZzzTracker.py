@@ -17,7 +17,6 @@ Trying to log my sleep data for a few days prior to working on the algorithm
 
 from os import stat
 from wasp import watch, system, EventMask, gc
-from time import mktime
 
 from watch import rtc, battery, accel
 from widgets import Clock, BatteryMeter, Button
