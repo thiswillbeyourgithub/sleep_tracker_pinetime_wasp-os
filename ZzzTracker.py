@@ -31,10 +31,9 @@ _FONT = sans18
 
 # DEBUG MODE : comment the next paragraph and uncomment DEBUG BLOCK
 
-_POLLFREQ = const(10)  # poll accelerometer data every X seconds, they will
+_POLLFREQ = const(10)  # get accelerometer data every X seconds, they will
 # be averaged
-_WIN_L = const(300)  # number of seconds between writing average accel values
-_RATIO = const(30)  # must be _WIN_L / _POLLFREQ, meaning data will be
+_WIN_L = const(300)  # number of seconds between storing average values to file
 # written every X points
 
 _WU_ON = const(1)  # const(1) to activate wake up alarm, const(0) to disable
@@ -48,7 +47,6 @@ _WU_ANTICIP = const(1800)  # default 1800 = 30 minutes
 # DEBUG BLOCK:
 #_POLLFREQ = const(5)
 #_WIN_L = const(10)
-#_RATIO = const(2)
 #_WU_ON = const(1)
 #_WU_LAT = const(600)
 #_WU_ANT_ON = const(0)
@@ -147,7 +145,7 @@ class ZzzTrackerApp():
     def _periodicSave(self):
         """save data after averageing over a window to file"""
         n = self._data_point_nb - self._last_checkpoint
-        if n >= _RATIO:
+        if n >= _WIN_L / _POLLFREQ:
             x_avg = sum([self._buff[i] for i in range(0, len(self._buff), 3)]) / n
             y_avg = sum([self._buff[i] for i in range(1, len(self._buff), 3)]) / n
             z_avg = sum([self._buff[i] for i in range(2, len(self._buff), 3)]) / n
