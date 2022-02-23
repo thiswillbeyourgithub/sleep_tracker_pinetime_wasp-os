@@ -59,6 +59,7 @@ class ZzzTrackerApp():
     def __init__(self):
         self._tracking = False  # False = not tracking, True = currently tracking
         self._WakingUp = False  # when True, watch is currently vibrating to wake you up
+        self._earlier = 0
         try:
             mkdir("logs/")
         except:  # folder already exists
@@ -222,16 +223,32 @@ class ZzzTrackerApp():
 
         # center and scale
         mean = sum(data) / len(data)
-        data2 = array("f", [x**2 for x in data])
-        std = sqrt((sum(data2) / len(data2)) - pow(mean, 2))
-        del data2
+        std = sqrt((sum([x**2 for x in data]) / len(data)) - pow(mean, 2))
         for i in range(len(data)):
             data[i] = (data[i] - mean) / std
+        del mean, std
 
-        # find most appropriate cosine
-        # TODO
-        self._earlier = 0
-        system.set_alarm(self._WU_t + self._earlier, self._listen_to_ticks)
+        # fitting cosine of various offsets in minutes, the best fit has the
+        # period indicating best wake up time
+        fits = array("f")
+        period = 324000  # 90  minutes, average sleep cycle duration
+        offsets = [0, 300, 600, 900, 1200, 1500, 1800]
+        omega = 2 * pi / period
+        cnt = 0
+        for offset in offsets:
+            fits.append(
+                    sum(
+                        [(sin(omega * t * _WIN_L + offset) - data[t])**2 for t in range(len(data))]  # least mean square regression
+                        ))
+            if fits[-1] == min(fits):
+                best_offset = offsets[cnt]
+            cnt += 1
+
+        # TODO find best wake up time
+        self._earlier = 10
+
+        system.set_alarm(max(self._WU_t - self._earlier, int(rtc.time()) + 3), self._listen_to_ticks)  # wake up right away if computation took too much time
+        system.cancel_alarm(self._WU_t, self._listen_to_ticks)  # cancel original alarm
 
         gc.collect()
 
