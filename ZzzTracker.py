@@ -233,25 +233,34 @@ class ZzzTrackerApp():
         del mean, std
 
         # fitting cosine of various offsets in minutes, the best fit has the
-        # period indicating best wake up time
+        # period indicating best wake up time:
         fits = array("f")
-        period = 324000  # 90  minutes, average sleep cycle duration
         offsets = [0, 300, 600, 900, 1200, 1500, 1800]
-        omega = 2 * pi / period
-        cnt = 0
-        for offset in offsets:
+        omega = 2 * pi / 324000  # 90 minutes, average sleep cycle duration
+        for cnt, offset in enumerate(offsets):  # least square regression
             fits.append(
-                    sum(
-                        [(sin(omega * t * _WIN_L + offset) - data[t])**2 for t in range(len(data))]  # least mean square regression
-                        ))
+                    sum([sin(omega * t * _WIN_L + offset) * data[t] for t in range(len(data))])
+                    -sum([(sin(omega * t * _WIN_L + offset) - data[t])**2 for t in range(len(data))])
+                    )
             if fits[-1] == min(fits):
                 best_offset = offsets[cnt]
-            cnt += 1
+        del fits, offset, offsets, cnt
 
-        # TODO find best wake up time
-        self._earlier = 10
+        # finding how early to wake up:
+        max_sin = 0
+        for t in range(self._WU_t, self._WU_t - _WU_ANTICIP, -300):  # counting backwards from original wake up time, steps of 5 minutes
+            s = sin(omega * t + best_offset)
+            if s > max_sin:
+                max_sin = s
+                self._earlier = -t  # number of seconds earlier than wake up time
+        del max_sin, s
 
-        system.set_alarm(max(self._WU_t - self._earlier, int(rtc.time()) + 3), self._listen_to_ticks)  # wake up right away if computation took too much time
+        print(self._earlier)
+        system.set_alarm(
+                min(
+                    max(self._WU_t - self._earlier, int(rtc.time()) + 3),  # not before right now
+                    self._WU_t - 5  # not after original wake up time
+                    ), self._listen_to_ticks)
         system.cancel_alarm(self._WU_t, self._listen_to_ticks)  # cancel original alarm
 
         gc.collect()
