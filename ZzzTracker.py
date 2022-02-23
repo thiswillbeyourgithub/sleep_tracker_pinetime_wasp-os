@@ -176,7 +176,11 @@ class ZzzTrackerApp():
         if self._WakingUp:
             self.btn_on = None
             self.btn_off = None
-            draw.string('WAKE UP', 0, 70)
+            if self._earlier != 0:
+                msg = "WAKE UP (" + str(self._earlier/60)[0:2] + "m early)"
+            else:
+                msg = "WAKE UP"
+            draw.string(msg, 0, 70)
             self.btn_al = Button(x=0, y=170, w=240, h=69, label="STOP")
             self.btn_al.draw()
         elif self._tracking:
