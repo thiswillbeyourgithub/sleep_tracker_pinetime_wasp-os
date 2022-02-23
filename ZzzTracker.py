@@ -37,10 +37,10 @@ _WIN_L = const(300)  # number of seconds between storing average values to file
 # written every X points
 
 _WU_ON = const(1)  # const(1) to activate wake up alarm, const(0) to disable
-_WU_LAT = const(28800)  # maximum seconds of sleep before waking you up,
-# default 28800 = 8h, will compute best wake up time
-# from _WU_LAT - _WU_ANTICIP seconds
-_WU_ANT_ON = const(0)  # const(1) to activate waking up before normal time
+_WU_LAT = const(27000)  # maximum seconds of sleep before waking you up,
+# default 27000 = 7h30
+_WU_ANT_ON = const(0)  # set to 1 to activate waking you up at optimal time
+# based on accelerometer data, at the earliest at _WU_LAT - _WU_ANTICIP
 _WU_ANTICIP = const(1800)  # default 1800 = 30 minutes
 
 
