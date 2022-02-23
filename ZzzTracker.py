@@ -58,8 +58,8 @@ class ZzzTrackerApp():
 
     def __init__(self):
         self._tracking = False  # False = not tracking, True = currently tracking
-        self._WakingUp = False  # when True, watch is currently vibrating to wake you up
         self._earlier = 0
+        self._page = "START" # can be START / TRACKING / RINGING / WAITING_EARLY_WU
         try:
             mkdir("logs/")
         except:  # folder already exists
@@ -81,7 +81,7 @@ class ZzzTrackerApp():
 
     def touch(self, event):
         """either start trackign or disable it, draw the screen in all cases"""
-        if self.btn_on:
+        if self._page == "START":
             if self.btn_on.touch(event):
                 self._tracking = True
                 # accel data not yet written to disk:
@@ -103,15 +103,15 @@ class ZzzTrackerApp():
                     if _WU_ANT_ON:
                         self._WU_a = self._WU_t - _WU_ANTICIP
                         system.set_alarm(self._WU_a, self._compute_best_WU)
-        elif self.btn_off:
+                self._page = "TRACKING"
+        elif self._page == "TRACKING":
             if self.btn_off.touch(event):
-                if self._tracking:
-                    self._disable_tracking()
-        elif self.btn_al:
+                self._disable_tracking()
+                self._page = "START"
+        elif self._page == "RINGING":
             if self.btn_al.touch(event):
-                self._WakingUp = False
-                if self._tracking:
-                    self._disable_tracking()
+                self._disable_tracking()
+                self._page = "START"
         self._draw()
 
     def _disable_tracking(self):
@@ -125,8 +125,6 @@ class ZzzTrackerApp():
             if _WU_ANT_ON:
                 system.cancel_alarm(self._WU_a, self._compute_best_WU)
         self._periodicSave()
-        self._offset = None
-        self._last_checkpoint = 0
 
     def _add_accel_alar(self):
         """set an alarm, due in _POLLFREQ minutes, to log the accelerometer data
@@ -173,9 +171,7 @@ class ZzzTrackerApp():
         draw = watch.drawable
         draw.fill(0)
         draw.set_font(_FONT)
-        if self._WakingUp:
-            self.btn_on = None
-            self.btn_off = None
+        if self._page == "RINGING":
             if self._earlier != 0:
                 msg = "WAKE UP (" + str(self._earlier/60)[0:2] + "m early)"
             else:
@@ -183,7 +179,7 @@ class ZzzTrackerApp():
             draw.string(msg, 0, 70)
             self.btn_al = Button(x=0, y=170, w=240, h=69, label="STOP")
             self.btn_al.draw()
-        elif self._tracking:
+        elif self._page in ["TRACKING", "WAITING_EARLY_WU"]:
             draw.string('Started at ' + ":".join([str(x) for x in watch.time.localtime(self._offset)[3:5]]), 0, 70)
             draw.string("data points:" + str(self._data_point_nb), 0, 90)
             if _WU_ON:
@@ -192,16 +188,13 @@ class ZzzTrackerApp():
                 else:
                     word = " at "
                 draw.string("Wake up" + word + ":".join([str(x) for x in watch.time.localtime(self._offset + _WU_LAT)[3:5]]), 0, 130)
-            self.btn_on = None
-            self.btn_al = None
             self.btn_off = Button(x=0, y=170, w=240, h=69, label="Stop tracking")
             self.btn_off.draw()
-        else:
+        elif self._page == "START":
             draw.string('Sleep tracker' , 0, 70)
-            self.btn_off = None
-            self.btn_al = None
             self.btn_on = Button(x=0, y=170, w=240, h=69, label="Start tracking")
             self.btn_on.draw()
+
         self.cl = Clock(True)
         self.cl.draw()
         bat = BatteryMeter()
@@ -251,19 +244,18 @@ class ZzzTrackerApp():
                 self._earlier = -t  # number of seconds earlier than wake up time
         del max_sin, s
 
-        print(self._earlier)
         system.set_alarm(
                 min(
                     max(self._WU_t - self._earlier, int(rtc.time()) + 3),  # not before right now
                     self._WU_t - 5  # not after original wake up time
                     ), self._listen_to_ticks)
-        system.cancel_alarm(self._WU_t, self._listen_to_ticks)  # cancel original alarm
+        self._page = "WAITING_EARLY_WU"
 
         gc.collect()
 
     def _listen_to_ticks(self):
         """listen to ticks every second, telling the watch to vibrate"""
-        self._WakingUp = True
+        self._page = "RINGING"
         system.wake()
         system.keep_awake()
         system.switch(self)
@@ -272,5 +264,5 @@ class ZzzTrackerApp():
 
     def tick(self, ticks):
         """vibrate to wake you up"""
-        if self._WakingUp:
+        if self._page == "RINGING":
             watch.vibrator.pulse(duty=50, ms=500)
