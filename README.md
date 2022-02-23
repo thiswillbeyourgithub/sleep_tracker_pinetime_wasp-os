@@ -12,6 +12,8 @@
         * send compiled : `./tools/wasptool --verbose --upload ZzzTracker.mpy --as apps/ZzzTracker.mpy --binary`
         * register compiled : `./tools/wasptool --verbose --eval "wasp.system.register('apps.ZzzTracker.ZzzTrackerApp')`
         * run it!
+        * get back the data using `wasptool --pull`
+        * take a look at it using pandas : ` df = pd.read_csv("./first.night.csv", names=["time", "x_avg", "y_avg", "z_avg", "angl_avg", "battery"])`
 
 ## Roadmap / Currently planned features:
 **First step**
