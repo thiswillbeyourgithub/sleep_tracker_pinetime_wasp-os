@@ -23,15 +23,15 @@ from widgets import Clock, BatteryMeter, Button
 from shell import mkdir, cd
 from fonts import sans18
 
-from math import atan, pow, degrees, sqrt
+from math import atan, pow, degrees, sqrt, sin, pi
 from micropython import const
 from array import array
 
 _FONT = sans18
 
-# DEBUG MODE : comment the next paragraph and uncomment DEBUG BLOCK
+# to activate DEBUG MODE : comment the next paragraph and uncomment DEBUG BLOCK
 
-_POLLFREQ = const(10)  # get accelerometer data every X seconds, they will
+_POLLFREQ = const(5)  # get accelerometer data every X seconds, they will
 # be averaged
 _WIN_L = const(300)  # number of seconds between storing average values to file
 # written every X points
@@ -45,12 +45,12 @@ _WU_ANTICIP = const(1800)  # default 1800 = 30 minutes
 
 
 # DEBUG BLOCK:
-#_POLLFREQ = const(5)
-#_WIN_L = const(10)
+#_POLLFREQ = const(1)
+#_WIN_L = const(5)
 #_WU_ON = const(1)
-#_WU_LAT = const(600)
-#_WU_ANT_ON = const(0)
-#_WU_ANTICIP = const(30)
+#_WU_LAT = const(30)
+#_WU_ANT_ON = const(1)
+#_WU_ANTICIP = const(5)
 
 
 class ZzzTrackerApp():
