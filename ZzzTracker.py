@@ -144,30 +144,27 @@ class ZzzTrackerApp():
 
     def _periodicSave(self):
         """save data after averageing over a window to file"""
-        n = self._data_point_nb - self._last_checkpoint
-        if n >= _WIN_L / _POLLFREQ:
-            x_avg = sum([self._buff[i] for i in range(0, len(self._buff), 3)]) / n
-            y_avg = sum([self._buff[i] for i in range(1, len(self._buff), 3)]) / n
-            z_avg = sum([self._buff[i] for i in range(2, len(self._buff), 3)]) / n
-            self._buff = array("f")
-
-            # formula from https://www.nature.com/articles/s41598-018-31266-z
-            angl_avg = degrees(atan(z_avg / (pow(x_avg, 2) + pow(y_avg, 2) + 0.0000001)))
-
-            val = array("f")
-            val.append(int(rtc.time() - self._offset))
-            val.append(x_avg)
-            val.append(y_avg)
-            val.append(z_avg)
-            val.append(angl_avg)
-            val.append(battery.level())
+        if self._data_point_nb - self._last_checkpoint >= _WIN_L / _POLLFREQ:
+            x_avg = sum([self._buff[i] for i in range(0, len(self._buff), 3)]) / (self._data_point_nb - self._last_checkpoint)
+            y_avg = sum([self._buff[i] for i in range(1, len(self._buff), 3)]) / (self._data_point_nb - self._last_checkpoint)
+            z_avg = sum([self._buff[i] for i in range(2, len(self._buff), 3)]) / (self._data_point_nb - self._last_checkpoint)
+            self._buff = array("f")  # reseting array
+            self._buff.append(int(rtc.time() - self._offset))
+            self._buff.append(x_avg)
+            self._buff.append(y_avg)
+            self._buff.append(z_avg)
+            self._buff.append(degrees(atan(z_avg / (pow(x_avg, 2) + pow(y_avg, 2) + 0.0000001)))) # formula from https://www.nature.com/articles/s41598-018-31266-z
+            self._buff.append(degrees(atan(x_avg / (pow(y_avg, 2) + pow(z_avg, 2) + 0.0000001))))
+            self._buff.append(degrees(atan(y_avg / (pow(z_avg, 2) + pow(x_avg, 2) + 0.0000001))))
+            del x_avg, y_avg, z_avg
+            self._buff.append(battery.voltage_mv())  # currently more accurate than percent
 
             f = open(self.filep, "a")
-            f.write(",".join([str(x)[0:8] for x in val]) + "\n")
+            f.write(",".join([str(x)[0:8] for x in self._buff]) + "\n")
             f.close()
 
             self._last_checkpoint = self._data_point_nb
-            del x_avg, y_avg, z_avg, angl_avg, n, val
+            self._buff = array("f")
         gc.collect()
 
     def _draw(self):
