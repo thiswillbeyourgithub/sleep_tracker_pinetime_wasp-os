@@ -186,10 +186,6 @@ class ZzzTrackerApp():
         elif self._tracking:
             draw.string('Started at ' + ":".join([str(x) for x in watch.time.localtime(self._offset)[3:5]]), 0, 70)
             draw.string("data points:" + str(self._data_point_nb), 0, 90)
-            try:
-                draw.string("file size:" + str(stat(self.filep)[6]), 0, 110)
-            except:
-                pass
             if _WU_ON:
                 if _WU_ANT_ON:
                     word = " before "
