@@ -194,8 +194,8 @@ class ZzzTrackerApp():
             self._buff.append(y_avg)
             self._buff.append(z_avg)
             self._buff.append(degrees(atan(z_avg / (pow(x_avg, 2) + pow(y_avg, 2) + 0.0000001)))) # formula from https://www.nature.com/articles/s41598-018-31266-z
-            self._buff.append(degrees(atan(x_avg / (pow(y_avg, 2) + pow(z_avg, 2) + 0.0000001))))
-            self._buff.append(degrees(atan(y_avg / (pow(z_avg, 2) + pow(x_avg, 2) + 0.0000001))))
+#            self._buff.append(degrees(atan(x_avg / (pow(y_avg, 2) + pow(z_avg, 2) + 0.0000001))))
+#            self._buff.append(degrees(atan(y_avg / (pow(z_avg, 2) + pow(x_avg, 2) + 0.0000001))))
             del x_avg, y_avg, z_avg
             self._buff.append(battery.voltage_mv())  # currently more accurate than percent
 
