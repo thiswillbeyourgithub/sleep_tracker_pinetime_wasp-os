@@ -16,7 +16,7 @@ import time
 from wasp import watch, system, EventMask, gc
 
 from watch import rtc, battery, accel
-from widgets import Button, Spinner, Checkbox, StatusBar
+from widgets import Button, Spinner, Checkbox, StatusBar, ConfirmationView
 from shell import mkdir, cd
 from fonts import sans18
 
@@ -37,6 +37,7 @@ class ZzzTrackerApp():
         self._spinval_H = 7  # default wake up time
         self._spinval_M = 30
         self._debug = False
+        self.confirmation_view = None
         self._tracking = False  # False = not tracking, True = currently tracking
         self._earlier = 0
         self._page = "START" # can be START / TRACKING / RINGING / WAITING_EARLY_WU / SETTINGS
@@ -103,10 +104,18 @@ class ZzzTrackerApp():
             elif self.btn_set.touch(event):
                 self._page = "SETTINGS"
 
-        elif self._page == "TRACKING":
-            if self.btn_off.touch(event):
-                self._disable_tracking()
-                self._page = "START"
+        elif self._page in ["TRACKING", "WAITING_EARLY_WU"]:
+            if self.confirmation_view is None:
+                no_full_draw = True
+                if self.btn_off.touch(event):
+                    self.confirmation_view = ConfirmationView()
+                    self.confirmation_view.draw("Stop tracking?")
+            else:
+                if self.confirmation_view.touch(event):
+                    if self.confirmation_view.value:
+                        self._disable_tracking()
+                        self._page = "START"
+                    self.confirmation_view = None
 
         elif self._page == "RINGING":
             if self.btn_al.touch(event):
