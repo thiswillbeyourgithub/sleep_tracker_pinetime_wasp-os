@@ -13,9 +13,9 @@ alarm you set up manually.
 """
 
 import time
-from wasp import watch, system, EventMask
+from wasp import watch, system, EventMask, gc
 
-from watch import rtc, battery, accel, gc
+from watch import rtc, battery, accel
 from widgets import Button, Spinner, Checkbox, StatusBar, ConfirmationView
 from shell import mkdir, cd
 from fonts import sans18
