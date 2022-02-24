@@ -229,7 +229,7 @@ class ZzzTrackerApp():
                 else:
                     word = " at "
                 draw.string("Wake up" + word + ":".join([str(x) for x in watch.time.localtime(self._offset + self._SL_L)[3:5]]), 0, 130)
-            self.btn_off = Button(x=0, y=170, w=240, h=69, label="Stop tracking")
+            self.btn_off = Button(x=0, y=170, w=240, h=40, label="Stop tracking")
             self.btn_off.draw()
         elif self._page == "START":
             draw.string('Sleep tracker' , 0, 70)
