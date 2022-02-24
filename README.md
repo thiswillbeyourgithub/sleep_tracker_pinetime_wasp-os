@@ -1,13 +1,13 @@
-# Waspos Sleep Tracker
-**Goal:** sleep tracker for the [pinetime smartwatch](https://pine64.com/product/pinetime-smartwatch-sealed/) by Pine64, on python, to run on [wasp-os](https://github.com/daniel-thompson/wasp-os), that wakes you up at the best time.
+# SleepTk : a sleep tracker and smart alarm for wasp-os
+**Goal:** sleep tracker and smart alarm for the [pinetime smartwatch](https://pine64.com/product/pinetime-smartwatch-sealed/) by Pine64, on python, to run on [wasp-os](https://github.com/daniel-thompson/wasp-os), that wakes you up at the best time.
 
 ## Note to reader:
 * I created this repository before even receiving my pine time and despite a very busy schedule to make sure no one else starts a similar project and end up duplicating efforts for nothing :)
 * If you're interested or have any kind of things to say about this, **please** open an issue and tell me all about it :)
-* Status as of February 23rd:
-    * First version finished, the waking up algorithm is not at all tested
+* Status as of February 2022:
+    * Finished but the smart algorithm is not at all tested yet
     * **Instructions**:
-    *(for now you need my forked wasp-os that exposes accelerometer data*
+    *(for now you need my forked wasp-os that exposes accelerometer data)
         * download [my wasp-os fork](https://github.com/thiswillbeyourgithub/wasp-os)
         * download the latest app : SleepTk.py
         * put the latest app in wasp-os/wasp/apps/SleepTk.py
