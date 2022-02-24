@@ -195,6 +195,14 @@ class SleepTkApp():
             self._periodicSave()
             if battery.level() <= _BATTERY_THRESHOLD:
                 self._disable_tracking(keep_main_alarm=True)
+                self._wakeup_smart_enabled = 0
+                h, m = watch.time.localtime(time.time())[3:5]
+                system.notify(watch.rtc.get_uptime_ms(), {"src": "SleepTk",
+                                                          "title": "Bat <20%",
+                                                          "body": "Stopped \
+tracking sleep at {}h{}m because your battery went below {}%. Alarm kept \
+on.".format(h, m, _BATTERY_THRESHOLD)})
+
         gc.collect()
 
     def _periodicSave(self):
