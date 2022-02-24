@@ -6,14 +6,14 @@
 * If you're interested or have any kind of things to say about this, **please** open an issue and tell me all about it :)
 * Status as of February 23rd:
     * First version finished, the waking up algorithm is not at all tested
-    * **Instructions**: (with a forked wasp-os that exposes accel data : [link](https://github.com/thiswillbeyourgithub/wasp-os))
-        * get the latest python file : ZzzTracker.py
-        * compile it : `./micropython/mpy-cross/mpy-cross -mno-unicode -march=armv7m ZzzTracker.py`
-        * send compiled : `./tools/wasptool --verbose --upload ZzzTracker.mpy --as apps/ZzzTracker.mpy --binary`
-        * register compiled : `./tools/wasptool --verbose --eval "wasp.system.register('apps.ZzzTracker.ZzzTrackerApp')`
-        * run it!
-        * if you want, get back the data using `wasptool --pull`
-        * take a look at it using pandas, for example using : ` df = pd.read_csv("./first.night.csv", names=["time", "x_avg", "y_avg", "z_avg", "angl_avg", "battery"])` (name and number of columns might change)
+    * **Instructions**:
+    *(for now you need my forked wasp-os that exposes accelerometer data*
+        * download [my wasp-os fork](https://github.com/thiswillbeyourgithub/wasp-os)
+        * download the latest app : SleepTk.py
+        * put the latest app in wasp-os/wasp/apps/SleepTk.py
+        * compile and install wasp-os
+        * run the app
+        * *if you want, you can get back the data using `wasptool --pull`,  to take a look using pandas : ` df = pd.read_csv("./first.night.csv", names=["time", "x_avg", "y_avg", "z_avg", "angl_avg", "battery"])` (name and number of columns might change)*
 
 ## TODO
 **sleep tracking**

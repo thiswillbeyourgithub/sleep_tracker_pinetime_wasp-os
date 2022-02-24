@@ -6,7 +6,7 @@
 
 # https://github.com/thiswillbeyourgithub/sleep_tracker_pinetime_wasp-os
 
-This app is designed to track accelerometer data throughout the night. It can
+SleepTk is designed to track accelerometer data throughout the night. It can
 also compute the best time to wake you up, up to 30 minutes before the
 alarm you set up manually.
 
@@ -32,8 +32,8 @@ _FREQ = const(5)  # get accelerometer data every X seconds, they will be average
 _STORE_FREQ = const(300)  # number of seconds between storing average values to file written every X points
 _ANTICIP_LEN = const(1800)  # defaults 1800 = 30m
 
-class ZzzTrackerApp():
-    NAME = 'ZzzTrck'
+class SleepTkApp():
+    NAME = 'SleepTk'
 
     def __init__(self):
         gc.collect()
