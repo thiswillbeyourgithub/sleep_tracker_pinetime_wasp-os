@@ -30,7 +30,7 @@ _AVG_SLEEP_CYCL = const(32400)  # 90 minutes, average sleep cycle duration
 _OFFSETS = array("H", [0, 300, 600, 900, 1200, 1500, 1800])
 _FREQ = const(5)  # get accelerometer data every X seconds, they will be averaged
 _STORE_FREQ = const(300)  # number of seconds between storing average values to file written every X points
-_ANTICIP_LEN = const(1800)  # defaults 1800 = 30m
+_SMART_LEN = const(1800)  # defaults 1800 = 30m
 
 class SleepTkApp():
     NAME = 'SleepTk'
@@ -38,7 +38,7 @@ class SleepTkApp():
     def __init__(self):
         gc.collect()
         self._wakeup_enabled = 1
-        self._wakeup_ant_enabled = 1  # activate waking you up at optimal time  based on accelerometer data, at the earliest at _WU_LAT - _WU_ANTICIP
+        self._wakeup_smart_enabled = 1  # activate waking you up at optimal time  based on accelerometer data, at the earliest at _WU_LAT - _WU_SMART
         self._spinval_H = 7  # default wake up time
         self._spinval_M = 30
         self._conf_view = None
@@ -98,9 +98,9 @@ class SleepTkApp():
                     self._WU_t = time.mktime((yyyy, mm, dd, HH, MM, 0, 0, 0, 0))
                     system.set_alarm(self._WU_t, self._listen_to_ticks)
 
-                    # alarm in _ANTICIP_LEN less seconds to compute best wake up time
-                    if self._wakeup_ant_enabled:
-                        self._WU_a = self._WU_t - _ANTICIP_LEN
+                    # alarm in _SMART_LEN less seconds to compute best wake up time
+                    if self._wakeup_smart_enabled:
+                        self._WU_a = self._WU_t - _SMART_LEN
                         system.set_alarm(self._WU_a, self._compute_best_WU)
                 self._page = b"TRA"
             elif self.btn_set.touch(event):
@@ -126,31 +126,39 @@ class SleepTkApp():
 
         elif self._page == b"SET":
             no_full_draw = True
-            disable_both = False
+            disable_all = False
             if self.check_al.touch(event):
                 if self._wakeup_enabled == 1:
                     self._wakeup_enabled = 0
-                    disable_both = True
+                    disable_all = True
                 else:
                     self._wakeup_enabled = 1
+                    no_full_draw = False
                 self.check_al.state = self._wakeup_enabled
                 self.check_al.update()
-            if self.check_anti.touch(event) or disable_both:
-                if self._wakeup_ant_enabled == 1 or disable_both:
-                    self._wakeup_ant_enabled = 0
-                    self.check_anti.state = self._wakeup_ant_enabled
-                    self._check_anti = None
+
+                if disable_all:
+                    self._wakeup_smart_enabled = 0
+                    self.check_smart.state = self._wakeup_smart_enabled
+                    self._check_smart = None
                     self._draw()
+
+            elif self.check_smart.touch(event):
+                if self._wakeup_smart_enabled == 1:
+                    self._wakeup_smart_enabled = 0
+                    self.check_smart.state = self._wakeup_smart_enabled
+                    self._check_smart = None
                 elif self._wakeup_enabled == 1:
-                    self._wakeup_ant_enabled = 1
-                    self.check_anti.state = self._wakeup_ant_enabled
-                    self.check_anti.update()
-            elif self.hours.touch(event):
-                self._spinval_H = self.hours.value
-                self.hours.update()
-            elif self.min.touch(event):
-                self._spinval_M = self.min.value
-                self.min.update()
+                    self._wakeup_smart_enabled = 1
+                    self.check_smart.state = self._wakeup_smart_enabled
+                    self.check_smart.update()
+                    self.check_smart.draw()
+            elif self._spin_H.touch(event):
+                self._spinval_H = self._spin_H.value
+                self._spin_H.update()
+            elif self._spin_M.touch(event):
+                self._spinval_M = self._spin_M.value
+                self._spin_M.update()
             elif self.btn_set_end.touch(event):
                 self._page = b"STA"
                 self._draw()
@@ -166,7 +174,7 @@ class SleepTkApp():
         if self._wakeup_enabled:
             if keep_alarm is False:  # to keep the alarm when stopping because of low battery
                 system.cancel_alarm(self._WU_t, self._listen_to_ticks)
-            if self._wakeup_ant_enabled:
+            if self._wakeup_smart_enabled:
                 system.cancel_alarm(self._WU_a, self._compute_best_WU)
         self._periodicSave()
         gc.collect()
@@ -229,44 +237,46 @@ class SleepTkApp():
             draw.string('Started at {}'.format(":".join([str(x) for x in watch.time.localtime(self._offset)[3:5]])), 0, 70)
             draw.string("data points: {}".format(str(self._data_point_nb)), 0, 90)
             if self._wakeup_enabled:
-                if self._wakeup_ant_enabled:
-                    word = " before "
-                else:
-                    word = " at "
-                draw.string("Wake up{}{}".format(word, ":".join([str(x) for x in watch.time.localtime(self._offset + self._SL_L)[3:5]])), 0, 130)
+                word = "Alarm at"
+                if self._wakeup_smart_enabled:
+                    word = "Alarm before "
+                ti = [str(x) for x in watch.time.localtime(self._offset + self._SL_L)[3:5]]
+                draw.string("{:2}{:2}".format(word, ":".join(ti)), 0, 130)
             self.btn_off = Button(x=0, y=200, w=240, h=40, label="Stop tracking")
             self.btn_off.draw()
         elif self._page == b"STA":
-            draw.string('Sleep tracker' , 0, 70)
+            draw.string('Sleep tracker with' , 0, 60)
+            draw.string('alarm and smart alarm.' , 0, 80)
+            draw.string('Wake you up to 30m' , 0, 100)
+            draw.string('before alarm.' , 0, 120)
+            draw.string('ALPHA SOFTWARE.' , 0, 140)
             self.btn_on = Button(x=0, y=200, w=200, h=40, label="Start tracking")
             self.btn_on.draw()
-            self.btn_set = Button(x=201, y=200, w=38, h=40, label="S")
+            self.btn_set = Button(x=201, y=200, w=39, h=40, label="S")
             self.btn_set.draw()
         elif self._page == b"SET":
-            draw.string("Settings", 0, 0)
-            self.btn_set_end = Button(x=201, y=0, w=38, h=40, label="X")
+            self.btn_set_end = Button(x=201, y=200, w=39, h=40, label="X")
             self.btn_set_end.draw()
 
-            self.hours = Spinner(0, 5, 0, 23, 2)
-            self.hours.value = self._spinval_H
-            self.hours.draw()
-            self.min = Spinner(60, 5, 0, 59, 2)
-            self.min.value = self._spinval_M
-            self.min.draw()
+            if self._wakeup_enabled:
+                self._spin_H = Spinner(10, 140, 0, 23, 2)
+                self._spin_H.value = self._spinval_H
+                self._spin_H.draw()
+                self._spin_M = Spinner(100, 140, 0, 59, 2)
+                self._spin_M.value = self._spinval_M
+                self._spin_M.draw()
 
-            self.check_al = Checkbox(x=0, y=160, label="Alarm?")
+            self.check_al = Checkbox(x=0, y=40, label="Alarm")
             self.check_al.state = self._wakeup_enabled
             self.check_al.draw()
             if self.check_al.state == 1:
-                self.check_anti = Checkbox(x=0, y=200, label="Anticipate?")
-                self.check_anti.state = self._wakeup_ant_enabled
-                self.check_anti.draw()
+                self.check_smart = Checkbox(x=0, y=80, label="Smart alarm")
+                self.check_smart.state = self._wakeup_smart_enabled
+                self.check_smart.draw()
 
-
-        if self._page != b"SET":
-            self.stat_bar = StatusBar()
-            self.stat_bar.clock = True
-            self.stat_bar.draw()
+        self.stat_bar = StatusBar()
+        self.stat_bar.clock = True
+        self.stat_bar.draw()
 
     def _compute_best_WU(self):
         """computes best wake up time from sleep data"""
@@ -304,7 +314,7 @@ class SleepTkApp():
         # finding how early to wake up:
         max_sin = 0
         WU_t = self._WU_t
-        for t in range(WU_t, WU_t - _ANTICIP_LEN, -300):  # counting backwards from original wake up time, steps of 5 minutes
+        for t in range(WU_t, WU_t - _SMART_LEN, -300):  # counting backwards from original wake up time, steps of 5 minutes
             s = sin(omega * t + best_offset)
             if s > max_sin:
                 max_sin = s
