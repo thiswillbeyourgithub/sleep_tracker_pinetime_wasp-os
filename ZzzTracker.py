@@ -76,7 +76,7 @@ class ZzzTrackerApp():
                 self._offset = int(rtc.time())  # makes output more compact
 
                 # create one file per recording session:
-                self.filep = "logs/sleep/" + str(self._offset) + ".csv"
+                self.filep = "logs/sleep/{}.csv".format(str(self._offset))
                 self._add_accel_alar()
 
                 if self._debug:
@@ -228,21 +228,21 @@ class ZzzTrackerApp():
         draw.set_font(_FONT)
         if self._page == "RINGING":
             if self._earlier != 0:
-                msg = "WAKE UP (" + str(self._earlier/60)[0:2] + "m early)"
+                msg = "WAKE UP ({}m early)".format(str(self._earlier/60)[0:2])
             else:
                 msg = "WAKE UP"
             draw.string(msg, 0, 70)
             self.btn_al = Button(x=0, y=170, w=240, h=40, label="STOP")
             self.btn_al.draw()
         elif self._page in ["TRACKING", "WAITING_EARLY_WU"]:
-            draw.string('Started at ' + ":".join([str(x) for x in watch.time.localtime(self._offset)[3:5]]), 0, 70)
-            draw.string("data points:" + str(self._data_point_nb), 0, 90)
+            draw.string('Started at {}'.format(":".join([str(x) for x in watch.time.localtime(self._offset)[3:5]])), 0, 70)
+            draw.string("data points: {}".format(str(self._data_point_nb)), 0, 90)
             if self._wakeup_enabled:
                 if self._wakeup_ant_enabled:
                     word = " before "
                 else:
                     word = " at "
-                draw.string("Wake up" + word + ":".join([str(x) for x in watch.time.localtime(self._offset + self._SL_L)[3:5]]), 0, 130)
+                draw.string("Wake up {} {}".format(word, ":".join([str(x) for x in watch.time.localtime(self._offset + self._SL_L)[3:5]])), 0, 130)
             self.btn_off = Button(x=0, y=170, w=240, h=40, label="Stop tracking")
             self.btn_off.draw()
         elif self._page == "START":
