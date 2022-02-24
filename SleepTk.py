@@ -302,7 +302,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
         f = open(self.filep, "rb")
         lines = f.readlines()
         f.close()
-        if b"\n" in lines:
+        if len(lines) == 0:
             lines = lines[0].split(b"\n")
         data = array("f", [float(line.split(",")[4]) for line in lines])
 
