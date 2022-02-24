@@ -26,6 +26,8 @@ from micropython import const
 
 _FONT = sans18
 _BATTERY_THRESHOLD = const(20)  # under 20% of battery, stop tracking and only keep the alarm
+_AVG_SLEEP_CYCL = const(32400)  # 90 minutes, average sleep cycle duration
+_OFFSETS = array("H", [0, 300, 600, 900, 1200, 1500, 1800])
 
 class ZzzTrackerApp():
     NAME = 'ZzzTrck'
@@ -298,16 +300,15 @@ class ZzzTrackerApp():
         # fitting cosine of various offsets in minutes, the best fit has the
         # period indicating best wake up time:
         fits = array("f")
-        offsets = [0, 300, 600, 900, 1200, 1500, 1800]
-        omega = 2 * pi / 324000  # 90 minutes, average sleep cycle duration
-        for cnt, offset in enumerate(offsets):  # least square regression
+        omega = 2 * pi / _AVG_SLEEP_CYCL
+        for cnt, offset in enumerate(_OFFSETS):  # least square regression
             fits.append(
                     sum([sin(omega * t * self._store_freq + offset) * data[t] for t in range(len(data))])
                     -sum([(sin(omega * t * self._store_freq + offset) - data[t])**2 for t in range(len(data))])
                     )
             if fits[-1] == min(fits):
-                best_offset = offsets[cnt]
-        del fits, offset, offsets, cnt
+                best_offset = _OFFSETS[cnt]
+        del fits, offset, _OFFSETS, cnt
 
         # finding how early to wake up:
         max_sin = 0
