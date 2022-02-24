@@ -58,6 +58,7 @@ class SleepTkApp():
         cd("..")
 
     def foreground(self):
+        self._conf_view = None
         gc.collect()
         self._draw()
         system.request_event(EventMask.TOUCH)
