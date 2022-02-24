@@ -191,21 +191,22 @@ class ZzzTrackerApp():
 
     def _periodicSave(self):
         """save data after averageing over a window to file"""
+        buff = self._buff
         if self._data_point_nb - self._last_checkpoint >= _STORE_FREQ / _FREQ:
-            x_avg = sum([self._buff[i] for i in range(0, len(self._buff), 3)]) / (self._data_point_nb - self._last_checkpoint)
-            y_avg = sum([self._buff[i] for i in range(1, len(self._buff), 3)]) / (self._data_point_nb - self._last_checkpoint)
-            z_avg = sum([self._buff[i] for i in range(2, len(self._buff), 3)]) / (self._data_point_nb - self._last_checkpoint)
-            self._buff = array("f")  # reseting array
-            self._buff.append(int(rtc.time() - self._offset))
-            self._buff.append(x_avg)
-            self._buff.append(y_avg)
-            self._buff.append(z_avg)
-            self._buff.append(degrees(atan(z_avg / (pow(x_avg, 2) + pow(y_avg, 2) + 0.0000001)))) # formula from https://www.nature.com/articles/s41598-018-31266-z
+            x_avg = sum([buff[i] for i in range(0, len(buff), 3)]) / (self._data_point_nb - self._last_checkpoint)
+            y_avg = sum([buff[i] for i in range(1, len(buff), 3)]) / (self._data_point_nb - self._last_checkpoint)
+            z_avg = sum([buff[i] for i in range(2, len(buff), 3)]) / (self._data_point_nb - self._last_checkpoint)
+            buff = array("f")  # reseting array
+            buff.append(int(rtc.time() - self._offset))
+            buff.append(x_avg)
+            buff.append(y_avg)
+            buff.append(z_avg)
+            buff.append(degrees(atan(z_avg / (pow(x_avg, 2) + pow(y_avg, 2) + 0.0000001)))) # formula from https://www.nature.com/articles/s41598-018-31266-z
             del x_avg, y_avg, z_avg
-            self._buff.append(battery.voltage_mv())  # currently more accurate than percent
+            buff.append(battery.voltage_mv())  # currently more accurate than percent
 
             f = open(self.filep, "ab")
-            f.write(b",".join([str(x)[0:8].encode() for x in self._buff]) + b"\n")
+            f.write(b",".join([str(x)[0:8].encode() for x in buff]) + b"\n")
             f.close()
 
             self._last_checkpoint = self._data_point_nb
@@ -302,7 +303,8 @@ class ZzzTrackerApp():
 
         # finding how early to wake up:
         max_sin = 0
-        for t in range(self._WU_t, self._WU_t - _ANTICIP_LEN, -300):  # counting backwards from original wake up time, steps of 5 minutes
+        WU_t = self._WU_t
+        for t in range(WU_t, WU_t - _ANTICIP_LEN, -300):  # counting backwards from original wake up time, steps of 5 minutes
             s = sin(omega * t + best_offset)
             if s > max_sin:
                 max_sin = s
@@ -311,8 +313,8 @@ class ZzzTrackerApp():
 
         system.set_alarm(
                 min(
-                    max(self._WU_t - self._earlier, int(rtc.time()) + 3),  # not before right now
-                    self._WU_t - 5  # not after original wake up time
+                    max(WU_t - self._earlier, int(rtc.time()) + 3),  # not before right now
+                    WU_t - 5  # not after original wake up time
                     ), self._listen_to_ticks)
         self._page = b"TRA2"
         gc.collect()
