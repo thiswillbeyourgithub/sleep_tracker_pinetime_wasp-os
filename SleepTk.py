@@ -85,8 +85,7 @@ class SleepTkApp():
                 self.filep = "logs/sleep/{}.csv".format(str(self._offset))
                 self._add_accel_alar()
 
-                # alarm in self._SL_L seconds after tracking started to wake you up
-                self._SL_L = self._spinval_H*60*60 + self._spinval_M*60
+                # setting up alarm
                 if self._wakeup_enabled:
                     now = rtc.get_localtime()
                     yyyy = now[0]
@@ -241,7 +240,7 @@ class SleepTkApp():
                 word = "Alarm at "
                 if self._wakeup_smart_enabled:
                     word = "Alarm before "
-                ti = [str(x) for x in watch.time.localtime(self._offset + self._SL_L)[3:5]]
+                ti = [str(x) for x in watch.time.localtime(self._WU_t)[3:5]]
                 draw.string("{:2}{:2}".format(word, ":".join(ti)), 0, 130)
             self.btn_off = Button(x=0, y=200, w=240, h=40, label="Stop tracking")
             self.btn_off.draw()
