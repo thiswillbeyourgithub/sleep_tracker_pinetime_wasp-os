@@ -25,7 +25,6 @@
 
 **misc**
 * turn off the Bluetooth connection when no phone is connected?
-* confirmation screen when disabling sleep tracking
 * ability to send in real time to Bluetooth device the current sleep stage you're probably in. For use in Targeted Memory Reactivation.
 * find a way to remove outliers of stored values
 
