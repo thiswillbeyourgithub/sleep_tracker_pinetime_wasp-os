@@ -108,10 +108,10 @@ class SleepTkApp():
 
         elif self._page.startswith(b"TRA"):
             if self._conf_view is None:
-                no_full_draw = True
                 if self.btn_off.touch(event):
                     self._conf_view = ConfirmationView()
                     self._conf_view.draw("Stop tracking?")
+                    no_full_draw = True
             else:
                 if self._conf_view.touch(event):
                     if self._conf_view.value:
