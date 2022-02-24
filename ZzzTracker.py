@@ -13,7 +13,7 @@ alarm you set up manually.
 """
 
 import time
-from wasp import watch, system, EventMask, gc
+from wasp import watch, system, EventMask
 
 from watch import rtc, battery, accel
 from widgets import Button, Spinner, Checkbox, StatusBar, ConfirmationView
@@ -215,7 +215,6 @@ class ZzzTrackerApp():
 
             self._last_checkpoint = self._data_point_nb
             self._buff = array("f")
-        gc.collect()
 
     def _draw(self):
         """GUI"""
@@ -280,7 +279,6 @@ class ZzzTrackerApp():
         """computes best wake up time from sleep data"""
         # stop tracking to save memory
         self._disable_tracking()
-        gc.collect()
 
         # get angle over time
         f = open(self.filep, "r")
@@ -327,7 +325,6 @@ class ZzzTrackerApp():
                     ), self._listen_to_ticks)
         self._page = "WAITING_EARLY_WU"
 
-        gc.collect()
 
     def _listen_to_ticks(self):
         """listen to ticks every second, telling the watch to vibrate"""
