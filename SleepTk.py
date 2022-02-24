@@ -166,13 +166,13 @@ class SleepTkApp():
         if no_full_draw is False:
             self._draw()
 
-    def _disable_tracking(self, keep_alarm=False):
+    def _disable_tracking(self, keep_main_alarm=False):
         """called by touching "STOP TRACKING" or when computing best alarm time
         to wake up you disables tracking features and alarms"""
         self._tracking = False
         system.cancel_alarm(self.next_al, self._trackOnce)
         if self._wakeup_enabled:
-            if keep_alarm is False:  # to keep the alarm when stopping because of low battery
+            if keep_main_alarm is False:  # to keep the alarm when stopping because of low battery
                 system.cancel_alarm(self._WU_t, self._listen_to_ticks)
             if self._wakeup_smart_enabled:
                 system.cancel_alarm(self._WU_a, self._compute_best_WU)
@@ -194,7 +194,7 @@ class SleepTkApp():
             self._add_accel_alar()
             self._periodicSave()
             if battery.level() <= _BATTERY_THRESHOLD:
-                self._disable_tracking(keep_alarm=True)
+                self._disable_tracking(keep_main_alarm=True)
         gc.collect()
 
     def _periodicSave(self):
