@@ -39,7 +39,7 @@ class ZzzTrackerApp():
         self._spinval_H = 7  # default wake up time
         self._spinval_M = 30
         self._debug = False
-        self.confirmation_view = None
+        self._conf_view = None
         self._tracking = False  # False = not tracking, True = currently tracking
         self._earlier = 0
         self._page = "START" # can be START / TRACKING / RINGING / WAITING_EARLY_WU / SETTINGS
@@ -107,17 +107,17 @@ class ZzzTrackerApp():
                 self._page = "SETTINGS"
 
         elif self._page in ["TRACKING", "WAITING_EARLY_WU"]:
-            if self.confirmation_view is None:
+            if self._conf_view is None:
                 no_full_draw = True
                 if self.btn_off.touch(event):
-                    self.confirmation_view = ConfirmationView()
-                    self.confirmation_view.draw("Stop tracking?")
+                    self._conf_view = ConfirmationView()
+                    self._conf_view.draw("Stop tracking?")
             else:
-                if self.confirmation_view.touch(event):
-                    if self.confirmation_view.value:
+                if self._conf_view.touch(event):
+                    if self._conf_view.value:
                         self._disable_tracking()
                         self._page = "START"
-                    self.confirmation_view = None
+                    self._conf_view = None
 
         elif self._page == "RINGING":
             if self.btn_al.touch(event):
