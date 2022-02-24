@@ -19,7 +19,7 @@ import time
 from wasp import watch, system, EventMask, gc
 
 from watch import rtc, battery, accel
-from widgets import Clock, BatteryMeter, Button, Spinner, Checkbox
+from widgets import Button, Spinner, Checkbox, StatusBar
 from shell import mkdir, cd
 from fonts import sans18
 
@@ -262,10 +262,9 @@ class ZzzTrackerApp():
 
 
         if self._page != "SETTINGS":
-            self.cl = Clock(True)
-            self.cl.draw()
-            bat = BatteryMeter()
-            bat.draw()
+            self.stat_bar = StatusBar()
+            self.stat_bar.clock = True
+            self.stat_bar.draw()
 
     def _compute_best_WU(self):
         """computes best wake up time from sleep data"""
