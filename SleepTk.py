@@ -237,7 +237,7 @@ class SleepTkApp():
             draw.string('Started at {}'.format(":".join([str(x) for x in watch.time.localtime(self._offset)[3:5]])), 0, 70)
             draw.string("data points: {}".format(str(self._data_point_nb)), 0, 90)
             if self._wakeup_enabled:
-                word = "Alarm at"
+                word = "Alarm at "
                 if self._wakeup_smart_enabled:
                     word = "Alarm before "
                 ti = [str(x) for x in watch.time.localtime(self._offset + self._SL_L)[3:5]]
