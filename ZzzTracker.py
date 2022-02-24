@@ -105,14 +105,17 @@ class ZzzTrackerApp():
                 self._page = "TRACKING"
             elif self.btn_set.touch(event):
                 self._page = "SETTINGS"
+
         elif self._page == "TRACKING":
             if self.btn_off.touch(event):
                 self._disable_tracking()
                 self._page = "START"
+
         elif self._page == "RINGING":
             if self.btn_al.touch(event):
                 self._disable_tracking()
                 self._page = "START"
+
         elif self._page == "SETTINGS":
             no_full_draw = True
             disable_both = False
