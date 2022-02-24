@@ -160,8 +160,6 @@ class ZzzTrackerApp():
             elif self.btn_set_end.touch(event):
                 self._page = "START"
                 self._draw()
-            else:
-                self._draw()
 
         if no_full_draw is False:
             self._draw()
