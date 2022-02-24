@@ -32,6 +32,13 @@ _FREQ = const(5)  # get accelerometer data every X seconds, they will be average
 _STORE_FREQ = const(300)  # number of seconds between storing average values to file written every X points
 _SMART_LEN = const(1800)  # defaults 1800 = 30m
 
+# page values:
+_START = const(0)
+_TRACKING = const(1)
+_TRACKING2 = const(2)
+_SETTINGS = const(3)
+_RINGING = const(4)
+
 class SleepTkApp():
     NAME = 'SleepTk'
 
@@ -44,7 +51,7 @@ class SleepTkApp():
         self._conf_view = None
         self._tracking = False  # False = not tracking, True = currently tracking
         self._earlier = 0
-        self._page = b"STA" # can be START / TRACKING / TRA2 = tracking but with early wake up time computed / SETTINGS / RINGING
+        self._page = _START
 
         try:
             mkdir("logs/")
@@ -72,7 +79,7 @@ class SleepTkApp():
         """either start trackign or disable it, draw the screen in all cases"""
         gc.collect()
         no_full_draw = False
-        if self._page == b"STA":
+        if self._page == _START:
             if self.btn_on.touch(event):
                 self._tracking = True
                 # accel data not yet written to disk:
@@ -102,11 +109,11 @@ class SleepTkApp():
                     if self._wakeup_smart_enabled:
                         self._WU_a = self._WU_t - _SMART_LEN
                         system.set_alarm(self._WU_a, self._compute_best_WU)
-                self._page = b"TRA"
+                self._page = _TRACKING
             elif self.btn_set.touch(event):
-                self._page = b"SET"
+                self._page = _SETTINGS
 
-        elif self._page.startswith(b"TRA"):
+        elif self._page == _TRACKING or self._page == _TRACKING2:
             if self._conf_view is None:
                 if self.btn_off.touch(event):
                     self._conf_view = ConfirmationView()
@@ -116,15 +123,15 @@ class SleepTkApp():
                 if self._conf_view.touch(event):
                     if self._conf_view.value:
                         self._disable_tracking()
-                        self._page = b"STA"
+                        self._page = _START
                     self._conf_view = None
 
-        elif self._page == b"RNG":
+        elif self._page == _RINGING:
             if self.btn_al.touch(event):
                 self._disable_tracking()
-                self._page = b"STA"
+                self._page = _START
 
-        elif self._page == b"SET":
+        elif self._page == _SETTINGS:
             no_full_draw = True
             disable_all = False
             if self.check_al.touch(event):
@@ -160,7 +167,7 @@ class SleepTkApp():
                 self._spinval_M = self._spin_M.value
                 self._spin_M.update()
             elif self.btn_set_end.touch(event):
-                self._page = b"STA"
+                self._page = _START
                 self._draw()
 
         if no_full_draw is False:
@@ -233,7 +240,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
         draw = watch.drawable
         draw.fill(0)
         draw.set_font(_FONT)
-        if self._page == b"RNG":
+        if self._page == _RINGING:
             if self._earlier != 0:
                 msg = "WAKE UP ({}m early)".format(str(self._earlier/60)[0:2])
             else:
@@ -241,7 +248,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             draw.string(msg, 0, 70)
             self.btn_al = Button(x=0, y=170, w=240, h=40, label="STOP")
             self.btn_al.draw()
-        elif self._page.startswith(b"TRA"):
+        elif self._page == _TRACKING or self._page == _TRACKING2:
             draw.string('Started at {}'.format(":".join([str(x) for x in watch.time.localtime(self._offset)[3:5]])), 0, 70)
             draw.string("data points: {}".format(str(self._data_point_nb)), 0, 90)
             if self._wakeup_enabled:
@@ -252,7 +259,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
                 draw.string("{:2}{:2}".format(word, ":".join(ti)), 0, 130)
             self.btn_off = Button(x=0, y=200, w=240, h=40, label="Stop tracking")
             self.btn_off.draw()
-        elif self._page == b"STA":
+        elif self._page == _START:
             draw.string('Sleep tracker with' , 0, 60)
             draw.string('alarm and smart alarm.' , 0, 80)
             draw.string('Wake you up to 30m' , 0, 100)
@@ -262,7 +269,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             self.btn_on.draw()
             self.btn_set = Button(x=201, y=200, w=39, h=40, label="S")
             self.btn_set.draw()
-        elif self._page == b"SET":
+        elif self._page == _SETTINGS:
             self.btn_set_end = Button(x=201, y=200, w=39, h=40, label="X")
             self.btn_set_end.draw()
 
@@ -334,14 +341,14 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
                     max(WU_t - self._earlier, int(rtc.time()) + 3),  # not before right now
                     WU_t - 5  # not after original wake up time
                     ), self._listen_to_ticks)
-        self._page = b"TRA2"
+        self._page = _TRACKING2
         gc.collect()
 
 
     def _listen_to_ticks(self):
         """listen to ticks every second, telling the watch to vibrate"""
         gc.collect()
-        self._page = b"RNG"
+        self._page = _RINGING
         system.wake()
         system.keep_awake()
         system.switch(self)
@@ -350,5 +357,5 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
 
     def tick(self, ticks):
         """vibrate to wake you up"""
-        if self._page == b"RNG":
+        if self._page == _RINGING:
             watch.vibrator.pulse(duty=50, ms=500)
