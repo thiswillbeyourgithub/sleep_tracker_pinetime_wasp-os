@@ -168,8 +168,7 @@ class ZzzTrackerApp():
 
     def _disable_tracking(self, keep_alarm=False):
         """called by touching "STOP TRACKING" or when computing best alarm time
-        to wake up you
-        disables tracking features and alarms"""
+        to wake up you disables tracking features and alarms"""
         self._tracking = False
         system.cancel_alarm(self.next_al, self._trackOnce)
         if self._wakeup_enabled:
@@ -308,7 +307,7 @@ class ZzzTrackerApp():
                     )
             if fits[-1] == min(fits):
                 best_offset = _OFFSETS[cnt]
-        del fits, offset, _OFFSETS, cnt
+        del fits, offset, cnt
 
         # finding how early to wake up:
         max_sin = 0
