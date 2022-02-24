@@ -20,8 +20,6 @@
 * try to roughly infer the sleep stage directly on the device?
     * if you actually use the watch during the night, make sure to count it as wakefulness
 
-**settings panel**
-* specify a battery threshold under which it should not keep tracking sleep, to make sure you don't drain the battery and end up missing the alarm clock
 
 **misc**
 * turn off the Bluetooth connection when no phone is connected?

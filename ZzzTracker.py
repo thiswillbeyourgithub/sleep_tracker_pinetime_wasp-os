@@ -22,8 +22,10 @@ from fonts import sans18
 
 from math import atan, pow, degrees, sqrt, sin, pi
 from array import array
+from micropython import const
 
 _FONT = sans18
+_BATTERY_THRESHOLD = const(20)  # under 20% of battery, stop tracking and only keep the alarm
 
 class ZzzTrackerApp():
     NAME = 'ZzzTrck'
@@ -164,14 +166,15 @@ class ZzzTrackerApp():
         if no_full_draw is False:
             self._draw()
 
-    def _disable_tracking(self):
+    def _disable_tracking(self, keep_alarm=False):
         """called by touching "STOP TRACKING" or when computing best alarm time
         to wake up you
         disables tracking features and alarms"""
         self._tracking = False
         system.cancel_alarm(self.next_al, self._trackOnce)
         if self._wakeup_enabled:
-            system.cancel_alarm(self._WU_t, self._listen_to_ticks)
+            if keep_alarm is False:  # to keep the alarm when stopping because of low battery
+                system.cancel_alarm(self._WU_t, self._listen_to_ticks)
             if self._wakeup_ant_enabled:
                 system.cancel_alarm(self._WU_a, self._compute_best_WU)
         self._periodicSave()
@@ -190,6 +193,8 @@ class ZzzTrackerApp():
             self._data_point_nb += 1
             self._add_accel_alar()
             self._periodicSave()
+            if battery.level() <= _BATTERY_THRESHOLD:
+                self._disable_tracking(keep_alarm=True)
 
     def _periodicSave(self):
         """save data after averageing over a window to file"""
