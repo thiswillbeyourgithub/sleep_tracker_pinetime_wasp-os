@@ -28,6 +28,9 @@ _FONT = sans18
 _BATTERY_THRESHOLD = const(20)  # under 20% of battery, stop tracking and only keep the alarm
 _AVG_SLEEP_CYCL = const(32400)  # 90 minutes, average sleep cycle duration
 _OFFSETS = array("H", [0, 300, 600, 900, 1200, 1500, 1800])
+_FREQ = const(5)  # get accelerometer data every X seconds, they will be averaged
+_STORE_FREQ = const(300)  # number of seconds between storing average values to file written every X points
+_ANTICIP_LEN = const(1800)  # defaults 1800 = 30m
 
 class ZzzTrackerApp():
     NAME = 'ZzzTrck'
@@ -36,9 +39,6 @@ class ZzzTrackerApp():
         gc.collect()
         self._wakeup_enabled = 1
         self._wakeup_ant_enabled = 1  # activate waking you up at optimal time  based on accelerometer data, at the earliest at _WU_LAT - _WU_ANTICIP
-        self._freq = 5  # get accelerometer data every X seconds, they will be averaged
-        self._store_freq = 300  # number of seconds between storing average values to file written every X points
-        self._wakeup_ant_latitude = 1800  # defaults 1800 = 30m
         self._spinval_H = 7  # default wake up time
         self._spinval_M = 30
         self._conf_view = None
@@ -98,9 +98,9 @@ class ZzzTrackerApp():
                     self._WU_t = time.mktime((yyyy, mm, dd, HH, MM, 0, 0, 0, 0))
                     system.set_alarm(self._WU_t, self._listen_to_ticks)
 
-                    # alarm in self._wakeup_ant_latitude less seconds to compute best wake up time
+                    # alarm in _ANTICIP_LEN less seconds to compute best wake up time
                     if self._wakeup_ant_enabled:
-                        self._WU_a = self._WU_t - self._wakeup_ant_latitude
+                        self._WU_a = self._WU_t - _ANTICIP_LEN
                         system.set_alarm(self._WU_a, self._compute_best_WU)
                 self._page = b"TRA"
             elif self.btn_set.touch(event):
@@ -172,14 +172,14 @@ class ZzzTrackerApp():
         gc.collect()
 
     def _add_accel_alar(self):
-        """set an alarm, due in self._freq minutes, to log the accelerometer data
+        """set an alarm, due in _FREQ minutes, to log the accelerometer data
         once"""
-        self.next_al = watch.rtc.time() + self._freq
+        self.next_al = watch.rtc.time() + _FREQ
         system.set_alarm(self.next_al, self._trackOnce)
 
     def _trackOnce(self):
-        """get one data point of accelerometer every self._freq seconds and
-        they are then averaged and stored every self._store_freq seconds"""
+        """get one data point of accelerometer every _FREQ seconds and
+        they are then averaged and stored every _STORE_FREQ seconds"""
         if self._tracking:
             [self._buff.append(x) for x in accel.read_xyz()]
             self._data_point_nb += 1
@@ -191,7 +191,7 @@ class ZzzTrackerApp():
 
     def _periodicSave(self):
         """save data after averageing over a window to file"""
-        if self._data_point_nb - self._last_checkpoint >= self._store_freq / self._freq:
+        if self._data_point_nb - self._last_checkpoint >= _STORE_FREQ / _FREQ:
             x_avg = sum([self._buff[i] for i in range(0, len(self._buff), 3)]) / (self._data_point_nb - self._last_checkpoint)
             y_avg = sum([self._buff[i] for i in range(1, len(self._buff), 3)]) / (self._data_point_nb - self._last_checkpoint)
             z_avg = sum([self._buff[i] for i in range(2, len(self._buff), 3)]) / (self._data_point_nb - self._last_checkpoint)
@@ -293,8 +293,8 @@ class ZzzTrackerApp():
         omega = 2 * pi / _AVG_SLEEP_CYCL
         for cnt, offset in enumerate(_OFFSETS):  # least square regression
             fits.append(
-                    sum([sin(omega * t * self._store_freq + offset) * data[t] for t in range(len(data))])
-                    -sum([(sin(omega * t * self._store_freq + offset) - data[t])**2 for t in range(len(data))])
+                    sum([sin(omega * t * _STORE_FREQ + offset) * data[t] for t in range(len(data))])
+                    -sum([(sin(omega * t * _STORE_FREQ + offset) - data[t])**2 for t in range(len(data))])
                     )
             if fits[-1] == min(fits):
                 best_offset = _OFFSETS[cnt]
@@ -302,7 +302,7 @@ class ZzzTrackerApp():
 
         # finding how early to wake up:
         max_sin = 0
-        for t in range(self._WU_t, self._WU_t - self._wakeup_ant_latitude, -300):  # counting backwards from original wake up time, steps of 5 minutes
+        for t in range(self._WU_t, self._WU_t - _ANTICIP_LEN, -300):  # counting backwards from original wake up time, steps of 5 minutes
             s = sin(omega * t + best_offset)
             if s > max_sin:
                 max_sin = s
