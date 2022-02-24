@@ -41,7 +41,6 @@ class ZzzTrackerApp():
         self._wakeup_ant_latitude = 1800  # defaults 1800 = 30m
         self._spinval_H = 7  # default wake up time
         self._spinval_M = 30
-        self._debug = False
         self._conf_view = None
         self._tracking = False  # False = not tracking, True = currently tracking
         self._earlier = 0
@@ -84,11 +83,6 @@ class ZzzTrackerApp():
                 # create one file per recording session:
                 self.filep = "logs/sleep/{}.csv".format(str(self._offset))
                 self._add_accel_alar()
-
-                if self._debug:
-                    self._freq = 1
-                    self._store_freq = 5
-                    self._wakeup_ant_latitude = 5
 
                 # alarm in self._SL_L seconds after tracking started to wake you up
                 self._SL_L = self._spinval_H*60*60 + self._spinval_M*60
@@ -157,12 +151,6 @@ class ZzzTrackerApp():
             elif self.min.touch(event):
                 self._spinval_M = self.min.value
                 self.min.update()
-            elif self.check_debug.touch(event):
-                if self._debug:
-                    self._debug = False
-                else:
-                    self._debug = True
-                self.check_debug.update()
             elif self.btn_set_end.touch(event):
                 self._page = b"STA"
                 self._draw()
@@ -265,9 +253,6 @@ class ZzzTrackerApp():
             self.min.value = self._spinval_M
             self.min.draw()
 
-            self.check_debug = Checkbox(x=0, y=120, label="Debug?")
-            self.check_debug.state = self._debug
-            self.check_debug.draw()
             self.check_al = Checkbox(x=0, y=160, label="Alarm?")
             self.check_al.state = self._wakeup_enabled
             self.check_al.draw()
