@@ -44,7 +44,7 @@ class ZzzTrackerApp():
         self._conf_view = None
         self._tracking = False  # False = not tracking, True = currently tracking
         self._earlier = 0
-        self._page = "START" # can be START / TRACKING / RINGING / WAITING_EARLY_WU / SETTINGS
+        self._page = b"STA" # can be START / TRACKING / TRA2 = tracking but with early wake up time computed / SETTINGS / RINGING
 
         try:
             mkdir("logs/")
@@ -68,7 +68,7 @@ class ZzzTrackerApp():
     def touch(self, event):
         """either start trackign or disable it, draw the screen in all cases"""
         no_full_draw = False
-        if self._page == "START":
+        if self._page == b"STA":
             if self.btn_on.touch(event):
                 self._tracking = True
                 # accel data not yet written to disk:
@@ -104,11 +104,11 @@ class ZzzTrackerApp():
                     if self._wakeup_ant_enabled:
                         self._WU_a = self._WU_t - self._wakeup_ant_latitude
                         system.set_alarm(self._WU_a, self._compute_best_WU)
-                self._page = "TRACKING"
+                self._page = b"TRA"
             elif self.btn_set.touch(event):
-                self._page = "SETTINGS"
+                self._page = b"SET"
 
-        elif self._page in ["TRACKING", "WAITING_EARLY_WU"]:
+        elif self._page.startswith(b"TRA"):
             if self._conf_view is None:
                 no_full_draw = True
                 if self.btn_off.touch(event):
@@ -118,15 +118,15 @@ class ZzzTrackerApp():
                 if self._conf_view.touch(event):
                     if self._conf_view.value:
                         self._disable_tracking()
-                        self._page = "START"
+                        self._page = b"STA"
                     self._conf_view = None
 
-        elif self._page == "RINGING":
+        elif self._page == b"RNG":
             if self.btn_al.touch(event):
                 self._disable_tracking()
-                self._page = "START"
+                self._page = b"STA"
 
-        elif self._page == "SETTINGS":
+        elif self._page == b"SET":
             no_full_draw = True
             disable_both = False
             if self.check_al.touch(event):
@@ -160,7 +160,7 @@ class ZzzTrackerApp():
                     self._debug = True
                 self.check_debug.update()
             elif self.btn_set_end.touch(event):
-                self._page = "START"
+                self._page = b"STA"
                 self._draw()
 
         if no_full_draw is False:
@@ -211,8 +211,8 @@ class ZzzTrackerApp():
             del x_avg, y_avg, z_avg
             self._buff.append(battery.voltage_mv())  # currently more accurate than percent
 
-            f = open(self.filep, "a")
-            f.write(",".join([str(x)[0:8] for x in self._buff]) + "\n")
+            f = open(self.filep, "ab")
+            f.write(b",".join([str(x)[0:8].encode() for x in self._buff]) + b"\n")
             f.close()
 
             self._last_checkpoint = self._data_point_nb
@@ -223,7 +223,7 @@ class ZzzTrackerApp():
         draw = watch.drawable
         draw.fill(0)
         draw.set_font(_FONT)
-        if self._page == "RINGING":
+        if self._page == b"RNG":
             if self._earlier != 0:
                 msg = "WAKE UP ({}m early)".format(str(self._earlier/60)[0:2])
             else:
@@ -231,7 +231,7 @@ class ZzzTrackerApp():
             draw.string(msg, 0, 70)
             self.btn_al = Button(x=0, y=170, w=240, h=40, label="STOP")
             self.btn_al.draw()
-        elif self._page in ["TRACKING", "WAITING_EARLY_WU"]:
+        elif self._page.startswith(b"TRA"):
             draw.string('Started at {}'.format(":".join([str(x) for x in watch.time.localtime(self._offset)[3:5]])), 0, 70)
             draw.string("data points: {}".format(str(self._data_point_nb)), 0, 90)
             if self._wakeup_enabled:
@@ -242,13 +242,13 @@ class ZzzTrackerApp():
                 draw.string("Wake up {} {}".format(word, ":".join([str(x) for x in watch.time.localtime(self._offset + self._SL_L)[3:5]])), 0, 130)
             self.btn_off = Button(x=0, y=170, w=240, h=40, label="Stop tracking")
             self.btn_off.draw()
-        elif self._page == "START":
+        elif self._page == b"STA":
             draw.string('Sleep tracker' , 0, 70)
             self.btn_on = Button(x=0, y=170, w=200, h=40, label="Start tracking")
             self.btn_on.draw()
             self.btn_set = Button(x=201, y=170, w=38, h=40, label="S")
             self.btn_set.draw()
-        elif self._page == "SETTINGS":
+        elif self._page == b"SET":
             draw.string("Settings", 0, 0)
             self.btn_set_end = Button(x=201, y=0, w=38, h=40, label="X")
             self.btn_set_end.draw()
@@ -272,7 +272,7 @@ class ZzzTrackerApp():
                 self.check_anti.draw()
 
 
-        if self._page != "SETTINGS":
+        if self._page != b"SET":
             self.stat_bar = StatusBar()
             self.stat_bar.clock = True
             self.stat_bar.draw()
@@ -283,11 +283,11 @@ class ZzzTrackerApp():
         self._disable_tracking()
 
         # get angle over time
-        f = open(self.filep, "r")
+        f = open(self.filep, "rb")
         lines = f.readlines()
         f.close()
-        if len(lines) == 1:
-            lines = lines[0].split("\n")
+        if b"\n" in lines:
+            lines = lines[0].split(b"\n")
         data = array("f", [float(line.split(",")[4]) for line in lines])
 
         # center and scale
@@ -324,12 +324,12 @@ class ZzzTrackerApp():
                     max(self._WU_t - self._earlier, int(rtc.time()) + 3),  # not before right now
                     self._WU_t - 5  # not after original wake up time
                     ), self._listen_to_ticks)
-        self._page = "WAITING_EARLY_WU"
+        self._page = b"TRA2"
 
 
     def _listen_to_ticks(self):
         """listen to ticks every second, telling the watch to vibrate"""
-        self._page = "RINGING"
+        self._page = b"RNG"
         system.wake()
         system.keep_awake()
         system.switch(self)
@@ -338,5 +338,5 @@ class ZzzTrackerApp():
 
     def tick(self, ticks):
         """vibrate to wake you up"""
-        if self._page == "RINGING":
+        if self._page == b"RNG":
             watch.vibrator.pulse(duty=50, ms=500)
