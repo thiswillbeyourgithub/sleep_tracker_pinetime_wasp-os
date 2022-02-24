@@ -234,13 +234,13 @@ class SleepTkApp():
                 else:
                     word = " at "
                 draw.string("Wake up{}{}".format(word, ":".join([str(x) for x in watch.time.localtime(self._offset + self._SL_L)[3:5]])), 0, 130)
-            self.btn_off = Button(x=0, y=170, w=240, h=40, label="Stop tracking")
+            self.btn_off = Button(x=0, y=200, w=240, h=40, label="Stop tracking")
             self.btn_off.draw()
         elif self._page == b"STA":
             draw.string('Sleep tracker' , 0, 70)
-            self.btn_on = Button(x=0, y=170, w=200, h=40, label="Start tracking")
+            self.btn_on = Button(x=0, y=200, w=200, h=40, label="Start tracking")
             self.btn_on.draw()
-            self.btn_set = Button(x=201, y=170, w=38, h=40, label="S")
+            self.btn_set = Button(x=201, y=200, w=38, h=40, label="S")
             self.btn_set.draw()
         elif self._page == b"SET":
             draw.string("Settings", 0, 0)
