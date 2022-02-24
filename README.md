@@ -15,6 +15,11 @@
         * run the app
         * *if you want, you can get back the data using `wasptool --pull`,  to take a look using pandas : ` df = pd.read_csv("./first.night.csv", names=["time", "x_avg", "y_avg", "z_avg", "angl_avg", "battery"])` (name and number of columns might change)*
 
+# Screenshots:
+![start](./screenshots/start_page.png)
+![settings](./screenshots/settings_page.png)
+![tracking](./screenshots/tracking_page.png)
+
 ## TODO
 **sleep tracking**
 * try to roughly infer the sleep stage directly on the device?
