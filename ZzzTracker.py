@@ -15,7 +15,7 @@ alarm you set up manually.
 import time
 from wasp import watch, system, EventMask
 
-from watch import rtc, battery, accel
+from watch import rtc, battery, accel, gc
 from widgets import Button, Spinner, Checkbox, StatusBar, ConfirmationView
 from shell import mkdir, cd
 from fonts import sans18
@@ -33,6 +33,7 @@ class ZzzTrackerApp():
     NAME = 'ZzzTrck'
 
     def __init__(self):
+        gc.collect()
         self._wakeup_enabled = 1
         self._wakeup_ant_enabled = 1  # activate waking you up at optimal time  based on accelerometer data, at the earliest at _WU_LAT - _WU_ANTICIP
         self._freq = 5  # get accelerometer data every X seconds, they will be averaged
@@ -58,15 +59,18 @@ class ZzzTrackerApp():
         cd("..")
 
     def foreground(self):
+        gc.collect()
         self._draw()
         system.request_event(EventMask.TOUCH)
 
     def sleep(self):
         """keep running in the background"""
+        gc.collect()
         return False
 
     def touch(self, event):
         """either start trackign or disable it, draw the screen in all cases"""
+        gc.collect()
         no_full_draw = False
         if self._page == b"STA":
             if self.btn_on.touch(event):
@@ -177,6 +181,7 @@ class ZzzTrackerApp():
             if self._wakeup_ant_enabled:
                 system.cancel_alarm(self._WU_a, self._compute_best_WU)
         self._periodicSave()
+        gc.collect()
 
     def _add_accel_alar(self):
         """set an alarm, due in self._freq minutes, to log the accelerometer data
@@ -194,6 +199,7 @@ class ZzzTrackerApp():
             self._periodicSave()
             if battery.level() <= _BATTERY_THRESHOLD:
                 self._disable_tracking(keep_alarm=True)
+        gc.collect()
 
     def _periodicSave(self):
         """save data after averageing over a window to file"""
@@ -324,10 +330,12 @@ class ZzzTrackerApp():
                     self._WU_t - 5  # not after original wake up time
                     ), self._listen_to_ticks)
         self._page = b"TRA2"
+        gc.collect()
 
 
     def _listen_to_ticks(self):
         """listen to ticks every second, telling the watch to vibrate"""
+        gc.collect()
         self._page = b"RNG"
         system.wake()
         system.keep_awake()
