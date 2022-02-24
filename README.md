@@ -18,8 +18,7 @@
 ## TODO
 **sleep tracking**
 * try to roughly infer the sleep stage directly on the device?
-    * if you actually use the watch during the night, make sure to count it as wakefulness
-
+    * if you actually use the watch during the night, make sure to count it as wakefulness?
 
 **misc**
 * turn off the Bluetooth connection when no phone is connected?
