@@ -44,6 +44,7 @@
 
 ## Pandas integration:
 Commands the author uses to take a look a the data using pandas:
+
 ```
 fname = "./logs/sleep/YOUR_TIME.csv"
 
@@ -57,4 +58,5 @@ df["hours"] = df["human_time"].dt.time
 df = df.set_index("hours")
 df["angl_avg"].plot()
 ```
+
 ![night example](./screenshots/example_night.png)
