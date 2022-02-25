@@ -296,53 +296,65 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
 
     def _compute_best_WU(self):
         """computes best wake up time from sleep data"""
-        # stop tracking to save memory
-        self._disable_tracking()
+        try:
+            # stop tracking to save memory, keep the alarm just in case
+            self._disable_tracking(keep_main_alarm=True)
 
-        # get angle over time
-        f = open(self.filep, "rb")
-        lines = f.readlines()
-        f.close()
-        if len(lines) == 0:
-            lines = lines[0].split(b"\n")
-        data = array("f", [float(line.split(",")[4]) for line in lines])
+            # get angle over time
+            f = open(self.filep, "rb")
+            lines = f.readlines()
+            f.close()
+            if len(lines) == 0:
+                lines = lines[0].split(b"\n")
+            data = array("f", [float(line.split(",")[4]) for line in lines])
 
-        # center and scale
-        mean = sum(data) / len(data)
-        std = sqrt((sum([x**2 for x in data]) / len(data)) - pow(mean, 2))
-        for i in range(len(data)):
-            data[i] = (data[i] - mean) / std
-        del mean, std
+            # center and scale
+            mean = sum(data) / len(data)
+            std = sqrt((sum([x**2 for x in data]) / len(data)) - pow(mean, 2))
+            for i in range(len(data)):
+                data[i] = (data[i] - mean) / std
+            del mean, std
 
-        # fitting cosine of various offsets in minutes, the best fit has the
-        # period indicating best wake up time:
-        fits = array("f")
-        omega = 2 * pi / _AVG_SLEEP_CYCL
-        for cnt, offset in enumerate(_OFFSETS):  # least square regression
-            fits.append(
-                    sum([sin(omega * t * _STORE_FREQ + offset) * data[t] for t in range(len(data))])
-                    -sum([(sin(omega * t * _STORE_FREQ + offset) - data[t])**2 for t in range(len(data))])
-                    )
-            if fits[-1] == min(fits):
-                best_offset = _OFFSETS[cnt]
-        del fits, offset, cnt
+            # fitting cosine of various offsets in minutes, the best fit has the
+            # period indicating best wake up time:
+            fits = array("f")
+            omega = 2 * pi / _AVG_SLEEP_CYCL
+            for cnt, offset in enumerate(_OFFSETS):  # least square regression
+                fits.append(
+                        sum([sin(omega * t * _STORE_FREQ + offset) * data[t] for t in range(len(data))])
+                        -sum([(sin(omega * t * _STORE_FREQ + offset) - data[t])**2 for t in range(len(data))])
+                        )
+                if fits[-1] == min(fits):
+                    best_offset = _OFFSETS[cnt]
+            del fits, offset, cnt
 
-        # finding how early to wake up:
-        max_sin = 0
-        WU_t = self._WU_t
-        for t in range(WU_t, WU_t - _SMART_LEN, -300):  # counting backwards from original wake up time, steps of 5 minutes
-            s = sin(omega * t + best_offset)
-            if s > max_sin:
-                max_sin = s
-                self._earlier = -t  # number of seconds earlier than wake up time
-        del max_sin, s
+            # finding how early to wake up:
+            max_sin = 0
+            WU_t = self._WU_t
+            for t in range(WU_t, WU_t - _SMART_LEN, -300):  # counting backwards from original wake up time, steps of 5 minutes
+                s = sin(omega * t + best_offset)
+                if s > max_sin:
+                    max_sin = s
+                    self._earlier = -t  # number of seconds earlier than wake up time
+            del max_sin, s
 
-        system.set_alarm(
-                min(
-                    max(WU_t - self._earlier, int(rtc.time()) + 3),  # not before right now
-                    WU_t - 5  # not after original wake up time
-                    ), self._listen_to_ticks)
-        self._page = _TRACKING2
+            system.set_alarm(
+                    min(
+                        WU_t - 5,  # not after original wake up time
+                        max(WU_t - self._earlier, int(rtc.time()) + 3)  # not before right now
+                        ), self._listen_to_ticks)
+            self._page = _TRACKING2
+            gc.collect()
+        except Exception as e:
+            gc.collect()
+            t = watch.time.localtime(time.time())
+            msg = "Exception occured at {}h{}m: '{}'%".format(t[3], t[4], str(e)))
+            system.notify(watch.rtc.get_uptime_ms(), {"src": "SleepTk",
+                                                      "title": "Smart alarm error",
+                                                      "body": msg})
+            f = open("smart_alarm_error_{}.txt".format(int(time.time())), "wb")
+            f.write(msg.encode())
+            f.close()
         gc.collect()
 
 
