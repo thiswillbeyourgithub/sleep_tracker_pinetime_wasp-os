@@ -108,7 +108,7 @@ class SleepTkApp():
                     # alarm in _SMART_LEN less seconds to compute best wake up time
                     if self._wakeup_smart_enabled:
                         self._WU_a = self._WU_t - _SMART_LEN
-                        system.set_alarm(self._WU_a, self._compute_best_WU)
+                        system.set_alarm(self._WU_a, self._smart_alarm_compute)
                 self._page = _TRACKING
             elif self.btn_set.touch(event):
                 self._page = _SETTINGS
@@ -182,7 +182,7 @@ class SleepTkApp():
             if keep_main_alarm is False:  # to keep the alarm when stopping because of low battery
                 system.cancel_alarm(self._WU_t, self._listen_to_ticks)
             if self._wakeup_smart_enabled:
-                system.cancel_alarm(self._WU_a, self._compute_best_WU)
+                system.cancel_alarm(self._WU_a, self._smart_alarm_compute)
         self._periodicSave()
         gc.collect()
 
@@ -294,7 +294,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
         self.stat_bar.clock = True
         self.stat_bar.draw()
 
-    def _compute_best_WU(self):
+    def _smart_alarm_compute(self):
         """computes best wake up time from sleep data"""
         try:
             # stop tracking to save memory, keep the alarm just in case
