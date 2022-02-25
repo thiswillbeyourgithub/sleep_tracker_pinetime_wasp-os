@@ -255,8 +255,8 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
                 word = "Alarm at "
                 if self._wakeup_smart_enabled:
                     word = "Alarm before "
-                ti = [str(x) for x in watch.time.localtime(self._WU_t)[3:5]]
-                draw.string("{:2}{:2}".format(word, ":".join(ti)), 0, 130)
+                ti = watch.time.localtime(self._WU_t)
+                draw.string("{}{:02d}:{:02d}".format(word, ti[3], ti[4]), 0, 130)
             self.btn_off = Button(x=0, y=200, w=240, h=40, label="Stop tracking")
             self.btn_off.draw()
         elif self._page == _START:
