@@ -31,6 +31,7 @@
 ## TODO
 **misc**
 * retake outdated UI screenshot + data sample
+* create a quick `.py` script to fetch the latest `TIMESTAMP.csv`
 * pressing the back button should return to home menu
 * turn off the Bluetooth connection when beginning tracking
 
