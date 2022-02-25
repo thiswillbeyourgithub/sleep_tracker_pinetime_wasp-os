@@ -20,14 +20,14 @@ from widgets import Button, Spinner, Checkbox, StatusBar, ConfirmationView
 from shell import mkdir, cd
 from fonts import sans18
 
-from math import atan, sin
+from math import sin
 from array import array
 from micropython import const
 
 # HARDCODED VARIABLES:
 _PIPI = const(628318)  # result of 2*pi*100_000
 _CONV = const(100000)  # to get 2*pi
-_START = const(0)  # page values
+_START = const(0)  # page values:
 _TRACKING = const(1)
 _TRACKING2 = const(2)
 _SETTINGS = const(3)
@@ -39,7 +39,7 @@ _STORE_FREQ = const(300)  # process data and store to file every X seconds
 _SLEEP_CYCL_TRY = array("H", [4800, 5400, 6000])  # sleep cycle length to try (80, 90 and 100 minutes)
 _BATTERY_THRESHOLD = const(20)  # under X% of battery, stop tracking and only keep the alarm
 
-# user can want to edit this:
+# user might want to edit this:
 _OFFSETS = array("H", [0, 600, 1200, 1800, 2400])  # possible offsets of sinus to try to fit to data (40 minutes, by increment of 10 minutes)
 
 
