@@ -349,7 +349,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
         except Exception as e:
             gc.collect()
             t = watch.time.localtime(time.time())
-            msg = "Exception occured at {}h{}m: '{}'%".format(t[3], t[4], str(e)))
+            msg = "Exception occured at {}h{}m: '{}'%".format(t[3], t[4], str(e))
             system.notify(watch.rtc.get_uptime_ms(), {"src": "SleepTk",
                                                       "title": "Smart alarm error",
                                                       "body": msg})
