@@ -243,14 +243,16 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             y_diff = sum([abs(abs(buff[i]) - abs(buff[i+1])) for i in range(1, len(buff)-1, 3)]) / (self._data_point_nb - self._last_checkpoint)
             z_diff = sum([abs(abs(buff[i]) - abs(buff[i+1])) for i in range(2, len(buff)-1, 3)]) / (self._data_point_nb - self._last_checkpoint)
             buff = array("f")  # reseting array
-            buff.append(abs(atan(z_diff / x_diff**2 + y_diff**2)))  # note: math.atan() is faster than using a taylor serie
+            buff.append(x_diff + y_diff + z_diff)
+            #buff.append(abs(atan(z_diff / x_diff**2 + y_diff**2)))
             # formula from https://www.nature.com/articles/s41598-018-31266-z
+            # note: math.atan() is faster than using a taylor serie
             buff.append(int(rtc.time() - self._offset))
             buff.append(x_diff)
             buff.append(y_diff)
             buff.append(z_diff)
             del x_diff, y_diff, z_diff
-            buff.append(battery.voltage_mv())  # currently more accurate than percent
+            buff.append(battery.voltage_mv())  # somewhat more accurate than percent
 
             f = open(self.filep, "ab")
             for x in buff[:-1]:
