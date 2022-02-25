@@ -353,14 +353,16 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             gc.collect()
 
             # the first value HAS to be high because you were still awake
-            data[0] = max(data)
+            if data[0] < 0.75*max(data):
+                data[0] = 0.75*max(data)
 
             # smoothen several times
-            for j in range(15):
+            for j in range(5):
                 for i in range(1, len(data)-2):
                     data[i] += data[i-1] + data[i+1]
                     data[i] /= 3
             del i, j
+            gc.collect()
 
             # center and scale and clip between -1 and 1
             mean = sum(data) / len(data)
@@ -368,6 +370,14 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             for i in range(len(data)):
                 data[i] = min(1, max(-1, (data[i] - mean) / std))
             del mean, std, i
+            gc.collect()
+
+            # smoothen several times
+            for j in range(5):
+                for i in range(1, len(data)-2):
+                    data[i] += data[i-1] + data[i+1]
+                    data[i] /= 3
+            del i, j
             gc.collect()
 
             # for each sleep cycle, do a least square regression on each
