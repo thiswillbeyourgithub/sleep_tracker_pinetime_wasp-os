@@ -243,11 +243,11 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             y_avg = sum([buff[i] for i in range(1, len(buff), 3)]) / (self._data_point_nb - self._last_checkpoint)
             z_avg = sum([buff[i] for i in range(2, len(buff), 3)]) / (self._data_point_nb - self._last_checkpoint)
             buff = array("f")  # reseting array
+            buff.append(abs(atan(z_avg / x_avg**2 + y_avg**2)))  # note: math.atan() is faster than using a taylor serie
             buff.append(int(rtc.time() - self._offset))
             buff.append(x_avg)
             buff.append(y_avg)
             buff.append(z_avg)
-            buff.append(abs(atan(z_avg / x_avg**2 + y_avg**2)))  # note: math.atan() is faster than using a taylor serie
                     # formula from https://www.nature.com/articles/s41598-018-31266-z
             del x_avg, y_avg, z_avg
             buff.append(battery.voltage_mv())  # currently more accurate than percent
@@ -327,26 +327,30 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             # stop tracking to save memory, keep the alarm just in case
             self._disable_tracking(keep_main_alarm=True)
 
-            # read file one character at a time, to get only the 4th
+            # read file one character at a time, to get only the 1st
             # value of each row, which is the arm angle
             data = array("f")
             buff = b""
-            cnt = 0
             f = open(self.filep, "rb")
+            skip = False
             while True:
                 char = f.read(1)
-                if char == b",":
-                    cnt += 1
-                elif char == b"\n":
+                if char == b",":  # start ignoring after the first col
+                    skip = True
+                    continue
+                if char == b"\n":
+                    skip = False  # stop skipping because reading a new line
                     data.append(float(buff))
-                    cnt = 0
                     buff = b""
-                elif cnt == 4:
-                    buff = buff + char
-                elif char == b"":
+                    continue
+
+                if char == b"":
                     break
+                elif not skip:
+                    buff += char
+
             f.close()
-            del f, char, buff, cnt
+            del f, char, buff
             gc.collect()
 
             # smoothen several times
