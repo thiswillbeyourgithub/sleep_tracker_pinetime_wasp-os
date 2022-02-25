@@ -20,7 +20,7 @@ from widgets import Button, Spinner, Checkbox, StatusBar, ConfirmationView
 from shell import mkdir, cd
 from fonts import sans18
 
-from math import atan, pow, degrees, sqrt, sin, pi
+from math import atan, sin
 from array import array
 from micropython import const
 
@@ -32,6 +32,10 @@ _OFFSETS = array("H", [0, 300, 600, 900, 1200, 1500, 1800])
 _FREQ = const(5)  # get accelerometer data every X seconds, they will be averaged
 _STORE_FREQ = const(300)  # number of seconds between storing average values to file written every X points
 _SMART_LEN = const(1800)  # defaults 1800 = 30m
+
+# math related :
+_DEGREE = const(5729578)  # result of 180/pi*100_000, for conversion
+_PIPI = const(628318)  # result of 2*pi*100_000
 
 # page values:
 _START = const(0)
@@ -244,7 +248,8 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             buff.append(x_avg)
             buff.append(y_avg)
             buff.append(z_avg)
-            buff.append(degrees(atan(z_avg / (pow(x_avg, 2) + pow(y_avg, 2) + 0.0000001)))) # formula from https://www.nature.com/articles/s41598-018-31266-z
+            buff.append(abs(atan(z_avg / x_avg**2 + y_avg**2)))
+                    # formula from https://www.nature.com/articles/s41598-018-31266-z
             del x_avg, y_avg, z_avg
             buff.append(battery.voltage_mv())  # currently more accurate than percent
 
@@ -329,7 +334,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
 
             # center and scale
             mean = sum(data) / len(data)
-            std = sqrt((sum([x**2 for x in data]) / len(data)) - pow(mean, 2))
+            std = ((sum([x**2 for x in data]) / len(data)) - mean**2)**0.5
             for i in range(len(data)):
                 data[i] = (data[i] - mean) / std
             del mean, std
@@ -337,7 +342,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             # fitting cosine of various offsets in minutes, the best fit has the
             # period indicating best wake up time:
             fits = array("f")
-            omega = 2 * pi / _AVG_SLEEP_CYCL
+            omega = _PIPI / 100000 * _AVG_SLEEP_CYCL / 2  # 2 * pi * period
             for cnt, offset in enumerate(_OFFSETS):  # least square regression
                 fits.append(
                         sum([sin(omega * t * _STORE_FREQ + offset) * data[t] for t in range(len(data))])
