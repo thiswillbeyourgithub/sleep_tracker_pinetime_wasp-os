@@ -201,6 +201,7 @@ class SleepTkApp():
             self._add_accel_alar()
             self._periodicSave()
             if battery.level() <= _BATTERY_THRESHOLD:
+                # strop tracking if battery low
                 self._disable_tracking(keep_main_alarm=True)
                 self._wakeup_smart_enabled = 0
                 h, m = watch.time.localtime(time.time())[3:5]
