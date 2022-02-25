@@ -25,7 +25,7 @@ from array import array
 from micropython import const
 
 _FONT = sans18
-_TIMESTAMP = const(946684800)
+_TIMESTAMP = const(946684800)  # unix time and time used by wasp os don't have the same reference date
 _BATTERY_THRESHOLD = const(20)  # under 20% of battery, stop tracking and only keep the alarm
 _AVG_SLEEP_CYCL = const(32400)  # 90 minutes, average sleep cycle duration
 _OFFSETS = array("H", [0, 300, 600, 900, 1200, 1500, 1800])  # try to fit sinus of different offsets, separated by 5 minutes
@@ -113,10 +113,10 @@ class SleepTkApp():
                 self._buff = array("f")
                 self._data_point_nb = 0  # total number of data points so far
                 self._last_checkpoint = 0  # to know when to save to file
-                self._offset = int(rtc.time()) + _TIMESTAMP  # makes output more compact
+                self._offset = int(rtc.time())  # makes output more compact
 
                 # create one file per recording session:
-                self.filep = "logs/sleep/{}.csv".format(str(self._offset))
+                self.filep = "logs/sleep/{}.csv".format(str(self._offset + _TIMESTAMP))
                 self._add_accel_alar()
 
                 # setting up alarm
