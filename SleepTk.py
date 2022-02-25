@@ -14,9 +14,9 @@ alarm you set up manually.
 
 import time
 from wasp import watch, system, EventMask, gc
-
 from watch import rtc, battery, accel
-from widgets import Button, Spinner, Checkbox, StatusBar, ConfirmationView, ScrollIndicator
+
+from widgets import Button, Spinner, Checkbox, StatusBar, ConfirmationView
 from shell import mkdir, cd
 from fonts import sans18
 
@@ -282,8 +282,6 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
         elif self._page == _START:
             self.btn_on = Button(x=0, y=200, w=240, h=40, label="Start tracking")
             self.btn_on.draw()
-            self.si = ScrollIndicator()
-            self.si.draw()
             draw.set_font(_FONT)
             draw.string('Sleep tracker with' , 0, 60)
             draw.string('alarm and smart alarm.' , 0, 80)
