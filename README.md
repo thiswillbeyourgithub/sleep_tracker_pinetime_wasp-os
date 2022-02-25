@@ -1,39 +1,40 @@
 # SleepTk : a sleep tracker and smart alarm for wasp-os
-**Goal:** sleep tracker and smart alarm for the [pinetime smartwatch](https://pine64.com/product/pinetime-smartwatch-sealed/) by Pine64, on python, to run on [wasp-os](https://github.com/daniel-thompson/wasp-os), that wakes you up at the best time.
+**Goal:** privacy friendly sleep tracker with smart alarm for the [pinetime smartwatch](https://pine64.com/product/pinetime-smartwatch-sealed/) by Pine64, on python, to run on [wasp-os](https://github.com/daniel-thompson/wasp-os).
 
-## Note to reader:
-* I created this repository before even receiving my pine time and despite a very busy schedule to make sure no one else starts a similar project and end up duplicating efforts for nothing :)
+## **How to install**:
+*(for now you need my slightly forked wasp-os that allows to use accelerometer data)*
+* download the latest [forked wasp-os](https://github.com/thiswillbeyourgithub/wasp-os)
+* download the latest [SleepTk.py](./SleepTk.py)
+* put the latest app in `wasp-os/wasp/apps/SleepTk.py`
+* compile `wasp-os`: `make submodules && make softdevice && make BOARD=pinetime all && echo "SUCCESS"`
+* upload it to your pinetime: `./tools/ota-dfu/dfu.py -z build-pinetime/micropython.zip -a XX:XX:XX:XX:XX:XX --legacy`
+* reboot the watch and enjoy `SleepTk`
+
+### Note to reader:
 * If you're interested or have any kind of things to say about this, **please** open an issue and tell me all about it :)
-* Status as of end of February 2022:
-    * Finished the UI and the alarm but the smart alarm implementation is not at all tested.
-    * **Instructions**:
-    *(for now you need my forked wasp-os that exposes accelerometer data)
-        * download [my wasp-os fork](https://github.com/thiswillbeyourgithub/wasp-os)
-        * download the latest app : SleepTk.py
-        * put the latest app in wasp-os/wasp/apps/SleepTk.py
-        * compile and install wasp-os
-        * run the app
-        * *if you want, you can get back the data using `wasptool --pull`, then running the commands suggested below.
+* Status as of end of February 2022: *UI (**done**), regular alarm (**done**), smart alarm (**mostly done but untested**)*
+* you can download your sleep data file using `wasptool --pull logs/sleep/TIMESTAMP.csv`. I added below a suggestion of workflow to load it into [pandas](https://pypi.org/project/pandas/).
 
 # Screenshots:
 ![start](./screenshots/start_page.png)
 ![settings](./screenshots/settings_page.png)
 ![tracking](./screenshots/tracking_page.png)
+![night example](./screenshots/example_night.png)
 
 ## TODO
-**sleep tracking**
-* try to roughly infer the sleep stage directly on the device?
-    * if you actually use the watch during the night, make sure to count it as wakefulness?
-
 **misc**
-* recreate outdated UI screenshot + data sample
+* retake outdated UI screenshot + data sample
 * pressing the back button should return to home menu
-* turn off the Bluetooth connection when no phone is connected?
-* ability to send in real time to Bluetooth device the current sleep stage you're probably in. For use in Targeted Memory Reactivation.
-* find a way to remove outliers of stored values
+* turn off the Bluetooth connection when beginning tracking
+
+**sleep tracking**
+* infer light and deep sleep directly on the device
 
 **Features that I'm note sure yet**
+* log smart alarm data to file
+* log heart rate data every 10 minutes
 * should the watch ask you after waking up to rate your freshness at wake?
+* ability to send in real time to Bluetooth device the current sleep stage you're probably in. For use in Targeted Memory Reactivation.
 
 ## Related links:
 * article with detailed implementation : https://www.nature.com/articles/s41598-018-31266-z
@@ -60,5 +61,3 @@ df["hours"] = df["human_time"].dt.time
 df = df.set_index("hours")
 df["fusion_value"].plot()
 ```
-
-![night example](./screenshots/example_night.png)
