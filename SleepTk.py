@@ -24,24 +24,24 @@ from math import atan, sin
 from array import array
 from micropython import const
 
-_FONT = sans18
-_TIMESTAMP = const(946684800)  # unix time and time used by wasp os don't have the same reference date
-_BATTERY_THRESHOLD = const(20)  # under 20% of battery, stop tracking and only keep the alarm
-_AVG_SLEEP_CYCL = const(32400)  # 90 minutes, average sleep cycle duration
-_OFFSETS = array("H", [0, 300, 600, 900, 1200, 1500, 1800])  # try to fit sinus of different offsets, separated by 5 minutes
-_FREQ = const(5)  # get accelerometer data every X seconds, they will be averaged
-_STORE_FREQ = const(300)  # number of seconds between storing average values to file written every X points
-_SMART_LEN = const(2700)  # can wake you up in any interval up to 45 minutes before
-
-# math related :
+# HARDCODED VARIABLES:
 _PIPI = const(628318)  # result of 2*pi*100_000
-
-# page values:
-_START = const(0)
+_CONV = const(100000)  # to get 2*pi
+_START = const(0)  # page values
 _TRACKING = const(1)
 _TRACKING2 = const(2)
 _SETTINGS = const(3)
 _RINGING = const(4)
+_FONT = sans18
+_TIMESTAMP = const(946684800)  # unix time and time used by wasp os don't have the same reference date
+_FREQ = const(5)  # get accelerometer data every X seconds, but process and store them only every _STORE_FREQ seconds
+_STORE_FREQ = const(300)  # process data and store to file every X seconds
+_SLEEP_CYCL_TRY = array("H", [4800, 5400, 6000])  # sleep cycle length to try (80, 90 and 100 minutes)
+_BATTERY_THRESHOLD = const(20)  # under X% of battery, stop tracking and only keep the alarm
+
+# user can want to edit this:
+_OFFSETS = array("H", [0, 600, 1200, 1800, 2400])  # possible offsets of sinus to try to fit to data (40 minutes, by increment of 10 minutes)
+
 
 class SleepTkApp():
     NAME = 'SleepTk'
@@ -132,9 +132,9 @@ class SleepTkApp():
                     self._WU_t = time.mktime((yyyy, mm, dd, HH, MM, 0, 0, 0, 0))
                     system.set_alarm(self._WU_t, self._listen_to_ticks)
 
-                    # alarm in _SMART_LEN less seconds to compute best wake up time
+                    # wake up SleepTk 2min before earliest possible wake up
                     if self._wakeup_smart_enabled:
-                        self._WU_a = self._WU_t - _SMART_LEN
+                        self._WU_a = self._WU_t - _OFFSETS[-1] - 120
                         system.set_alarm(self._WU_a, self._smart_alarm_compute)
                 self._page = _TRACKING
 
@@ -298,7 +298,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
                 # no need to remind it after the first time
                 draw.string('Swipe down for settings' , 0, 100)
             else:
-                draw.string('Wake you up to 45m' , 0, 120)
+                draw.string('Wake you up to 40m' , 0, 120)
                 draw.string('earlier.' , 0, 140)
             draw.string('PRE RELEASE.' , 0, 160)
         elif self._page == _SETTINGS:
@@ -327,13 +327,12 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             # stop tracking to save memory, keep the alarm just in case
             self._disable_tracking(keep_main_alarm=True)
 
-
             # read file one character at a time, to get only the 4th
             # value of each row, which is the arm angle
             data = array("f")
             buff = b""
             cnt = 0
-            f = open(fname, "rb")
+            f = open(self.filep, "rb")
             while True:
                 char = f.read(1)
                 if char == b",":
@@ -347,53 +346,71 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
                 elif char == b"":
                     break
             f.close()
-            del f, char, buff
+            del f, char, buff, cnt
             gc.collect()
 
             # smoothen several times
-            for j in range(5):
+            for j in range(15):
                 for i in range(1, len(data)-2):
                     data[i] += data[i-1] + data[i+1]
                     data[i] /= 3
+            del i, j
 
             # center and scale and clip between -1 and 1
             mean = sum(data) / len(data)
             std = ((sum([x**2 for x in data]) / len(data)) - mean**2)**0.5
             for i in range(len(data)):
                 data[i] = min(1, max(-1, (data[i] - mean) / std))
-            del mean, std
+            del mean, std, i
             gc.collect()
 
-            # fitting cosine of various offsets in minutes, the best fit has the
-            # period indicating best wake up time:
-            fits = array("f")
-            omega = _PIPI / 100000 * _AVG_SLEEP_CYCL / 2  # 2 * pi * period
-            for cnt, offset in enumerate(_OFFSETS):  # least square regression
-                fits.append(
-                        sum([sin(omega * t * _STORE_FREQ + offset) * data[t] for t in range(len(data))])
-                        -sum([(sin(omega * t * _STORE_FREQ + offset) - data[t])**2 for t in range(len(data))])
-                        )
-                if fits[-1] == min(fits):
-                    best_offset = _OFFSETS[cnt]
-            del fits, offset, cnt
+            # for each sleep cycle, do a least square regression on each
+            # possible offset value of a sinusoidal wave with the same
+            # frequency as the sleep cycle
+            bof_p_cycl = array("H", [0] * len(_SLEEP_CYCL_TRY))  # best offset found per cycle
+            bfi_p_cycl = array("f", [0] * len(_SLEEP_CYCL_TRY))  # fit value for best offset
+            for cnt_cycle, cycle in enumerate(_SLEEP_CYCL_TRY):
+                omega = (_PIPI / _CONV) / (cycle * 2)  # 2 * pi * frequency
+                fits = array("f")
+                # least square regression:
+                for cnt_offs, offset in enumerate(_OFFSETS):
+                    fits.append(sum(
+                                [(sin(omega * (i*_STORE_FREQ + offset)) - data[i])**4
+                                 for i in range(len(data))]
+                                ))
+                    if fits[-1] == min(fits):
+                        bof_p_cycl[cnt_cycle] = _OFFSETS[cnt_offs]
+                bfi_p_cycl[cnt_cycle] = min(fits)
+            del fits, offset, cnt_cycle, cnt_offs, data, cycle, omega
+            gc.collect()
+
+            # find sleep cycle and offset with the least fit:
+            for i, fit in enumerate(bfi_p_cycl):
+                if fit == min(bfi_p_cycl):
+                    best_offset = bof_p_cycl[i]
+                    best_omega = (_PIPI / _CONV) / (_SLEEP_CYCL_TRY[i] * 2)
+                    break
+            del bof_p_cycl, bfi_p_cycl, i, fit
+            gc.collect()
 
             # finding how early to wake up:
-            max_sin = 0
+            max_sin = -1
             WU_t = self._WU_t
-            for t in range(WU_t, WU_t - _SMART_LEN, -300):  # counting backwards from original wake up time, steps of 5 minutes
-                s = sin(omega * t + best_offset)
+            # counting backwards from original wake up time
+            for t in range(WU_t, WU_t - _OFFSETS[-1], -_STORE_FREQ):
+                s = sin(best_omega * (t + best_offset))
                 if s > max_sin:
                     max_sin = s
-                    self._earlier = -t  # number of seconds earlier than wake up time
-            del max_sin, s
-
-            system.set_alarm(
-                    min(
-                        WU_t - 5,  # not after original wake up time
-                        max(WU_t - self._earlier, int(rtc.time()) + 3)  # not before right now
-                        ), self._listen_to_ticks)
-            self._page = _TRACKING2
+                    earlier = t  # number of seconds earlier than wake up time
+            del max_sin, s, t, best_offset, best_omega
             gc.collect()
+
+            system.set_alarm(min(WU_t - 5,  # not after original wake up time
+                                 max(WU_t - earlier,  # not before right now
+                                     int(rtc.time()) + 3)
+                                 ), self._listen_to_ticks)
+            self._earlier = earlier
+            self._page = _TRACKING2
         except Exception as e:
             gc.collect()
             t = watch.time.localtime(time.time())
