@@ -350,12 +350,19 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             del f, char, buff
             gc.collect()
 
-            # center and scale
+            # smoothen several times
+            for j in range(5):
+                for i in range(1, len(data)-2):
+                    data[i] += data[i-1] + data[i+1]
+                    data[i] /= 3
+
+            # center and scale and clip between -1 and 1
             mean = sum(data) / len(data)
             std = ((sum([x**2 for x in data]) / len(data)) - mean**2)**0.5
             for i in range(len(data)):
-                data[i] = (data[i] - mean) / std
+                data[i] = min(1, max(-1, (data[i] - mean) / std))
             del mean, std
+            gc.collect()
 
             # fitting cosine of various offsets in minutes, the best fit has the
             # period indicating best wake up time:
