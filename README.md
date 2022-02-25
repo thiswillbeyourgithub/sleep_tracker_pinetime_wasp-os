@@ -59,8 +59,6 @@ Commands the author uses to take a look a the data using pandas:
 fname = "./logs/sleep/YOUR_TIME.csv"
 
 import pandas as pd
-from math import atan
-
 df = pd.read_csv(fname, names=["fusion_value", "time", "x_diff", "y_diff", "z_diff", "battery"])
 offset = int(fname.split("/")[-1].split(".csv")[0])
 df["human_time"] = pd.to_datetime(df["time"]+offset, unit='s')
