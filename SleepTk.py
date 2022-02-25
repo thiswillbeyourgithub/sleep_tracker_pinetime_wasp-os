@@ -68,12 +68,20 @@ class SleepTkApp():
         self._conf_view = None
         gc.collect()
         self._draw()
-        system.request_event(EventMask.TOUCH)
+        system.request_event(EventMask.TOUCH |
+                             EventMask.BUTTON)
 
     def sleep(self):
         """keep running in the background"""
         gc.collect()
         return False
+
+    def press(self, button, state):
+        "stop ringing alarm if pressed physical button"
+        if state:
+            if self._page == _RINGING:
+                self._disable_tracking()
+                self._page = _START
 
     def touch(self, event):
         """either start trackign or disable it, draw the screen in all cases"""
