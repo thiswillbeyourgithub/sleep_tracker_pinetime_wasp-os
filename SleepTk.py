@@ -327,13 +327,28 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             # stop tracking to save memory, keep the alarm just in case
             self._disable_tracking(keep_main_alarm=True)
 
-            # get angle over time
-            f = open(self.filep, "rb")
-            lines = f.readlines()
+
+            # read file one character at a time, to get only the 4th
+            # value of each row, which is the arm angle
+            data = array("f")
+            buff = b""
+            cnt = 0
+            f = open(fname, "rb")
+            while True:
+                char = f.read(1)
+                if char == b",":
+                    cnt += 1
+                elif char == b"\n":
+                    data.append(float(buff))
+                    cnt = 0
+                    buff = b""
+                elif cnt == 4:
+                    buff = buff + char
+                elif char == b"":
+                    break
             f.close()
-            if len(lines) == 0:
-                lines = lines[0].split(b"\n")
-            data = array("f", [float(line.split(",")[4]) for line in lines])
+            del f, char, buff
+            gc.collect()
 
             # center and scale
             mean = sum(data) / len(data)
