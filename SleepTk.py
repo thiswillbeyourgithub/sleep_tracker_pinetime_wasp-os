@@ -28,10 +28,10 @@ _FONT = sans18
 _TIMESTAMP = const(946684800)
 _BATTERY_THRESHOLD = const(20)  # under 20% of battery, stop tracking and only keep the alarm
 _AVG_SLEEP_CYCL = const(32400)  # 90 minutes, average sleep cycle duration
-_OFFSETS = array("H", [0, 300, 600, 900, 1200, 1500, 1800])
+_OFFSETS = array("H", [0, 300, 600, 900, 1200, 1500, 1800])  # try to fit sinus of different offsets, separated by 5 minutes
 _FREQ = const(5)  # get accelerometer data every X seconds, they will be averaged
 _STORE_FREQ = const(300)  # number of seconds between storing average values to file written every X points
-_SMART_LEN = const(1800)  # defaults 1800 = 30m
+_SMART_LEN = const(2700)  # can wake you up in any interval up to 45 minutes before
 
 # math related :
 _DEGREE = const(5729578)  # result of 180/pi*100_000, for conversion
@@ -295,7 +295,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
                 # no need to remind it after the first time
                 draw.string('Swipe down for settings' , 0, 100)
             else:
-                draw.string('Wake you up to 30m' , 0, 120)
+                draw.string('Wake you up to 45m' , 0, 120)
                 draw.string('earlier.' , 0, 140)
             draw.string('PRE RELEASE.' , 0, 160)
         elif self._page == _SETTINGS:
