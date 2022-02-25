@@ -56,20 +56,4 @@ df["human_time"] = pd.to_datetime(df["time"]+offset, unit='s')
 df["hours"] = df["human_time"].dt.time
 df = df.set_index("hours")
 df["angl_avg"].plot()
-
-# testing different fusion formulae:
-def fusion(x, y, z):
-    values = z / (x**2 + y**2)
-    for i in range(len(values)-2):  # rolling average
-        values[i+1] = (values[i] + values[i+1] + values[i+2])/3
-    return [abs(atan(val)) for val in values]  # arctan then absolute value
-
-x = df["x_avg"].values ; y = df["y_avg"].values ; z = df["z_avg"].values
-
-df["angl_avg"] = fusion(x, y, z)
-df["f2"] = fusion(y, z, x)
-df["f3"] = fusion(z, x, y)
-
-# plotting
-df["f1"].plot() ; df["f2"].plot() ; df["f3"].plot()
 ```
