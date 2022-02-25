@@ -48,13 +48,13 @@ class SleepTkApp():
 
     def __init__(self):
         gc.collect()
-        self._is_computing = False
         self._wakeup_enabled = 1
         self._wakeup_smart_enabled = 0  # activate waking you up at optimal time  based on accelerometer data, at the earliest at _WU_LAT - _WU_SMART
         self._spinval_H = 7  # default wake up time
         self._spinval_M = 30
         self._conf_view = None
-        self._tracking = False  # False = not tracking, True = currently tracking
+        self._is_computing = False
+        self._is_tracking = False
         self._earlier = 0
         self._page = _START
 
@@ -108,7 +108,7 @@ class SleepTkApp():
         no_full_draw = False
         if self._page == _START:
             if self.btn_on.touch(event):
-                self._tracking = True
+                self._is_tracking = True
                 # accel data not yet written to disk:
                 self._buff = array("f")
                 self._data_point_nb = 0  # total number of data points so far
@@ -198,7 +198,7 @@ class SleepTkApp():
     def _disable_tracking(self, keep_main_alarm=False):
         """called by touching "STOP TRACKING" or when computing best alarm time
         to wake up you disables tracking features and alarms"""
-        self._tracking = False
+        self._is_tracking = False
         system.cancel_alarm(self.next_al, self._trackOnce)
         if self._wakeup_enabled:
             if keep_main_alarm is False:  # to keep the alarm when stopping because of low battery
@@ -217,7 +217,7 @@ class SleepTkApp():
     def _trackOnce(self):
         """get one data point of accelerometer every _FREQ seconds and
         they are then averaged and stored every _STORE_FREQ seconds"""
-        if self._tracking:
+        if self._is_tracking:
             [self._buff.append(x) for x in accel.read_xyz()]
             self._data_point_nb += 1
             self._add_accel_alar()
