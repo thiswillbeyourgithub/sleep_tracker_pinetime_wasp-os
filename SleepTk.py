@@ -421,7 +421,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
                 if s > max_sin:
                     max_sin = s
                     earlier = t  # number of seconds earlier than wake up time
-            del max_sin, s, t, best_offset, best_omega
+            del max_sin, s, t
             gc.collect()
 
             system.set_alarm(min(WU_t - 5,  # not after original wake up time
@@ -432,7 +432,8 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             self._page = _TRACKING2
             elapsed = timer.time()
             timer.stop()
-            msg = "Finished computing best wake up time in {}".format(elapsed)
+            msg = "Finished computing best wake up time in {}. Best fitting \
+                    offset: {}. Best sleep cycle duration: {:.2f}h".format(elapsed, best_offset, (_PIPI / _CONV / best_omega / 2 / 60 / 60))
             system.notify(watch.rtc.get_uptime_ms(), {"src": "SleepTk",
                                                       "title": "Finished smart alarm computation",
                                                       "body": msg})
