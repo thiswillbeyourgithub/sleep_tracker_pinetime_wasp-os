@@ -247,7 +247,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             else:
                 msg = "WAKE UP"
             draw.string(msg, 0, 70)
-            self.btn_al = Button(x=0, y=170, w=240, h=40, label="STOP")
+            self.btn_al = Button(x=0, y=70, w=240, h=140, label="WAKE UP")
             self.btn_al.draw()
         elif self._page == _TRACKING or self._page == _TRACKING2:
             draw.string('Started at {}'.format(":".join([str(x) for x in watch.time.localtime(self._offset)[3:5]])), 0, 70)
