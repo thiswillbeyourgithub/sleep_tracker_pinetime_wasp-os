@@ -13,7 +13,7 @@
         * put the latest app in wasp-os/wasp/apps/SleepTk.py
         * compile and install wasp-os
         * run the app
-        * *if you want, you can get back the data using `wasptool --pull`,  to take a look using pandas : ` df = pd.read_csv("./first.night.csv", names=["time", "x_avg", "y_avg", "z_avg", "angl_avg", "battery"])` (name and number of columns might change)*
+        * *if you want, you can get back the data using `wasptool --pull`, then running the commands suggested below.
 
 # Screenshots:
 ![start](./screenshots/start_page.png)
@@ -38,3 +38,38 @@
 * very interesting research paper on the topic : https://academic.oup.com/sleep/article/42/12/zsz180/5549536
 * maybe coding a 1D convolution is a good way to extract peaks
 * list of ways to find local maxima in python : https://blog.finxter.com/how-to-find-local-minima-in-1d-and-2d-numpy-arrays/ + https://pythonawesome.com/overview-of-the-peaks-dectection-algorithms-available-in-python/
+
+
+
+
+## Pandas integration:
+Commands the author uses to take a look a the data using pandas:
+```
+fname = "./logs/sleep/YOUR_TIME.csv"
+
+import pandas as pd
+from math import atan
+
+df = pd.read_csv(fname, names=["angl_avg", "time", "x_avg", "y_avg", "z_avg", "battery"])
+offset = int(fname.split("/")[-1].split(".csv")[0])
+df["human_time"] = pd.to_datetime(df["time"]+offset, unit='s')
+df["hours"] = df["human_time"].dt.time
+df = df.set_index("hours")
+df["angl_avg"].plot()
+
+# testing different fusion formulae:
+def fusion(x, y, z):
+    values = z / (x**2 + y**2)
+    for i in range(len(values)-2):  # rolling average
+        values[i+1] = (values[i] + values[i+1] + values[i+2])/3
+    return [abs(atan(val)) for val in values]  # arctan then absolute value
+
+x = df["x_avg"].values ; y = df["y_avg"].values ; z = df["z_avg"].values
+
+df["angl_avg"] = fusion(x, y, z)
+df["f2"] = fusion(y, z, x)
+df["f3"] = fusion(z, x, y)
+
+# plotting
+df["f1"].plot() ; df["f2"].plot() ; df["f3"].plot()
+```
