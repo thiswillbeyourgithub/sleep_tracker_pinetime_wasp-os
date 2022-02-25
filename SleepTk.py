@@ -250,7 +250,8 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             self.btn_al = Button(x=0, y=70, w=240, h=140, label="WAKE UP")
             self.btn_al.draw()
         elif self._page == _TRACKING or self._page == _TRACKING2:
-            draw.string('Started at {}'.format(":".join([str(x) for x in watch.time.localtime(self._offset)[3:5]])), 0, 70)
+            ti = watch.time.localtime(self._offset)
+            draw.string('Started at {:2d}:{:2d}'.format(ti[3], ti[4]), 0, 70)
             draw.string("data points: {}".format(str(self._data_point_nb)), 0, 90)
             if self._wakeup_enabled:
                 word = "Alarm at "
