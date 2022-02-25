@@ -26,7 +26,6 @@
     * if you actually use the watch during the night, make sure to count it as wakefulness?
 
 **misc**
-* the settings should be a scrolled page
 * turn off the Bluetooth connection when no phone is connected?
 * ability to send in real time to Bluetooth device the current sleep stage you're probably in. For use in Targeted Memory Reactivation.
 * find a way to remove outliers of stored values

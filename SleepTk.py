@@ -16,7 +16,7 @@ import time
 from wasp import watch, system, EventMask, gc
 
 from watch import rtc, battery, accel
-from widgets import Button, Spinner, Checkbox, StatusBar, ConfirmationView
+from widgets import Button, Spinner, Checkbox, StatusBar, ConfirmationView, ScrollIndicator
 from shell import mkdir, cd
 from fonts import sans18
 
@@ -45,7 +45,7 @@ class SleepTkApp():
     def __init__(self):
         gc.collect()
         self._wakeup_enabled = 1
-        self._wakeup_smart_enabled = 1  # activate waking you up at optimal time  based on accelerometer data, at the earliest at _WU_LAT - _WU_SMART
+        self._wakeup_smart_enabled = 0  # activate waking you up at optimal time  based on accelerometer data, at the earliest at _WU_LAT - _WU_SMART
         self._spinval_H = 7  # default wake up time
         self._spinval_M = 30
         self._conf_view = None
@@ -69,6 +69,7 @@ class SleepTkApp():
         gc.collect()
         self._draw()
         system.request_event(EventMask.TOUCH |
+                             EventMask.SWIPE_UPDOWN |
                              EventMask.BUTTON)
 
     def sleep(self):
@@ -82,6 +83,15 @@ class SleepTkApp():
             if self._page == _RINGING:
                 self._disable_tracking()
                 self._page = _START
+
+    def swipe(self, event):
+        "switches between start page and settings page"
+        if self._page == _START:
+            self._page = _SETTINGS
+            self._draw()
+        elif self._page == _SETTINGS:
+            self._page = _START
+            self._draw()
 
     def touch(self, event):
         """either start trackign or disable it, draw the screen in all cases"""
@@ -118,8 +128,6 @@ class SleepTkApp():
                         self._WU_a = self._WU_t - _SMART_LEN
                         system.set_alarm(self._WU_a, self._smart_alarm_compute)
                 self._page = _TRACKING
-            elif self.btn_set.touch(event):
-                self._page = _SETTINGS
 
         elif self._page == _TRACKING or self._page == _TRACKING2:
             if self._conf_view is None:
@@ -174,9 +182,6 @@ class SleepTkApp():
             elif self._spin_M.touch(event):
                 self._spinval_M = self._spin_M.value
                 self._spin_M.update()
-            elif self.btn_set_end.touch(event):
-                self._page = _START
-                self._draw()
 
         if no_full_draw is False:
             self._draw()
@@ -270,32 +275,31 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             self.btn_off = Button(x=0, y=200, w=240, h=40, label="Stop tracking")
             self.btn_off.draw()
         elif self._page == _START:
-            self.btn_on = Button(x=0, y=200, w=200, h=40, label="Start tracking")
+            self.btn_on = Button(x=0, y=200, w=240, h=40, label="Start tracking")
             self.btn_on.draw()
-            self.btn_set = Button(x=201, y=200, w=39, h=40, label="S")
-            self.btn_set.draw()
+            self.si = ScrollIndicator()
+            self.si.draw()
             draw.set_font(_FONT)
             draw.string('Sleep tracker with' , 0, 60)
             draw.string('alarm and smart alarm.' , 0, 80)
-            draw.string('Wake you up to 30m' , 0, 100)
-            draw.string('before alarm.' , 0, 120)
+            if not self._wakeup_smart_enabled:
+                # no need to remind it after the first time
+                draw.string('Swipe down for settings' , 0, 100)
+            else:
+                draw.string('Wake you up to 30m' , 0, 120)
+                draw.string('earlier.' , 0, 140)
             draw.string('PRE RELEASE.' , 0, 160)
         elif self._page == _SETTINGS:
-            self.btn_set_end = Button(x=201, y=200, w=39, h=40, label="X")
-            self.btn_set_end.draw()
-
-            if self._wakeup_enabled:
-                self._spin_H = Spinner(10, 140, 0, 23, 2)
-                self._spin_H.value = self._spinval_H
-                self._spin_H.draw()
-                self._spin_M = Spinner(100, 140, 0, 59, 2)
-                self._spin_M.value = self._spinval_M
-                self._spin_M.draw()
-
             self.check_al = Checkbox(x=0, y=40, label="Alarm")
             self.check_al.state = self._wakeup_enabled
             self.check_al.draw()
-            if self.check_al.state == 1:
+            if self._wakeup_enabled:
+                self._spin_H = Spinner(30, 120, 0, 23, 2)
+                self._spin_H.value = self._spinval_H
+                self._spin_H.draw()
+                self._spin_M = Spinner(150, 120, 0, 59, 2)
+                self._spin_M.value = self._spinval_M
+                self._spin_M.draw()
                 self.check_smart = Checkbox(x=0, y=80, label="Smart alarm")
                 self.check_smart.state = self._wakeup_smart_enabled
                 self.check_smart.draw()
