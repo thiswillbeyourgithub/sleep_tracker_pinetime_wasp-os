@@ -247,7 +247,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             buff.append(x_avg)
             buff.append(y_avg)
             buff.append(z_avg)
-            buff.append(abs(atan(z_avg / x_avg**2 + y_avg**2)))
+            buff.append(abs(atan(z_avg / x_avg**2 + y_avg**2)))  # note: math.atan() is faster than using a taylor serie
                     # formula from https://www.nature.com/articles/s41598-018-31266-z
             del x_avg, y_avg, z_avg
             buff.append(battery.voltage_mv())  # currently more accurate than percent
