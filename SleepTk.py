@@ -352,6 +352,9 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             del f, char, buff
             gc.collect()
 
+            # the first value HAS to be high because you were still awake
+            data[0] = max(data)
+
             # smoothen several times
             for j in range(15):
                 for i in range(1, len(data)-2):
