@@ -34,7 +34,6 @@ _STORE_FREQ = const(300)  # number of seconds between storing average values to 
 _SMART_LEN = const(2700)  # can wake you up in any interval up to 45 minutes before
 
 # math related :
-_DEGREE = const(5729578)  # result of 180/pi*100_000, for conversion
 _PIPI = const(628318)  # result of 2*pi*100_000
 
 # page values:
