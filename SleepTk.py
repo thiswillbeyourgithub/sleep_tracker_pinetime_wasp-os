@@ -13,7 +13,7 @@ alarm you set up manually.
 """
 
 import time
-from wasp import watch, system, EventMask, gc
+from wasp import watch, system, EventMask, gc, machine
 from watch import rtc, battery, accel
 
 from widgets import Button, Spinner, Checkbox, StatusBar, ConfirmationView
@@ -323,7 +323,10 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
     def _smart_alarm_compute(self):
         """computes best wake up time from sleep data"""
         self._is_computing = True
+        gc.collect()
         try:
+            timer = machine.Timer(id=1, period=8000000)
+            timer.start()
             # stop tracking to save memory, keep the alarm just in case
             self._disable_tracking(keep_main_alarm=True)
 
@@ -427,6 +430,12 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
                                  ), self._listen_to_ticks)
             self._earlier = earlier
             self._page = _TRACKING2
+            elapsed = timer.time()
+            timer.stop()
+            msg = "Finished computing best wake up time in {}".format(elapsed)
+            system.notify(watch.rtc.get_uptime_ms(), {"src": "SleepTk",
+                                                      "title": "Finished smart alarm computation",
+                                                      "body": msg})
         except Exception as e:
             gc.collect()
             t = watch.time.localtime(time.time())
@@ -438,6 +447,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             f.write(msg.encode())
             f.close()
         finally:
+            t.stop()
             self._is_computing = False
         gc.collect()
 
