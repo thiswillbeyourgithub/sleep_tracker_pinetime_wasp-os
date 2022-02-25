@@ -253,7 +253,11 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             buff.append(battery.voltage_mv())  # currently more accurate than percent
 
             f = open(self.filep, "ab")
-            f.write(b",".join([str(x)[0:8].encode() for x in buff]) + b"\n")
+            for x in buff[:-1]:
+                f.write("{:08d}".format(x).encode())
+                f.write(b",")
+            f.write("{:08d}".format(buff[-1]).encode())
+            f.write(b"\n")
             f.close()
 
             self._last_checkpoint = self._data_point_nb
