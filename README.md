@@ -4,8 +4,8 @@
 ## Note to reader:
 * I created this repository before even receiving my pine time and despite a very busy schedule to make sure no one else starts a similar project and end up duplicating efforts for nothing :)
 * If you're interested or have any kind of things to say about this, **please** open an issue and tell me all about it :)
-* Status as of February 2022:
-    * Finished but the smart algorithm is not at all tested yet
+* Status as of end of February 2022:
+    * Finished the UI and the alarm but the smart alarm implementation is not at all tested.
     * **Instructions**:
     *(for now you need my forked wasp-os that exposes accelerometer data)
         * download [my wasp-os fork](https://github.com/thiswillbeyourgithub/wasp-os)
