@@ -44,6 +44,7 @@ class SleepTkApp():
 
     def __init__(self):
         gc.collect()
+        self._is_computing = False
         self._wakeup_enabled = 1
         self._wakeup_smart_enabled = 0  # activate waking you up at optimal time  based on accelerometer data, at the earliest at _WU_LAT - _WU_SMART
         self._spinval_H = 7  # default wake up time
@@ -73,9 +74,13 @@ class SleepTkApp():
                              EventMask.BUTTON)
 
     def sleep(self):
-        """keep running in the background"""
+        """stop sleeping when calculating smart alarm time"""
         gc.collect()
-        return False
+        if self._is_computing:
+            return False
+
+    def background(self):
+        gc.collect()
 
     def press(self, button, state):
         "stop ringing alarm if pressed physical button"
@@ -310,6 +315,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
 
     def _smart_alarm_compute(self):
         """computes best wake up time from sleep data"""
+        self._is_computing = True
         try:
             # stop tracking to save memory, keep the alarm just in case
             self._disable_tracking(keep_main_alarm=True)
@@ -369,6 +375,8 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             f = open("smart_alarm_error_{}.txt".format(int(time.time())), "wb")
             f.write(msg.encode())
             f.close()
+        finally:
+            self._is_computing = False
         gc.collect()
 
 
