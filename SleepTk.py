@@ -254,9 +254,9 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
 
             f = open(self.filep, "ab")
             for x in buff[:-1]:
-                f.write("{:08d}".format(x).encode())
+                f.write("{}".format(x).encode())
                 f.write(b",")
-            f.write("{:08d}".format(buff[-1]).encode())
+            f.write("{}".format(buff[-1]).encode())
             f.write(b"\n")
             f.close()
 
