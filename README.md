@@ -3,6 +3,7 @@
 
 ## Features:
 * **sleep tracking**: logs your movement during the night, infers your sleep cycle and write it all down in a `.csv` file
+* **Flexible**: does not make too many assumption regarding time to fall asleep, sleep cycle duration etc. SleepTk tries various data to see what fits best for your profile. If you still want to customize things, all the hardcoded and commented settings are easily accessible at the top of the file.
 * alarm clock: wakes you up at a specific time
 * **smart alarm clock**: can wake you up to 40 minutes before the set time to make sure you wake up feeling refreshed.
 * **privacy friendly**: your data is not sent to anyone, it is stored and analyzed directly on the watch (but you can still download if if needed)
