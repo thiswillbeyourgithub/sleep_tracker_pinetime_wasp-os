@@ -17,11 +17,12 @@
 * compile `wasp-os`: `make submodules && make softdevice && make BOARD=pinetime all && echo "SUCCESS"`
 * upload it to your pinetime: `./tools/ota-dfu/dfu.py -z build-pinetime/micropython.zip -a XX:XX:XX:XX:XX:XX --legacy`
 * reboot the watch and enjoy `SleepTk`
+* *optional: download your latest sleep data using the script `pull_latest_sleep_data.py`*
 
 ### Note to reader:
 * If you're interested or have any kind of things to say about this, **please** open an issue and tell me all about it :)
 * Status as of end of February 2022: *UI (**done**), regular alarm (**done**), smart alarm (**mostly done but untested**)*
-* you can download your sleep data file using `wasptool --pull logs/sleep/TIMESTAMP.csv`. I added below a suggestion of workflow to load it into [pandas](https://pypi.org/project/pandas/).
+* you can download your sleep data file using the file `pull_latest_sleep_data`. A suggested workflow to load it into [pandas](https://pypi.org/project/pandas/) can be found at the bottom of the page.
 
 # Screenshots:
 ![start](./screenshots/start_page.png)
@@ -32,7 +33,6 @@
 ## TODO
 **misc**
 * retake outdated UI screenshot + data sample with the right time
-* create a quick `.py` script to fetch the latest `TIMESTAMP.csv`
 * add a small factor that increases omega over the night. Because sleep cycle tend to be shorter over the night. That would really help the fitting
 * move signal processing function to a separate class
 * test clipping all values above `3 x [mean value]`, to avoid too high peaks
