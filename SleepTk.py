@@ -20,7 +20,7 @@ from widgets import Button, Spinner, Checkbox, StatusBar, ConfirmationView
 from shell import mkdir, cd
 from fonts import sans18
 
-from math import sin
+from math import sin, atan
 from array import array
 from micropython import const
 
@@ -239,20 +239,19 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
         """save data after averageing over a window to file"""
         buff = self._buff
         if self._data_point_nb - self._last_checkpoint >= _STORE_FREQ / _FREQ:
-            x_diff = sum([abs(abs(buff[i]) - abs(buff[i+1])) for i in range(0, len(buff)-1, 3)]) / (self._data_point_nb - self._last_checkpoint)
-            y_diff = sum([abs(abs(buff[i]) - abs(buff[i+1])) for i in range(1, len(buff)-1, 3)]) / (self._data_point_nb - self._last_checkpoint)
-            z_diff = sum([abs(abs(buff[i]) - abs(buff[i+1])) for i in range(2, len(buff)-1, 3)]) / (self._data_point_nb - self._last_checkpoint)
+            x_avg = sum([buff[i] for i in range(0, len(buff), 3)]) / (self._data_point_nb - self._last_checkpoint)
+            y_avg = sum([buff[i] for i in range(1, len(buff), 3)]) / (self._data_point_nb - self._last_checkpoint)
+            z_avg = sum([buff[i] for i in range(2, len(buff), 3)]) / (self._data_point_nb - self._last_checkpoint)
             buff = array("f")  # reseting array
-            buff.append(x_diff + y_diff + z_diff)
-            #buff.append(abs(atan(z_diff / x_diff**2 + y_diff**2)))
+            buff.append(abs(atan(z_avg / (x_avg**2 + y_avg**2))))
             # formula from https://www.nature.com/articles/s41598-018-31266-z
             # note: math.atan() is faster than using a taylor serie
             buff.append(int(rtc.time() - self._offset))
-            buff.append(x_diff)
-            buff.append(y_diff)
-            buff.append(z_diff)
-            del x_diff, y_diff, z_diff
-            buff.append(battery.voltage_mv())  # somewhat more accurate than percent
+            buff.append(x_avg)
+            buff.append(y_avg)
+            buff.append(z_avg)
+            del x_avg, y_avg, z_avg
+            buff.append(battery.voltage_mv())  # currently more accurate than percent
 
             f = open(self.filep, "ab")
             for x in buff[:-1]:
@@ -339,7 +338,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             self._disable_tracking(keep_main_alarm=True)
 
             # read file one character at a time, to get only the 1st
-            # value of each row, which is the fusion value
+            # value of each row, which is the arm angle
             data = array("f")
             buff = b""
             f = open(self.filep, "rb")
@@ -356,7 +355,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
                     continue
                 if char == b"":  # end of file
                     break
-                elif not skip:  # add digit of the fusion value
+                elif not skip:  # digit of arm angle value
                     buff += char
 
             f.close()
