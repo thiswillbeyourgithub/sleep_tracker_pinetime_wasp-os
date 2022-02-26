@@ -35,6 +35,7 @@
 * create a quick `.py` script to fetch the latest `TIMESTAMP.csv`
 * add a small factor that increases omega over the night. Because sleep cycle tend to be shorter over the night. That would really help the fitting
 * move signal processing function to a separate class
+* test clipping all values above `3 x [mean value]`, to avoid too high peaks
 * pressing the back button should return to home menu
 * turn off the Bluetooth connection when beginning tracking
 
