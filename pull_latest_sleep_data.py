@@ -7,20 +7,25 @@ import shlex
 import re
 
 mode = "all"  # download "all" files or only "latest"
-assert mode in ["all", "latest"]
 
+print("\n\nRunning gc.collect()...")
+mem_cmd = './tools/wasptool --verbose --eval \'wasp.gc.collect()\''
+os.system(mem_cmd)
+
+print("\n\nListing remote files...")
 ls_cmd = './tools/wasptool --verbose --eval \'from shell import ls ; ls(\"/flash/logs/sleep/\")\''
 ls_cmd = shlex.split(ls_cmd)  # properly split args
-print("Listing remote files...")
 out = subprocess.check_output(ls_cmd).decode()
 files = re.findall(r"\d*\.csv", out)
 print(f"Found files {', '.join(files)}")
 
+
 if mode == "latest":
     to_dl = files[-1]
-
 elif mode == "all":
     to_dl = files
+else:
+    raise Exception("Wrong value for 'mode'")
 
 print("\n\n")
 for fi in to_dl:
