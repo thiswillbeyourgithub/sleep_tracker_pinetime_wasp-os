@@ -175,22 +175,23 @@ class SleepTkApp():
                     self._check_smart = None
                     self._draw()
 
-            elif self.check_smart.touch(event):
-                if self._wakeup_smart_enabled == 1:
-                    self._wakeup_smart_enabled = 0
-                    self.check_smart.state = self._wakeup_smart_enabled
-                    self._check_smart = None
-                elif self._wakeup_enabled == 1:
-                    self._wakeup_smart_enabled = 1
-                    self.check_smart.state = self._wakeup_smart_enabled
-                    self.check_smart.update()
-                    self.check_smart.draw()
-            elif self._spin_H.touch(event):
-                self._spinval_H = self._spin_H.value
-                self._spin_H.update()
-            elif self._spin_M.touch(event):
-                self._spinval_M = self._spin_M.value
-                self._spin_M.update()
+            if self.check_al.state:
+                if self.check_smart.touch(event):
+                    if self._wakeup_smart_enabled == 1:
+                        self._wakeup_smart_enabled = 0
+                        self.check_smart.state = self._wakeup_smart_enabled
+                        self._check_smart = None
+                    elif self._wakeup_enabled == 1:
+                        self._wakeup_smart_enabled = 1
+                        self.check_smart.state = self._wakeup_smart_enabled
+                        self.check_smart.update()
+                        self.check_smart.draw()
+                elif self._spin_H.touch(event):
+                    self._spinval_H = self._spin_H.value
+                    self._spin_H.update()
+                elif self._spin_M.touch(event):
+                    self._spinval_M = self._spin_M.value
+                    self._spin_M.update()
 
         if no_full_draw is False:
             self._draw()
