@@ -287,6 +287,8 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
                     word = "Alarm before "
                 ti = watch.time.localtime(self._WU_t)
                 draw.string("{}{:02d}:{:02d}".format(word, ti[3], ti[4]), 0, 130)
+            else:
+                draw.string("No alarm set", 0, 130)
             self.btn_off = Button(x=0, y=200, w=240, h=40, label="Stop tracking")
             self.btn_off.draw()
         elif self._page == _START:
