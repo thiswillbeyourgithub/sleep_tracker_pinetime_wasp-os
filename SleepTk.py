@@ -321,6 +321,72 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
         self.stat_bar.clock = True
         self.stat_bar.draw()
 
+    def _signal_processing(self, data):
+        """signal processing over the data read from the local file"""
+
+        # the first value HAS to be high because you were still awake
+        data[0] = 0.001
+
+        # remove outliers:
+        for x in range(len(data)):
+            if data[x] > 0.75*max(data):
+                data[x] = 0.75 * max(data)
+
+        # smoothen several times
+        for j in range(2):
+            for i in range(1, len(data)-2):
+                data[i] += data[i-1] + data[i+1]
+                data[i] /= 3
+        del i, j
+        gc.collect()
+
+        # center and scale and clip between -1 and 1
+        mean = sum(data) / len(data)
+        #mean = m(data)
+        std = ((sum([x**2 for x in data]) / len(data)) - mean**2)**0.5
+        for i in range(len(data)):
+            data[i] = min(1, max(-1, (data[i] - mean) / std))
+        del mean, std, i
+        gc.collect()
+
+        # smoothen several times
+        for j in range(2):
+            for i in range(1, len(data)-2):
+                data[i] += data[i-1] + data[i+1]
+                data[i] /= 3
+        del i, j
+        gc.collect()
+
+        # for each sleep cycle, do a least square regression on each
+        # possible offset value of a sinusoidal wave with the same
+        # frequency as the sleep cycle
+        bof_p_cycl = array("H", [0] * len(_SLEEP_CYCL_TRY))  # best offset found per cycle
+        bfi_p_cycl = array("f", [0] * len(_SLEEP_CYCL_TRY))  # fit value for best offset
+        for cnt_cycle, cycle in enumerate(_SLEEP_CYCL_TRY):
+            omega = (_PIPI / _CONV) / (cycle * 2)  # 2 * pi * frequency
+            fits = array("f")
+            # least square regression:
+            for cnt_offs, offset in enumerate(_OFFSETS):
+                fits.append(sum(
+                            [(sin(omega * (i*_STORE_FREQ + offset)) - data[i])**4
+                             for i in range(len(data))]
+                            ))
+                if fits[-1] == min(fits):
+                    bof_p_cycl[cnt_cycle] = _OFFSETS[cnt_offs]
+            bfi_p_cycl[cnt_cycle] = min(fits)
+        #del fits, offset, cnt_cycle, cnt_offs, data, cycle, omega
+        gc.collect()
+
+        # find sleep cycle and offset with the least fit:
+        for i, fit in enumerate(bfi_p_cycl):
+            if fit == min(bfi_p_cycl):
+                best_offset = bof_p_cycl[i]
+                best_omega = (_PIPI / _CONV) / (_SLEEP_CYCL_TRY[i] * 2)
+                break
+
+        return (best_omega, best_offset)
+
+
     def _smart_alarm_compute(self):
         """computes best wake up time from sleep data"""
         self._is_computing = True
@@ -362,61 +428,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             del f, char, buff
             gc.collect()
 
-            # the first value HAS to be high because you were still awake
-            if data[0] < 0.75*max(data):
-                data[0] = 0.75*max(data)
-
-            # smoothen several times
-            for j in range(5):
-                for i in range(1, len(data)-2):
-                    data[i] += data[i-1] + data[i+1]
-                    data[i] /= 3
-            del i, j
-            gc.collect()
-
-            # center and scale and clip between -1 and 1
-            mean = sum(data) / len(data)
-            std = ((sum([x**2 for x in data]) / len(data)) - mean**2)**0.5
-            for i in range(len(data)):
-                data[i] = min(1, max(-1, (data[i] - mean) / std))
-            del mean, std, i
-            gc.collect()
-
-            # smoothen several times
-            for j in range(5):
-                for i in range(1, len(data)-2):
-                    data[i] += data[i-1] + data[i+1]
-                    data[i] /= 3
-            del i, j
-            gc.collect()
-
-            # for each sleep cycle, do a least square regression on each
-            # possible offset value of a sinusoidal wave with the same
-            # frequency as the sleep cycle
-            bof_p_cycl = array("H", [0] * len(_SLEEP_CYCL_TRY))  # best offset found per cycle
-            bfi_p_cycl = array("f", [0] * len(_SLEEP_CYCL_TRY))  # fit value for best offset
-            for cnt_cycle, cycle in enumerate(_SLEEP_CYCL_TRY):
-                omega = (_PIPI / _CONV) / (cycle * 2)  # 2 * pi * frequency
-                fits = array("f")
-                # least square regression:
-                for cnt_offs, offset in enumerate(_OFFSETS):
-                    fits.append(sum(
-                                [(sin(omega * (i*_STORE_FREQ + offset)) - data[i])**4
-                                 for i in range(len(data))]
-                                ))
-                    if fits[-1] == min(fits):
-                        bof_p_cycl[cnt_cycle] = _OFFSETS[cnt_offs]
-                bfi_p_cycl[cnt_cycle] = min(fits)
-            del fits, offset, cnt_cycle, cnt_offs, data, cycle, omega
-            gc.collect()
-
-            # find sleep cycle and offset with the least fit:
-            for i, fit in enumerate(bfi_p_cycl):
-                if fit == min(bfi_p_cycl):
-                    best_offset = bof_p_cycl[i]
-                    best_omega = (_PIPI / _CONV) / (_SLEEP_CYCL_TRY[i] * 2)
-                    break
-            del bof_p_cycl, bfi_p_cycl, i, fit
+            best_omega, best_offset = self._signal_processing(data)
             gc.collect()
 
             # finding how early to wake up:
