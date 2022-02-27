@@ -64,7 +64,6 @@ Commands the author uses to take a look a the data using pandas:
 fname = "./logs/sleep/YOUR_TIME.csv"
 
 import pandas as pd
-from math import atan
 
 df = pd.read_csv(fname, names=["angl_avg", "time", "x_avg", "y_avg", "z_avg", "battery"])
 offset = int(fname.split("/")[-1].split(".csv")[0])
