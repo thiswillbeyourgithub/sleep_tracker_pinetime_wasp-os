@@ -324,9 +324,6 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
     def _signal_processing(self, data):
         """signal processing over the data read from the local file"""
 
-        # the first value HAS to be high because you were still awake
-        data[0] = 0.001
-
         # remove outliers:
         for x in range(len(data)):
             if data[x] > 0.75*max(data):
