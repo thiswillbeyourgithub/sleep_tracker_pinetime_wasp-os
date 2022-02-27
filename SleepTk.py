@@ -251,7 +251,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             buff.append(y_avg)
             buff.append(z_avg)
             del x_avg, y_avg, z_avg
-            buff.append(battery.voltage_mv())  # currently more accurate than percent
+            buff.append(int(battery.voltage_mv()))  # currently more accurate than percent
 
             f = open(self.filep, "ab")
             for x in buff[:-1]:
