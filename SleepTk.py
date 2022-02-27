@@ -393,7 +393,6 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
                                                   "title": "Starting smart alarm computation",
                                                   "body": "Starting computation for the smart alarm at ".format(t[3], t[4])
                                                   })
-        del t
         try:
             timer = machine.Timer(id=1, period=8000000)
             timer.start()
