@@ -64,11 +64,14 @@ Commands the author uses to take a look a the data using pandas:
 fname = "./logs/sleep/YOUR_TIME.csv"
 
 import pandas as pd
+from array import array
+from matplotlib import pyplot as plt
 
 df = pd.read_csv(fname, names=["angl_avg", "time", "x_avg", "y_avg", "z_avg", "battery"])
 offset = int(fname.split("/")[-1].split(".csv")[0])
 df["human_time"] = pd.to_datetime(df["time"]+offset, unit='s')
 df["hours"] = df["human_time"].dt.time
 df = df.set_index("hours")
+data = array("f", df["angl_avg"].values[:-4])
 df["angl_avg"].plot()
 ```
