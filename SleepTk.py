@@ -325,9 +325,12 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
         """signal processing over the data read from the local file"""
 
         # remove outliers:
+        ma = 0.75*max(data)
         for x in range(len(data)):
-            if data[x] > 0.75*max(data):
-                data[x] = 0.75 * max(data)
+            if data[x] > ma:
+                data[x] = ma
+        del ma, x
+        gc.collect()
 
         # smoothen several times
         for j in range(2):
@@ -339,14 +342,13 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
 
         # center and scale and clip between -1 and 1
         mean = sum(data) / len(data)
-        #mean = m(data)
         std = ((sum([x**2 for x in data]) / len(data)) - mean**2)**0.5
         for i in range(len(data)):
             data[i] = min(1, max(-1, (data[i] - mean) / std))
         del mean, std, i
         gc.collect()
 
-        # smoothen several times
+        # smoothen
         for j in range(2):
             for i in range(1, len(data)-2):
                 data[i] += data[i-1] + data[i+1]
@@ -357,6 +359,9 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
         # for each sleep cycle, do a least square regression on each
         # possible offset value of a sinusoidal wave with the same
         # frequency as the sleep cycle
+        def compute_sin(amplitude, angular_freq, time, index, last_index):
+            return amplitude * (index/last_index) * sin(omega * time)
+        amp = max(data)
         bof_p_cycl = array("H", [0] * len(_SLEEP_CYCL_TRY))  # best offset found per cycle
         bfi_p_cycl = array("f", [0] * len(_SLEEP_CYCL_TRY))  # fit value for best offset
         for cnt_cycle, cycle in enumerate(_SLEEP_CYCL_TRY):
@@ -365,13 +370,13 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             # least square regression:
             for cnt_offs, offset in enumerate(_OFFSETS):
                 fits.append(sum(
-                            [(sin(omega * (i*_STORE_FREQ + offset)) - data[i])**4
+                            [(compute_sin(amp, omega, offset + i * _STORE_FREQ, i, len(data)) - data[i])**2
                              for i in range(len(data))]
                             ))
                 if fits[-1] == min(fits):
                     bof_p_cycl[cnt_cycle] = _OFFSETS[cnt_offs]
             bfi_p_cycl[cnt_cycle] = min(fits)
-        #del fits, offset, cnt_cycle, cnt_offs, data, cycle, omega
+        del fits, offset, cnt_cycle, cnt_offs, data, cycle, omega
         gc.collect()
 
         # find sleep cycle and offset with the least fit:
@@ -381,6 +386,8 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
                 best_omega = (_PIPI / _CONV) / (_SLEEP_CYCL_TRY[i] * 2)
                 break
 
+        # to plot the best fitting function :
+        # plt.plot(data) ; plt.plot( [compute_sin(amp, best_omega, i*_STORE_FREQ + best_offset, i, len(data)) for i in range(len(data))] )
         return (best_omega, best_offset)
 
 
