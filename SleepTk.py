@@ -367,7 +367,6 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
                     if i+start_w not in x_maximas:
                         x_maximas.append(i + start_w)
                         y_maximas.append(m)
-
         del window, start_w, i, m
         gc.collect()
 
@@ -376,6 +375,8 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             if x*_STORE_FREQ < 3600:
                 y_maximas.remove(y_maximas[i])
                 x_maximas.remove(x)
+        del i, x
+        gc.collect()
 
         # merge the smallest peaks while there are more than N peaks
         N = 4
@@ -384,12 +385,12 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             for i, y in y_maximas:  # find location of minimum
                 if y == y_min:
                     x_min_idx = i
-            if x_min_idx == len(x_maxinas):  # min is last, merging it with penultimate
+            if x_min_idx == len(x_maximas):  # min is last, merging it with penultimate
                 closest = x_min_idx-1
             elif x_min_idx == 0:  # min is first, merging it with 2nd
                 closest = x_min_idx+1
             else:  # merge with closest
-                if x_maximas[x_min_idx-1] - x_maximas[x_min_idxn] < x_maximas[x_min_idx+1] - x_maximas[x_min_idxn]:
+                if x_maximas[x_min_idx-1] - x_maximas[x_min_idx] < x_maximas[x_min_idx+1] - x_maximas[x_min_idx]:
                     closest = x_min_idx-1
                 else:
                     closest = x_min_idx+1
@@ -398,6 +399,8 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             x_maximas[closest] /= 2
             y_maximas.remove(y_maximas[x_min_idx])
             x_maximas.remove(x_maximas[x_min_idx])
+        del closest, y_min, x_min_idx, i, y
+        gc.collect()
 
         # sleep cycle period is the time average distance between those N peaks
         period = (x_maximas[-1] - x_maximas[0]) / N
@@ -410,7 +413,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
         if last_peak_time + period < WU_t and last_peak_time + period > allowed_time:
             earlier = WU_t - (last_peak_time + period)
         else:
-            earlier = 0
+            earlier = 0  # don't anticipate
         return (earlier, period)
 
     def _smart_alarm_compute(self):
