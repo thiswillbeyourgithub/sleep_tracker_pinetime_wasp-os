@@ -50,7 +50,6 @@ class SleepTkApp():
         self._spinval_H = 7  # default wake up time
         self._spinval_M = 30
         self._conf_view = None
-        self._is_computing = False
         self._is_tracking = False
         self._earlier = 0
         self._page = _START
@@ -73,12 +72,6 @@ class SleepTkApp():
         system.request_event(EventMask.TOUCH |
                              EventMask.SWIPE_UPDOWN |
                              EventMask.BUTTON)
-
-    def sleep(self):
-        """stop sleeping when calculating smart alarm time"""
-        gc.collect()
-        if self._is_computing:
-            return False
 
     def background(self):
         gc.collect()
@@ -420,7 +413,6 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
 
     def _smart_alarm_compute(self):
         """computes best wake up time from sleep data"""
-        self._is_computing = True
         gc.collect()
         t = watch.time.localtime(time.time())
         system.notify(watch.rtc.get_uptime_ms(), {"src": "SleepTk",
@@ -479,8 +471,6 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             f = open("smart_alarm_error_{}.txt".format(int(time.time())), "wb")
             f.write(msg.encode())
             f.close()
-        finally:
-            self._is_computing = False
         gc.collect()
 
 
