@@ -479,12 +479,12 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
                                                       })
         except Exception as e:
             wasp.gc.collect()
-            t = wasp.watch.time.localtime(time.time())
+            t = wasp.watch.time.localtime(wasp.watch.rtc.time())
             msg = "Exception occured at {:02d}h{:02d}m: '{}'%".format(t[3], t[4], str(e))
             wasp.system.notify(wasp.watch.rtc.get_uptime_ms(), {"src": "SleepTk",
                                                       "title": "Smart alarm error",
                                                       "body": msg})
-            f = open("smart_alarm_error_{}.txt".format(int(time.time())), "wb")
+            f = open("smart_alarm_error_{}.txt".format(int(wasp.watch.rtc.time())), "wb")
             f.write(msg.encode())
             f.close()
         wasp.gc.collect()
