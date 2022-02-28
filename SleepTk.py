@@ -35,7 +35,7 @@ _BATTERY_THRESHOLD = micropython.const(20)  # under X% of battery, stop tracking
 
 # user might want to edit this:
 _ANTICIPATE_ALLOWED = micropython.const(2400)  # number of seconds SleepTk can wake you up before the alarm clock you set
-_GRADUAL_WAKE = array.array("H", [1, 2, 3, 5, 8, 13, 20])  # nb of minutes before alarm to send a tiny vibration to make a smoother wake up
+_GRADUAL_WAKE = array.array("H", [1, 2, 3, 4, 5, 8, 13, 20])  # nb of minutes before alarm to send a tiny vibration to make a smoother wake up
 
 
 class SleepTkApp():
