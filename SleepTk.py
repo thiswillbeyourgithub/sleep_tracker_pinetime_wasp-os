@@ -361,7 +361,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
         y_maximas = array("f")
         window = int(60*60/_STORE_FREQ)  # over 60 minutes
         for start_w in range(len(data)) - window:
-            m = max(data[start_w:start_w+window]
+            m = max(data[start_w:start_w+window])
             for i in range(start_w, start_w + window):
                 if data[i] == m:
                     if i+start_w not in x_maximas:
