@@ -417,8 +417,8 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
         mute = watch.display.mute
         mute(True)
         system.wake()
-        system.switch(self)
         mute(True)
+        system.switch(self)
         t = watch.time.localtime(time.time())
         system.notify(watch.rtc.get_uptime_ms(), {"src": "SleepTk",
                                                   "title": "Starting smart alarm computation",
