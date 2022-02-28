@@ -428,10 +428,11 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
         mute(True)
         system.switch(self)
         t = watch.time.localtime(time.time())
-        system.notify(watch.rtc.get_uptime_ms(), {"src": "SleepTk",
-                                                  "title": "Starting smart alarm computation",
-                                                  "body": "Starting computation for the smart alarm at ".format(t[3], t[4])
-                                                  })
+        system.notify(watch.rtc.get_uptime_ms(),
+                      {"src": "SleepTk",
+                       "title": "Starting smart alarm computation",
+                       "body": "Starting computation for the smart alarm at {:02d}h{:02d}m".format(t[3], t[4])}
+                      )
         try:
             start_time = rtc.time()
             # stop tracking to save memory, keep the alarm just in case
@@ -471,14 +472,14 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             system.set_alarm(max(WU_t - earlier, int(rtc.time()) + 3),  # not before right now, to make sure it rings
                              self._listen_to_ticks)
             self._page = _TRACKING2
-            msg = "Finished computing best wake up time in {:2f}.Best sleep cycle duration: {:.2f}h".format(rtc.time() - start_time, period)
             system.notify(watch.rtc.get_uptime_ms(), {"src": "SleepTk",
                                                       "title": "Finished smart alarm computation",
-                                                      "body": msg})
+                                                      "body": "Finished computing best wake up time in {:2f}s. Best sleep cycle duration: {:.2f}h".format(rtc.time() - start_time, period)
+                                                      })
         except Exception as e:
             gc.collect()
             t = watch.time.localtime(time.time())
-            msg = "Exception occured at {}h{}m: '{}'%".format(t[3], t[4], str(e))
+            msg = "Exception occured at {:02d}h{:02d}m: '{}'%".format(t[3], t[4], str(e))
             system.notify(watch.rtc.get_uptime_ms(), {"src": "SleepTk",
                                                       "title": "Smart alarm error",
                                                       "body": msg})
