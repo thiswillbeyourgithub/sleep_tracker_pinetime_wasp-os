@@ -13,7 +13,7 @@ alarm you set up manually.
 """
 
 import time
-from wasp import watch, system, EventMask, gc, machine
+from wasp import watch, system, EventMask, EventType, gc, machine
 from watch import rtc, battery, accel
 
 from widgets import Button, Spinner, Checkbox, StatusBar, ConfirmationView
@@ -89,6 +89,8 @@ class SleepTkApp():
             if self._page == _RINGING:
                 self._disable_tracking()
                 self._page = _START
+            else:
+                system.navigate(EventType.HOME)
 
     def swipe(self, event):
         "switches between start page and settings page"
