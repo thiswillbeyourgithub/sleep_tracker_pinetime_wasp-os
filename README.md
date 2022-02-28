@@ -32,18 +32,14 @@
 
 ## TODO
 **misc**
+* make sure smart alarm works with the new local maximum method
 * retake outdated UI screenshot + data sample with the right time
-* pressing the back button should return to home menu
-* turn off the Bluetooth connection when beginning tracking
+* add a power nap mode that wakes you as soon as there has been no movement for 5 minutes
+* when smart alarm is on but could not find any better wake up time, vibrates just a tiny bit every 5 minutes before waking up to make you gradually come back from sleep.
 
-**sleep tracking**
-* infer light and deep sleep directly on the device
-
-**Features that I'm note sure yet**
-* log smart alarm data to file
-* log heart rate data every 10 minutes
-* should the watch ask you after waking up to rate your freshness at wake?
-* ability to send in real time to Bluetooth device the current sleep stage you're probably in. For use in Targeted Memory Reactivation.
+* log heart rate data every X minutes?
+* log smart alarm data to file? log user rating of how well he/she felt fresh at wake?
+* ability to send in real time to Bluetooth device the current sleep stage you're probably in. For use in Targeted Memory Reactivation?
 
 ## Related links:
 * article with detailed implementation : https://www.nature.com/articles/s41598-018-31266-z
