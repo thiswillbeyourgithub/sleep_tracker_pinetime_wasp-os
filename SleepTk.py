@@ -431,7 +431,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
         mute = watch.display.mute
         mute(True)
         system.wake()
-        mute(True)
+        system.keep_awake()
         system.switch(self)
         t = watch.time.localtime(rtc.time())
         system.notify(watch.rtc.get_uptime_ms(),
@@ -499,6 +499,8 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
         """listen to ticks every second, telling the watch to vibrate"""
         gc.collect()
         self._page = _RINGING
+        mute = watch.display.mute
+        mute(True)
         system.wake()
         system.keep_awake()
         system.switch(self)
