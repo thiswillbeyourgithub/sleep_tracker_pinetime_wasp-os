@@ -326,6 +326,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
                 data[x] = ma
         del ma, x
         gc.collect()
+        system.keep_awake()
 
         # smoothen several times
         for j in range(2):
@@ -334,6 +335,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
                 data[i] /= 3
         del i, j
         gc.collect()
+        system.keep_awake()
 
         # center and scale and clip between -1 and 1
         mean = sum(data) / len(data)
@@ -342,6 +344,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             data[i] = min(1, max(-1, (data[i] - mean) / std))
         del mean, std, i
         gc.collect()
+        system.keep_awake()
 
         # smoothen
         for j in range(2):
@@ -350,6 +353,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
                 data[i] /= 3
         del i, j
         gc.collect()
+        system.keep_awake()
 
         # find local maximas
         x_maximas = array("f")
@@ -364,6 +368,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
                         y_maximas.append(m)
         del window, start_w, i, m
         gc.collect()
+        system.keep_awake()
 
         # remove all peaks found in the first 60 minutes:
         for i, x in enumerate(x_maximas):
@@ -372,6 +377,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
                 x_maximas.remove(x)
         del i, x
         gc.collect()
+        system.keep_awake()
 
         # merge the smallest peaks while there are more than N peaks
         N = 4
@@ -396,6 +402,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             x_maximas.remove(x_maximas[x_min_idx])
         del closest, y_min, x_min_idx, i, y
         gc.collect()
+        system.keep_awake()
 
         # sleep cycle period is the time average distance between those N peaks
         period = (x_maximas[-1] - x_maximas[0]) / N
@@ -409,6 +416,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             earlier = WU_t - (last_peak_time + period)
         else:
             earlier = 0  # don't anticipate
+        system.keep_awake()
         return (earlier, period)
 
     def _smart_alarm_compute(self):
@@ -453,6 +461,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             f.close()
             del f, char, buff
             gc.collect()
+            system.keep_awake()
 
             earlier, period = self._signal_processing(data)
             WU_t = self._WU_t
