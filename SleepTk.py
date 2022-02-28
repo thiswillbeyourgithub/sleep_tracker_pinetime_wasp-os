@@ -20,7 +20,7 @@ from widgets import Button, Spinner, Checkbox, StatusBar, ConfirmationView
 from shell import mkdir, cd
 from fonts import sans18
 
-from math import sin, atan
+from math import atan
 from array import array
 from micropython import const
 
