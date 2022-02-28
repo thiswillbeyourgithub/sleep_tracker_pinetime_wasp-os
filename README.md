@@ -34,7 +34,6 @@
 **misc**
 * retake outdated UI screenshot + data sample with the right time
 * pressing the back button should return to home menu
-* give up on sinus fitting, use instead a simple peak finder then take the mean / median distance between peaks as the best sleep cycle
 * turn off the Bluetooth connection when beginning tracking
 
 **sleep tracking**

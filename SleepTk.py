@@ -25,8 +25,6 @@ from array import array
 from micropython import const
 
 # HARDCODED VARIABLES:
-_PIPI = const(628318)  # result of 2*pi*100_000
-_CONV = const(100000)  # to get 2*pi
 _START = const(0)  # page values:
 _TRACKING = const(1)
 _TRACKING2 = const(2)
@@ -36,11 +34,10 @@ _FONT = sans18
 _TIMESTAMP = const(946684800)  # unix time and time used by wasp os don't have the same reference date
 _FREQ = const(30)  # get accelerometer data every X seconds, but process and store them only every _STORE_FREQ seconds
 _STORE_FREQ = const(300)  # process data and store to file every X seconds
-_SLEEP_CYCL_TRY = array("H", [4800, 5400, 6000])  # sleep cycle length to try (80, 90 and 100 minutes)
 _BATTERY_THRESHOLD = const(20)  # under X% of battery, stop tracking and only keep the alarm
 
 # user might want to edit this:
-_OFFSETS = array("H", [0, 600, 1200, 1800, 2400])  # possible offsets of sinus to try to fit to data (40 minutes, by increment of 10 minutes)
+_ANTICIPATE_ALLOWED = const(2400)  # number of seconds SleepTk can wake you up before the alarm clock you set
 
 
 class SleepTkApp():
@@ -134,7 +131,7 @@ class SleepTkApp():
 
                     # wake up SleepTk 2min before earliest possible wake up
                     if self._wakeup_smart_enabled:
-                        self._WU_a = self._WU_t - _OFFSETS[-1] - 120
+                        self._WU_a = self._WU_t - _ANTICIPATE_ALLOWED - 120
                         system.set_alarm(self._WU_a, self._smart_alarm_compute)
                 self._page = _TRACKING
 
@@ -381,7 +378,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
                 x_maximas.remove(x)
 
         # merge the smallest peaks while there are more than N peaks
-        N = 3
+        N = 4
         while len(x_maximas) > N:
             y_min = min(y_maximas)  # find minimum
             for i, y in y_maximas:  # find location of minimum
@@ -409,48 +406,12 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
         # SleepTk is allowed to anticipate: add new alarm at best time
         last_peak_time = self._offset + x_maximas[-1] * _STORE_FREQ
         WU_t = self._WU_t
-        allowed_time = WU_t - _OFFSETS[-1]
+        allowed_time = WU_t - _ANTICIPATE_ALLOWED
         if last_peak_time + period < WU_t and last_peak_time + period > allowed_time:
             earlier = WU_t - (last_peak_time + period)
         else:
             earlier = 0
         return (earlier, period)
-
-
-#        # for each sleep cycle, do a least square regression on each
-#        # possible offset value of a sinusoidal wave with the same
-#        # frequency as the sleep cycle
-#        def compute_sin(amplitude, angular_freq, time, index, last_index):
-#            return amplitude * (index/last_index) * sin(omega * time)
-#        amp = max(data)
-#        bof_p_cycl = array("H", [0] * len(_SLEEP_CYCL_TRY))  # best offset found per cycle
-#        bfi_p_cycl = array("f", [0] * len(_SLEEP_CYCL_TRY))  # fit value for best offset
-#        for cnt_cycle, cycle in enumerate(_SLEEP_CYCL_TRY):
-#            omega = (_PIPI / _CONV) / (cycle * 2)  # 2 * pi * frequency
-#            fits = array("f")
-#            # least square regression:
-#            for cnt_offs, offset in enumerate(_OFFSETS):
-#                fits.append(sum(
-#                            [(compute_sin(amp, omega, offset + i * _STORE_FREQ, i, len(data)) - data[i])**2
-#                             for i in range(len(data))]
-#                            ))
-#                if fits[-1] == min(fits):
-#                    bof_p_cycl[cnt_cycle] = _OFFSETS[cnt_offs]
-#            bfi_p_cycl[cnt_cycle] = min(fits)
-#        del fits, offset, cnt_cycle, cnt_offs, data, cycle, omega
-#        gc.collect()
-#
-#        # find sleep cycle and offset with the least fit:
-#        for i, fit in enumerate(bfi_p_cycl):
-#            if fit == min(bfi_p_cycl):
-#                best_offset = bof_p_cycl[i]
-#                best_omega = (_PIPI / _CONV) / (_SLEEP_CYCL_TRY[i] * 2)
-#                break
-
-        # to plot the best fitting function :
-        # plt.plot(data) ; plt.plot( [compute_sin(amp, best_omega, i*_STORE_FREQ + best_offset, i, len(data)) for i in range(len(data))] )
-#        return (best_omega, best_offset)
-
 
     def _smart_alarm_compute(self):
         """computes best wake up time from sleep data"""
@@ -491,30 +452,15 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             del f, char, buff
             gc.collect()
 
-            #best_omega, best_offset = self._signal_processing(data)
             earlier, period = self._signal_processing(data)
             WU_t = self._WU_t
             gc.collect()
-
-#            # finding how early to wake up:
-#            max_sin = -1
-#            WU_t = self._WU_t
-#            # counting backwards from original wake up time
-#            for t in range(WU_t, WU_t - _OFFSETS[-1], -_STORE_FREQ):
-#                s = sin(best_omega * (t + best_offset))
-#                if s > max_sin:
-#                    max_sin = s
-#                    earlier = t  # number of seconds earlier than wake up time
-#            del max_sin, s, t
-#            gc.collect()
 
             self._earlier = earlier
             system.set_alarm(max(WU_t - earlier, int(rtc.time()) + 3),  # not before right now, to make sure it rings
                              self._listen_to_ticks)
             self._page = _TRACKING2
             msg = "Finished computing best wake up time in {:2f}.Best sleep cycle duration: {:.2f}h".format(rtc.time() - start_time, period)
-#            msg = "Finished computing best wake up time in {}. Best fitting \
-#                    offset: {}. Best sleep cycle duration: {:.2f}h".format(elapsed, best_offset, (_PIPI / _CONV / best_omega / 2 / 60 / 60))
             system.notify(watch.rtc.get_uptime_ms(), {"src": "SleepTk",
                                                       "title": "Finished smart alarm computation",
                                                       "body": msg})
