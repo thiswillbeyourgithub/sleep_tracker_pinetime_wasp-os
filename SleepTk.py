@@ -56,12 +56,10 @@ class SleepTkApp():
             shell.mkdir("logs/")
         except:  # folder already exists
             pass
-        cd("logs")
         try:
             shell.mkdir("logs/sleep")
         except:  # folder already exists
             pass
-        cd("..")
 
     def foreground(self):
         self._conf_view = None
