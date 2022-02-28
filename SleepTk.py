@@ -313,7 +313,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
                 self._spin_H = Spinner(30, 120, 0, 23, 2)
                 self._spin_H.value = self._spinval_H
                 self._spin_H.draw()
-                self._spin_M = Spinner(150, 120, 0, 59, 2)
+                self._spin_M = Spinner(150, 120, 0, 59, 2, 5)
                 self._spin_M.value = self._spinval_M
                 self._spin_M.draw()
                 self.check_smart = Checkbox(x=0, y=80, label="Smart alarm")
