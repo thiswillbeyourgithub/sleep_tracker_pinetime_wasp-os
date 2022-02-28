@@ -35,7 +35,6 @@
 * make sure smart alarm works with the new local maximum method
 * retake outdated UI screenshot + data sample with the right time
 * add a power nap mode that wakes you as soon as there has been no movement for 5 minutes
-* when smart alarm is on but could not find any better wake up time, vibrates just a tiny bit every 5 minutes before waking up to make you gradually come back from sleep.
 
 * log heart rate data every X minutes?
 * log smart alarm data to file? log user rating of how well he/she felt fresh at wake?

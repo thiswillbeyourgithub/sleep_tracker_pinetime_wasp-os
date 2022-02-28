@@ -38,6 +38,7 @@ _BATTERY_THRESHOLD = const(20)  # under X% of battery, stop tracking and only ke
 
 # user might want to edit this:
 _ANTICIPATE_ALLOWED = const(2400)  # number of seconds SleepTk can wake you up before the alarm clock you set
+_GRADUAL_WAKE = array("H", [1, 2, 3, 5, 8, 13, 20])  # nb of minutes before alarm to send a tiny vibration to make a smoother wake up
 
 
 class SleepTkApp():
@@ -123,6 +124,11 @@ class SleepTkApp():
                         dd += 1
                     self._WU_t = time.mktime((yyyy, mm, dd, HH, MM, 0, 0, 0, 0))
                     system.set_alarm(self._WU_t, self._listen_to_ticks)
+
+                    # also set alarm to vibrate a tiny bit before wake up time
+                    # to wake up gradually
+                    for t in _GRADUAL_WAKE:
+                        system.set_alarm(self._WU_t - t*60, self._tiny_vibration)
 
                     # wake up SleepTk 2min before earliest possible wake up
                     if self._wakeup_smart_enabled:
@@ -503,3 +509,14 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
         """vibrate to wake you up"""
         if self._page == _RINGING:
             watch.vibrator.pulse(duty=50, ms=500)
+
+    def _tiny_vibration(self):
+        """vibrate just a tiny bit before waking up, to gradually return
+        to consciousness"""
+        gc.collect()
+        mute = watch.display.mute
+        mute(True)
+        system.wake()
+        system.keep_awake()
+        system.switch(self)
+        watch.vibrator.pulse(duty=60, ms=100)
