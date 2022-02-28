@@ -51,6 +51,7 @@ class SleepTkApp():
         self._is_tracking = False
         self._earlier = 0
         self._page = _START
+        self._old_notification_level = wasp.system.notify_level
 
         try:
             shell.mkdir("logs/")
@@ -129,6 +130,7 @@ class SleepTkApp():
                     if self._wakeup_smart_enabled:
                         self._WU_a = self._WU_t - _ANTICIPATE_ALLOWED - 120
                         wasp.system.set_alarm(self._WU_a, self._smart_alarm_compute)
+                wasp.system.notify_level = 1  # silent notifications
                 self._page = _TRACKING
 
         elif self._page == _TRACKING or self._page == _TRACKING2:
@@ -493,6 +495,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
     def _listen_to_ticks(self):
         """listen to ticks every second, telling the watch to vibrate"""
         wasp.gc.collect()
+        wasp.system.notify_level = self._old_notification_level  # restore notification level
         self._page = _RINGING
         mute = wasp.watch.display.mute
         mute(True)
