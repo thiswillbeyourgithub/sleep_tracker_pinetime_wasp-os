@@ -414,6 +414,11 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
     def _smart_alarm_compute(self):
         """computes best wake up time from sleep data"""
         gc.collect()
+        mute = watch.display.mute
+        mute(True)
+        system.wake()
+        system.switch(self)
+        mute(True)
         t = watch.time.localtime(time.time())
         system.notify(watch.rtc.get_uptime_ms(), {"src": "SleepTk",
                                                   "title": "Starting smart alarm computation",
