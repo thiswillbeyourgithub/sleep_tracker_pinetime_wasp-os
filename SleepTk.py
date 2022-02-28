@@ -219,7 +219,7 @@ class SleepTkApp():
                 # strop tracking if battery low
                 self._disable_tracking(keep_main_alarm=True)
                 self._wakeup_smart_enabled = 0
-                h, m = watch.time.localtime(time.time())[3:5]
+                h, m = watch.time.localtime(rtc.time())[3:5]
                 system.notify(watch.rtc.get_uptime_ms(), {"src": "SleepTk",
                                                           "title": "Bat <20%",
                                                           "body": "Stopped \
@@ -427,7 +427,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
         system.wake()
         mute(True)
         system.switch(self)
-        t = watch.time.localtime(time.time())
+        t = watch.time.localtime(rtc.time())
         system.notify(watch.rtc.get_uptime_ms(),
                       {"src": "SleepTk",
                        "title": "Starting smart alarm computation",
