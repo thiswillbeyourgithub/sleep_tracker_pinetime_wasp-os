@@ -67,8 +67,8 @@ class SleepTkApp():
         wasp.gc.collect()
         self._draw()
         wasp.system.request_event(wasp.EventMask.TOUCH |
-                             wasp.EventMask.SWIPE_UPDOWN |
-                             wasp.EventMask.BUTTON)
+                                  wasp.EventMask.SWIPE_UPDOWN |
+                                  wasp.EventMask.BUTTON)
 
     def background(self):
         wasp.gc.collect()

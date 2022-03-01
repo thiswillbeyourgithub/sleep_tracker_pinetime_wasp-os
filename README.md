@@ -33,8 +33,10 @@
 
 ## TODO
 **misc**
-* make sure smart alarm works with the new local maximum method
 * retake outdated UI screenshot + data sample with the right time
+* show settings panel after clicking start, instead of a swipe menu
+* recommend best wake up time
+* make sure smart alarm works with the new local maximum method
 * add a power nap mode that wakes you as soon as there has been no movement for 5 minutes
 
 * log heart rate data every X minutes?
