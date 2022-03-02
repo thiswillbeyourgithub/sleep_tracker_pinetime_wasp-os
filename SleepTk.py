@@ -323,10 +323,8 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
         """signal processing over the data read from the local file"""
 
         # remove outliers:
-        ma = 0.75*max(data)
         for x in range(len(data)):
-            if data[x] > ma:
-                data[x] = ma
+            data[x] = min(0.0008, data[x])
         del ma, x
         wasp.gc.collect()
         wasp.system.keep_awake()
