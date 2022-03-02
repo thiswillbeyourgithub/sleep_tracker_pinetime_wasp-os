@@ -341,7 +341,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
         # center data
         mean = sum(data) / len(data)
         for i in range(len(data)):
-            data[i] = data[i] - mean)
+            data[i] = data[i] - mean
         del mean, i
         wasp.gc.collect()
         wasp.system.keep_awake()
