@@ -59,14 +59,55 @@ Commands the author uses to take a look a the data using pandas:
 fname = "./logs/sleep/YOUR_TIME.csv"
 
 import pandas as pd
-from array import array
-from matplotlib import pyplot as plt
+import plotly.express as plt
 
-df = pd.read_csv(fname, names=["angl_avg", "time", "x_avg", "y_avg", "z_avg", "battery"])
-offset = int(fname.split("/")[-1].split(".csv")[0])
-df["human_time"] = pd.to_datetime(df["time"]+offset, unit='s')
-df["hours"] = df["human_time"].dt.time
-df = df.set_index("hours")
-data = array("f", df["angl_avg"].values[:-4])
-df["angl_avg"].plot()
+df = pd.read_csv(fname, names=["motion", "elapsed", "x_avg", "y_avg", "z_avg", "battery"])
+start_time = int(fname.split("/")[-1].split(".csv")[0])
+
+df["time"] = pd.to_datetime(df["elapsed"]+start_time, unit='s')
+df["human_time"] = df["time"].dt.time
+
+month = df.iloc[0]["time"].month_name()
+dayname = str(df.iloc[0]["time"].day_name())
+daynumber = str(df.iloc[0]["time"].day)
+if daynumber == 1:
+    daynumber = str(daynumber) + "st"
+elif daynumber.endswith("2"):
+    daynumber = str(daynumber) + "nd"
+elif daynumber.endswith("3"):
+    daynumber = str(daynumber) + "rd"
+else:
+    daynumber = str(daynumber) + "th"
+date = f"{month} {daynumber} ({dayname})"
+
+fig = px.line(df,
+              x="time",
+              y="motion",
+              labels={"motion": "Body motion"},
+              title=f"Night starting on {date}")
+fig.update_xaxes(type="date",
+                 tickformat="%H:%M"
+                 )
+fig.show()
+```
+
+Now, to investigate signal processing:
+```
+
+# reproduce signal processing of the watch here:
+import array
+data = array.array("f", df["motion"])
+
+
+### PUT SIGNAL PROCESSING CODE HERE
+
+
+from matplotlib import pyplot as plt
+plt.plot(data)
+for i in x_maximas:
+    plt.axvline(x=i,
+                color="red",
+                linestyle="--"
+                )
+plt.show()
 ```
