@@ -325,7 +325,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
         # remove outliers:
         for x in range(len(data)):
             data[x] = min(0.0008, data[x])
-        del ma, x
+        del x
         wasp.gc.collect()
         wasp.system.keep_awake()
 
@@ -342,7 +342,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
         mean = sum(data) / len(data)
         std = ((sum([x**2 for x in data]) / len(data)) - mean**2)**0.5
         for i in range(len(data)):
-            data[i] = min(1, max(-1, (data[i] - mean) / std))
+            data[i] = (data[i] - mean) / std
         del mean, std, i
         wasp.gc.collect()
         wasp.system.keep_awake()
