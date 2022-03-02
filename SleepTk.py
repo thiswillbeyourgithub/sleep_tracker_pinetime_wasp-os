@@ -221,7 +221,7 @@ class SleepTkApp():
                 # strop tracking if battery low
                 self._disable_tracking(keep_main_alarm=True)
                 self._wakeup_smart_enabled = 0
-                h, m = watch.time.localtime(wasp.watch.rtc.time())[3:5]
+                h, m = wasp.watch.time.localtime(wasp.watch.rtc.time())[3:5]
                 wasp.system.notify(wasp.watch.rtc.get_uptime_ms(), {"src": "SleepTk",
                                                           "title": "Bat <20%",
                                                           "body": "Stopped \
