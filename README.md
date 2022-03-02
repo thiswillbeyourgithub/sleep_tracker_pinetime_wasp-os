@@ -33,9 +33,10 @@
 
 ## TODO
 **misc**
-* retake outdated UI screenshot + data sample with the right time
+* retake outdated UI screenshot + data sample with the right timestamp
+* if error encountered when pulling data, erase file OR check file size
 * show settings panel after clicking start, instead of a swipe menu
-* recommend best wake up time
+* recommend best wake up time when setting up alarm
 * make sure smart alarm works with the new local maximum method
 * add a power nap mode that wakes you as soon as there has been no movement for 5 minutes
 
