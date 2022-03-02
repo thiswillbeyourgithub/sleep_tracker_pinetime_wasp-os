@@ -33,7 +33,6 @@
 
 ## TODO
 **misc**
-* retake outdated UI screenshot + data sample with the right timestamp
 * if error encountered when pulling data, erase file OR check file size
 * show settings panel after clicking start, instead of a swipe menu
 * recommend best wake up time when setting up alarm
