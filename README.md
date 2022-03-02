@@ -92,15 +92,17 @@ fig.update_xaxes(type="date",
 fig.show()
 ```
 
-Now, to investigate signal processing:
+Now, to play around with the signal processing function:
 ```
-
-# reproduce signal processing of the watch here:
 import array
 data = array.array("f", df["motion"])
+data = data[:15] # remove the last few data points as the signal
+# processor does not yet have access to them when finding best wake up time
 
 
-### PUT SIGNAL PROCESSING CODE HERE
+##############################################
+### PUT LATEST SIGNAL PROCESSING CODE HERE ###
+##############################################
 
 
 from matplotlib import pyplot as plt
