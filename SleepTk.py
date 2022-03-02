@@ -24,9 +24,8 @@ import micropython
 # HARDCODED VARIABLES:
 _START = micropython.const(0)  # page values:
 _TRACKING = micropython.const(1)
-_TRACKING2 = micropython.const(2)
-_SETTINGS = micropython.const(3)
-_RINGING = micropython.const(4)
+_SETTINGS = micropython.const(2)
+_RINGING = micropython.const(3)
 _FONT = fonts.sans18
 _TIMESTAMP = micropython.const(946684800)  # unix time and time used by wasp os don't have the same reference date
 _FREQ = micropython.const(30)  # get accelerometer data every X seconds, but process and store them only every _STORE_FREQ seconds
@@ -133,7 +132,7 @@ class SleepTkApp():
                 wasp.system.notify_level = 1  # silent notifications
                 self._page = _TRACKING
 
-        elif self._page == _TRACKING or self._page == _TRACKING2:
+        elif self._page == _TRACKING:
             if self._conf_view is None:
                 if self.btn_off.touch(event):
                     self._conf_view = widgets.ConfirmationView()
@@ -273,7 +272,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             draw.string(msg, 0, 70)
             self.btn_al = widgets.Button(x=0, y=70, w=240, h=140, label="WAKE UP")
             self.btn_al.draw()
-        elif self._page == _TRACKING or self._page == _TRACKING2:
+        elif self._page == _TRACKING:
             ti = wasp.watch.time.localtime(self._offset)
             draw.string('Started at {:02d}:{:02d}'.format(ti[3], ti[4]), 0, 70)
             draw.string("data points: {}".format(str(self._data_point_nb)), 0, 90)
@@ -454,7 +453,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             self._earlier = earlier
             wasp.system.set_alarm(max(WU_t - earlier, int(wasp.watch.rtc.time()) + 3),  # not before right now, to make sure it rings
                                   self._listen_to_ticks)
-            self._page = _TRACKING2
+            self._page = _TRACKING
             wasp.system.notify(wasp.watch.rtc.get_uptime_ms(), {"src": "SleepTk",
                                                       "title": "Finished smart alarm computation",
                                                       "body": "Finished computing best wake up time in {:2f}s. Sleep cycle: {:.2f}h".format(wasp.watch.rtc.time() - start_time, cycle)
