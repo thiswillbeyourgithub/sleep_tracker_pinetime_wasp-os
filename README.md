@@ -29,7 +29,7 @@
 ![start](./screenshots/start_page.png)
 ![settings](./screenshots/settings_page.png)
 ![tracking](./screenshots/tracking_page.png)
-![night example](./screenshots/example_night.png)
+![night example](./screenshots/example_night2.png)
 
 ## TODO
 **misc**
