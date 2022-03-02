@@ -384,20 +384,23 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
         wasp.gc.collect()
         wasp.system.keep_awake()
 
-        # sleep cycle period is the time average distance between those N peaks
-        period = (x_maximas[-1] - x_maximas[0]) / N
+        # sleep cycle duration is the average time distance between those N peaks
+        cycle = sum([x_maximas[i+1] - x_maximas[i] for i in range(len(x_maximas) -1)]) / N * _STORE_FREQ
 
-        # if wake up time is in more time than last period but less than what
-        # SleepTk is allowed to anticipate: add new alarm at best time
-        last_peak_time = self._offset + x_maximas[-1] * _STORE_FREQ
+        last_peak = self._offset + x_maximas[-1] * _STORE_FREQ
         WU_t = self._WU_t
-        allowed_time = WU_t - _ANTICIPATE_ALLOWED
-        if last_peak_time + period < WU_t and last_peak_time + period > allowed_time:
-            earlier = WU_t - (last_peak_time + period)
-        else:
-            earlier = 0  # don't anticipate
+
+        # check if too late, already woken up:
+        if last_peak + cycle > WU_t:
+            raise Exception("Took too long to compute!")
+
+        # if smart alarm wants to wake you up too early, limit how early
+        if last_peak + cycle < WU_t - _ANTICIPATE_ALLOWED:
+            earlier = _ANTICIPATE_ALLOWED
+        else:  # will wake you up at computed time
+            earlier = last_peak - self._offset + cycle
         wasp.system.keep_awake()
-        return (earlier, period)
+        return (earlier, cycle)
 
     def _smart_alarm_compute(self):
         """computes best wake up time from sleep data"""
@@ -444,17 +447,17 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             wasp.gc.collect()
             wasp.system.keep_awake()
 
-            earlier, period = self._signal_processing(data)
+            earlier, cycle = self._signal_processing(data)
             WU_t = self._WU_t
             wasp.gc.collect()
 
             self._earlier = earlier
             wasp.system.set_alarm(max(WU_t - earlier, int(wasp.watch.rtc.time()) + 3),  # not before right now, to make sure it rings
-                             self._listen_to_ticks)
+                                  self._listen_to_ticks)
             self._page = _TRACKING2
             wasp.system.notify(wasp.watch.rtc.get_uptime_ms(), {"src": "SleepTk",
                                                       "title": "Finished smart alarm computation",
-                                                      "body": "Finished computing best wake up time in {:2f}s. Best sleep cycle duration: {:.2f}h".format(wasp.watch.rtc.time() - start_time, period)
+                                                      "body": "Finished computing best wake up time in {:2f}s. Sleep cycle: {:.2f}h".format(wasp.watch.rtc.time() - start_time, cycle)
                                                       })
         except Exception as e:
             wasp.gc.collect()
