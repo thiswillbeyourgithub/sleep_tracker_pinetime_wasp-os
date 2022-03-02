@@ -347,51 +347,40 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
         wasp.system.keep_awake()
 
         # find local maximas
-        x_maximas = array.array("f")
-        y_maximas = array.array("f")
-        window = int(60*60/_STORE_FREQ)  # over 60 minutes
-        for start_w in range(len(data)) - window:
-            m = max(data[start_w:start_w+window])
+        x_maximas = array.array("H", [0])
+        y_maximas = array.array("f", [0])
+        window = int(60*60/_STORE_FREQ)
+        skip = 1800 // _STORE_FREQ  # skip first 60 minutes of data
+        for start_w in range(skip, len(data) - window + 1):
+            m = max(data[start_w:start_w + window])
             for i in range(start_w, start_w + window):
-                if data[i] == m:
-                    if i+start_w not in x_maximas:
-                        x_maximas.append(i + start_w)
-                        y_maximas.append(m)
-        del window, start_w, i, m
+                if data[i] == m and m > 0:
+                    if i not in x_maximas:
+                        if i - x_maximas[-1] <= 2:
+                            # too close to last maximum, keep highest
+                            if y_maximas[-1] < data[i]:
+                                x_maximas[-1] = i
+                                y_maximas[-1] = data[i]
+                        else:
+                            x_maximas.append(i)
+                            y_maximas.append(m)
+        del window, skip, start_w, i, m, x_maximas[0], y_maximas[0], data
         wasp.gc.collect()
         wasp.system.keep_awake()
 
-        # remove all peaks found in the first 60 minutes:
-        for i, x in enumerate(x_maximas):
-            if x*_STORE_FREQ < 3600:
-                y_maximas.remove(y_maximas[i])
-                x_maximas.remove(x)
-        del i, x
-        wasp.gc.collect()
-        wasp.system.keep_awake()
-
-        # merge the smallest peaks while there are more than N peaks
-        N = 4
+        # merge the closest peaks while there are more than N peaks
+        N = 3
         while len(x_maximas) > N:
-            y_min = min(y_maximas)  # find minimum
-            for i, y in y_maximas:  # find location of minimum
-                if y == y_min:
-                    x_min_idx = i
-            if x_min_idx == len(x_maximas):  # min is last, merging it with penultimate
-                closest = x_min_idx-1
-            elif x_min_idx == 0:  # min is first, merging it with 2nd
-                closest = x_min_idx+1
-            else:  # merge with closest
-                if x_maximas[x_min_idx-1] - x_maximas[x_min_idx] < x_maximas[x_min_idx+1] - x_maximas[x_min_idx]:
-                    closest = x_min_idx-1
-                else:
-                    closest = x_min_idx+1
-            y_maximas[closest] += y_maximas[x_min_idx]  # adding peak values
-            x_maximas[closest] += x_maximas[x_min_idx]  # averaging the x coordinate
-            x_maximas[closest] /= 2
-            y_maximas.remove(y_maximas[x_min_idx])
-            x_maximas.remove(x_maximas[x_min_idx])
-        del closest, y_min, x_min_idx, i, y
+            diffs = array.array("f", [x_maximas[int(x)+1] - x_maximas[int(x)] for x in range(len(x_maximas)-1)])
+            ex = False
+            for d_min_idx, d in enumerate(diffs):
+                if ex:
+                    break
+                if d == min(diffs):
+                    y_maximas.remove(y_maximas[d_min_idx+1])
+                    x_maximas.remove(x_maximas[d_min_idx+1])
+                    ex = True
+        del diffs, ex, d_min_idx
         wasp.gc.collect()
         wasp.system.keep_awake()
 
