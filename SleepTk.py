@@ -330,15 +330,15 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
         wasp.system.keep_awake()
 
         # smoothen several times
-        for j in range(2):
-            for i in range(1, len(data)-2):
-                data[i] += data[i-1] + data[i+1]
-                data[i] /= 3
+        for j in range(5):
+            for i in range(1, len(data)-1):
+                data[i] += data[i-1]
+                data[i] /= 2
         del i, j
         wasp.gc.collect()
         wasp.system.keep_awake()
 
-        # center and scale and clip between -1 and 1
+        # center and scale
         mean = sum(data) / len(data)
         std = ((sum([x**2 for x in data]) / len(data)) - mean**2)**0.5
         for i in range(len(data)):
