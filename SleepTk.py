@@ -450,9 +450,17 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             WU_t = self._WU_t
             wasp.gc.collect()
 
-            self._earlier = earlier
+            # add new alarm
             wasp.system.set_alarm(max(WU_t - earlier, int(wasp.watch.rtc.time()) + 3),  # not before right now, to make sure it rings
                                   self._listen_to_ticks)
+
+            # replace old gentle alarm by another one
+            for t in _GRADUAL_WAKE:
+                wasp.system.cancel_alarm(WU_t - t*60, self._tiny_vibration)
+                if earlier + t*60 < _ANTICIPATE_ALLOWED:
+                    wasp.system.set_alarm(WU_t - earlier - t*60, self._tiny_vibration)
+
+            self._earlier = earlier
             self._page = _TRACKING
             wasp.system.notify(wasp.watch.rtc.get_uptime_ms(), {"src": "SleepTk",
                                                       "title": "Finished smart alarm computation",
