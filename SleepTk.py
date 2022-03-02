@@ -347,15 +347,6 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
         wasp.gc.collect()
         wasp.system.keep_awake()
 
-        # smoothen
-        for j in range(2):
-            for i in range(1, len(data)-2):
-                data[i] += data[i-1] + data[i+1]
-                data[i] /= 3
-        del i, j
-        wasp.gc.collect()
-        wasp.system.keep_awake()
-
         # find local maximas
         x_maximas = array.array("f")
         y_maximas = array.array("f")
