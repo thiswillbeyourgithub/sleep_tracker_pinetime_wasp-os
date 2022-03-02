@@ -418,7 +418,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
         try:
             start_time = wasp.watch.rtc.time()
             # stop tracking to save memory, keep the alarm just in case
-            self._disable_tracking(keep_main_alarm=True)
+            #self._disable_tracking(keep_main_alarm=True)
 
             # read file one character at a time, to get only the 1st
             # value of each row, which is the arm angle
