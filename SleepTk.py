@@ -232,7 +232,11 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
         wasp.gc.collect()
 
     def _periodicSave(self):
-        """save data after averageing over a window to file"""
+        """save data after averaging over a window to file
+        row order in the csv:
+            1. arm angle
+            2. elapsed times
+            3/4/5. x/y/z average value over _STORE_FREQ seconds"""
         buff = self._buff
         if self._data_point_nb - self._last_checkpoint >= _STORE_FREQ / _FREQ:
             x_avg = sum([buff[i] for i in range(0, len(buff), 3)]) / (self._data_point_nb - self._last_checkpoint)
@@ -247,7 +251,6 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             buff.append(y_avg)
             buff.append(z_avg)
             del x_avg, y_avg, z_avg
-            buff.append(int(wasp.watch.battery.voltage_mv()))  # currently more accurate than percent
 
             f = open(self.filep, "ab")
             for x in buff[:-1]:
