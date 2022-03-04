@@ -34,10 +34,10 @@
 
 ## TODO
 **misc**
-* if error encountered when pulling data, erase file OR check file size
 * show settings panel after clicking start, instead of a swipe menu
     * add a Button instead of checkbox to manage alarm / gentle alarm / smart alarm / both
         * recommend best wake up time when setting up alarm
+* add a "nap tracking" mode that records sleep tracking with more precision
 * add a power nap mode that wakes you as soon as there has been no movement for 5 minutes
 
 * log heart rate data every X minutes?
