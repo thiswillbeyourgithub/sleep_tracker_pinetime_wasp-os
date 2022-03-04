@@ -444,8 +444,9 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
                     buff = b""
                     continue
                 if char == b"":  # end of file
+                    data.append(float(buff))
                     break
-                elif not skip:  # digit of arm angle value
+                if not skip:  # digit of arm angle value
                     buff += char
 
             f.close()
