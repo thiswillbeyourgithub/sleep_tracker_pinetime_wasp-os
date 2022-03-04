@@ -42,14 +42,15 @@ class SleepTkApp():
 
     def __init__(self):
         wasp.gc.collect()
+        # default values:
         self._wakeup_enabled = 1
         self._wakeup_smart_enabled = 0  # activate waking you up at optimal time  based on accelerometer data, at the earliest at _WU_LAT - _WU_SMART
         self._spinval_H = 7  # default wake up time
         self._spinval_M = 30
-        self._conf_view = None
-        self._is_tracking = False
-        self._earlier = 0
         self._page = _START
+        self._is_tracking = False
+        self._conf_view = None  # confirmation view
+        self._earlier = 0  # number of seconds between the alarm you set manually and the smart alarm time
         self._old_notification_level = wasp.system.notify_level
         self._buff = array.array("f")
 
