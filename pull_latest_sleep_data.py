@@ -34,6 +34,10 @@ for fi in to_dl:
     else:
         print(f"Downloading file '{fi}'")
         pull_cmd = f'./tools/wasptool --verbose --pull logs/sleep/{fi}'
-        os.system(pull_cmd)
-        print(f"Succesfully downloaded to './logs/sleep/{fi}'")
+        try:
+            out = subprocess.check_output(shlex.split(pull_cmd))
+            print(f"Succesfully downloaded to './logs/sleep/{fi}'")
+        except Exception as e:
+            print(f"Error happenned when donloading {fi}, deleting file")
+            os.system(f"rm ./logs/sleep/{fi}")
     print("\n\n")
