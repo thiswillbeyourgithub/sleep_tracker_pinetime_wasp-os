@@ -51,6 +51,7 @@ class SleepTkApp():
         self._earlier = 0
         self._page = _START
         self._old_notification_level = wasp.system.notify_level
+        self._buff = array.array("f")
 
         try:
             shell.mkdir("logs/")
@@ -98,7 +99,6 @@ class SleepTkApp():
             if self.btn_on.touch(event):
                 self._is_tracking = True
                 # accel data not yet written to disk:
-                self._buff = array.array("f")
                 self._data_point_nb = 0  # total number of data points so far
                 self._last_checkpoint = 0  # to know when to save to file
                 self._offset = int(wasp.watch.rtc.time())  # makes output more compact
@@ -257,7 +257,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             f.close()
 
             self._last_checkpoint = self._data_point_nb
-            self._buff = array.array("f")
+            del self._buff[:]
 
     def _draw(self):
         """GUI"""
