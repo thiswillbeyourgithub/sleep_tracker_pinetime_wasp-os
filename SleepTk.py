@@ -52,7 +52,7 @@ class SleepTkApp():
         self._conf_view = None  # confirmation view
         self._earlier = 0  # number of seconds between the alarm you set manually and the smart alarm time
         self._old_notification_level = wasp.system.notify_level
-        self._buff = array.array("f")
+        self._buff = array.array("f", [0, 0, 0])
 
         try:
             shell.mkdir("logs/")
@@ -214,7 +214,11 @@ class SleepTkApp():
         """get one data point of accelerometer every _FREQ seconds and
         they are then averaged and stored every _STORE_FREQ seconds"""
         if self._is_tracking:
-            [self._buff.append(x) for x in wasp.watch.accel.read_xyz()]
+            buff = self._buff
+            xyz = wasp.watch.accel.read_xyz()
+            buff[0] += xyz[0]
+            buff[1] += xyz[1]
+            buff[2] += xyz[2]
             self._data_point_nb += 1
             self._add_accel_alar()
             self._periodicSave()
@@ -236,32 +240,31 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
         row order in the csv:
             1. arm angle
             2. elapsed times
-            3/4/5. x/y/z average value over _STORE_FREQ seconds"""
+            3/4/5. x/y/z average value over _STORE_FREQ seconds
+         arm angle formula from https://www.nature.com/articles/s41598-018-31266-z
+         note: math.atan() is faster than using a taylor serie
+        """
         buff = self._buff
-        if self._data_point_nb - self._last_checkpoint >= _STORE_FREQ / _FREQ:
-            x_avg = sum([buff[i] for i in range(0, len(buff), 3)]) / (self._data_point_nb - self._last_checkpoint)
-            y_avg = sum([buff[i] for i in range(1, len(buff), 3)]) / (self._data_point_nb - self._last_checkpoint)
-            z_avg = sum([buff[i] for i in range(2, len(buff), 3)]) / (self._data_point_nb - self._last_checkpoint)
-            buff = array.array("f")  # reseting array
-            buff.append(abs(math.atan(z_avg / (x_avg**2 + y_avg**2))))
-            # formula from https://www.nature.com/articles/s41598-018-31266-z
-            # note: math.atan() is faster than using a taylor serie
-            buff.append(int(wasp.watch.rtc.time() - self._offset))
-            buff.append(x_avg)
-            buff.append(y_avg)
-            buff.append(z_avg)
-            del x_avg, y_avg, z_avg
+        n = self._data_point_nb - self._last_checkpoint
+        if n >= _STORE_FREQ / _FREQ:
+            buff[0] /= n  # averages x, y, z
+            buff[1] /= n
+            buff[2] /= n
 
             f = open(self.filep, "ab")
-            for x in buff[:-1]:
-                f.write("{:7f}".format(x).encode())
-                f.write(b",")
-            f.write("{:7f}".format(buff[-1]).encode())
-            f.write(b"\n")
+            f.write("{:7f},{},{:7f},{:7f},{:7f}\n".format(
+                math.atan(buff[2] / (buff[0]**2 + buff[1]**2)),  # average arm angle
+                int(wasp.watch.rtc.time() - self._offset),
+                buff[0], buff[1], buff[2]
+                ).encode())
             f.close()
-
+            del f
+            buff[0] = 0  # resets x/y/z to 0
+            buff[1] = 0
+            buff[2] = 0
             self._last_checkpoint = self._data_point_nb
-            del self._buff[:]
+            wasp.gc.collect()
+
 
     def _draw(self):
         """GUI"""
