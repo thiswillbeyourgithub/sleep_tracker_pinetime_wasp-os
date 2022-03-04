@@ -329,7 +329,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
         wasp.system.keep_awake()
 
         # smoothen several times
-        for j in range(3):
+        for j in range(1):
             for i in range(1, len(data)-1):
                 data[i] += data[i-1]
                 data[i] /= 2
