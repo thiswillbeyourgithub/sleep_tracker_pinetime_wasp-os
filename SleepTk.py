@@ -19,21 +19,23 @@ import shell
 import fonts
 import math
 import array
-import micropython
+from micropython import const
 
 # HARDCODED VARIABLES:
-_START = micropython.const(0)  # page values:
-_TRACKING = micropython.const(1)
-_SETTINGS = micropython.const(2)
-_RINGING = micropython.const(3)
+_ON = const(1)
+_OFF = const(0)
+_START = const(0)  # page values:
+_TRACKING = const(1)
+_SETTINGS = const(2)
+_RINGING = const(3)
 _FONT = fonts.sans18
-_TIMESTAMP = micropython.const(946684800)  # unix time and time used by wasp os don't have the same reference date
-_FREQ = micropython.const(10)  # get accelerometer data every X seconds, but process and store them only every _STORE_FREQ seconds
-_STORE_FREQ = micropython.const(60)  # process data and store to file every X seconds
-_BATTERY_THRESHOLD = micropython.const(20)  # under X% of battery, stop tracking and only keep the alarm
+_TIMESTAMP = const(946684800)  # unix time and time used by wasp os don't have the same reference date
+_FREQ = const(10)  # get accelerometer data every X seconds, but process and store them only every _STORE_FREQ seconds
+_STORE_FREQ = const(60)  # process data and store to file every X seconds
+_BATTERY_THRESHOLD = const(20)  # under X% of battery, stop tracking and only keep the alarm
 
 # user might want to edit this:
-_ANTICIPATE_ALLOWED = micropython.const(2400)  # number of seconds SleepTk can wake you up before the alarm clock you set
+_ANTICIPATE_ALLOWED = const(2400)  # number of seconds SleepTk can wake you up before the alarm clock you set
 _GRADUAL_WAKE = array.array("H", [1, 2, 3, 4, 5, 8, 13])  # nb of minutes before alarm to send a tiny vibration to make a smoother wake up
 
 
@@ -43,16 +45,16 @@ class SleepTkApp():
     def __init__(self):
         wasp.gc.collect()
         # default values:
-        self._wakeup_enabled = 1
-        self._wakeup_smart_enabled = 0  # activate waking you up at optimal time  based on accelerometer data, at the earliest at _WU_LAT - _WU_SMART
+        self._wakeup_enabled = _ON
+        self._wakeup_smart_enabled = _OFF  # activate waking you up at optimal time  based on accelerometer data, at the earliest at _WU_LAT - _WU_SMART
         self._spinval_H = 7  # default wake up time
         self._spinval_M = 30
         self._page = _START
-        self._is_tracking = False
-        self._conf_view = None  # confirmation view
+        self._is_tracking = _OFF
+        self._conf_view = _OFF  # confirmation view
         self._earlier = 0  # number of seconds between the alarm you set manually and the smart alarm time
         self._old_notification_level = wasp.system.notify_level
-        self._buff = array.array("f", [0, 0, 0])
+        self._buff = array.array("f", [_OFF, _OFF, _OFF])
 
         try:
             shell.mkdir("logs/")
@@ -64,7 +66,7 @@ class SleepTkApp():
             pass
 
     def foreground(self):
-        self._conf_view = None
+        self._conf_view = _OFF
         wasp.gc.collect()
         self._draw()
         wasp.system.request_event(wasp.EventMask.TOUCH |
@@ -134,7 +136,7 @@ class SleepTkApp():
                 self._page = _TRACKING
 
         elif self._page == _TRACKING:
-            if self._conf_view is None:
+            if self._conf_view is _OFF:
                 if self.btn_off.touch(event):
                     self._conf_view = widgets.ConfirmationView()
                     self._conf_view.draw("Stop tracking?")
@@ -144,7 +146,7 @@ class SleepTkApp():
                     if self._conf_view.value:
                         self._disable_tracking()
                         self._page = _START
-                    self._conf_view = None
+                    self._conf_view = _OFF
 
         elif self._page == _RINGING:
             if self.btn_al.touch(event):
@@ -155,29 +157,29 @@ class SleepTkApp():
             no_full_draw = True
             disable_all = False
             if self.check_al.touch(event):
-                if self._wakeup_enabled == 1:
-                    self._wakeup_enabled = 0
+                if self._wakeup_enabled == _ON:
+                    self._wakeup_enabled = _OFF
                     disable_all = True
                 else:
-                    self._wakeup_enabled = 1
+                    self._wakeup_enabled = _ON
                     no_full_draw = False
                 self.check_al.state = self._wakeup_enabled
                 self.check_al.update()
 
                 if disable_all:
-                    self._wakeup_smart_enabled = 0
+                    self._wakeup_smart_enabled = _OFF
                     self.check_smart.state = self._wakeup_smart_enabled
                     self._check_smart = None
                     self._draw()
 
             if self.check_al.state:
                 if self.check_smart.touch(event):
-                    if self._wakeup_smart_enabled == 1:
-                        self._wakeup_smart_enabled = 0
+                    if self._wakeup_smart_enabled == _ON:
+                        self._wakeup_smart_enabled = _OFF
                         self.check_smart.state = self._wakeup_smart_enabled
                         self._check_smart = None
-                    elif self._wakeup_enabled == 1:
-                        self._wakeup_smart_enabled = 1
+                    elif self._wakeup_enabled == _ON:
+                        self._wakeup_smart_enabled = _ON
                         self.check_smart.state = self._wakeup_smart_enabled
                         self.check_smart.update()
                         self.check_smart.draw()
@@ -225,7 +227,7 @@ class SleepTkApp():
             if wasp.watch.battery.level() <= _BATTERY_THRESHOLD:
                 # strop tracking if battery low
                 self._disable_tracking(keep_main_alarm=True)
-                self._wakeup_smart_enabled = 0
+                self._wakeup_smart_enabled = _OFF
                 h, m = wasp.watch.time.localtime(wasp.watch.rtc.time())[3:5]
                 wasp.system.notify(wasp.watch.rtc.get_uptime_ms(), {"src": "SleepTk",
                                                           "title": "Bat <20%",
