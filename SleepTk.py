@@ -18,7 +18,7 @@ import widgets
 import shell
 import fonts
 import math
-import array
+from array import array
 from micropython import const
 
 # HARDCODED VARIABLES:
@@ -36,7 +36,7 @@ _BATTERY_THRESHOLD = const(20)  # under X% of battery, stop tracking and only ke
 
 # user might want to edit this:
 _ANTICIPATE_ALLOWED = const(2400)  # number of seconds SleepTk can wake you up before the alarm clock you set
-_GRADUAL_WAKE = array.array("H", [1, 2, 3, 4, 5, 8, 13])  # nb of minutes before alarm to send a tiny vibration to make a smoother wake up
+_GRADUAL_WAKE = array("H", [1, 2, 3, 4, 5, 8, 13])  # nb of minutes before alarm to send a tiny vibration to make a smoother wake up
 
 
 class SleepTkApp():
@@ -54,7 +54,7 @@ class SleepTkApp():
         self._conf_view = _OFF  # confirmation view
         self._earlier = 0  # number of seconds between the alarm you set manually and the smart alarm time
         self._old_notification_level = wasp.system.notify_level
-        self._buff = array.array("f", [_OFF, _OFF, _OFF])
+        self._buff = array("f", [_OFF, _OFF, _OFF])
 
         try:
             shell.mkdir("logs/")
@@ -355,8 +355,8 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
         wasp.system.keep_awake()
 
         # find local maximas
-        x_maximas = array.array("H", [0])
-        y_maximas = array.array("f", [0])
+        x_maximas = array("H", [0])
+        y_maximas = array("f", [0])
         window = int(60*60/_STORE_FREQ)
         skip = 1800 // _STORE_FREQ  # skip first 60 minutes of data
         for start_w in range(skip, len(data) - window + 1):
@@ -379,7 +379,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
         # merge the closest peaks while there are more than N peaks
         N = 3
         while len(x_maximas) > N:
-            diffs = array.array("f", [x_maximas[int(x)+1] - x_maximas[int(x)] for x in range(len(x_maximas)-1)])
+            diffs = array("f", [x_maximas[int(x)+1] - x_maximas[int(x)] for x in range(len(x_maximas)-1)])
             ex = False
             for d_min_idx, d in enumerate(diffs):
                 if ex:
@@ -431,7 +431,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
 
             # read file one character at a time, to get only the 1st
             # value of each row, which is the arm angle
-            data = array.array("f")
+            data = array("f")
             buff = b""
             f = open(self.filep, "rb")
             skip = False
