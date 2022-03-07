@@ -12,7 +12,6 @@ before the alarm you set up manually.
 
 """
 
-import time
 import wasp
 import widgets
 import shell
@@ -120,7 +119,7 @@ class SleepTkApp():
                     MM = self._spinval_M
                     if HH < now[3] or (HH == now[3] and MM <= now[4]):
                         dd += 1
-                    self._WU_t = time.mktime((yyyy, mm, dd, HH, MM, 0, 0, 0, 0))
+                    self._WU_t = wasp.watch.time.mktime((yyyy, mm, dd, HH, MM, 0, 0, 0, 0))
                     wasp.system.set_alarm(self._WU_t, self._listen_to_ticks)
 
                     # also set alarm to vibrate a tiny bit before wake up time
