@@ -53,6 +53,7 @@
 * very interesting research paper on the topic : https://academic.oup.com/sleep/article/42/12/zsz180/5549536
 * maybe coding a 1D convolution is a good way to extract peaks
 * list of ways to find local maxima in python : https://blog.finxter.com/how-to-find-local-minima-in-1d-and-2d-numpy-arrays/ + https://pythonawesome.com/overview-of-the-peaks-dectection-algorithms-available-in-python/
+* interesting study : https://ieeexplore.ieee.org/document/7052479
 
 ### Related project:
 * another hackable smartwatch has a similar software: [sleepphasealarm](https://banglejs.com/apps/#sleepphasealarm) and [steelball](https://github.com/jabituyaben/SteelBall) for the [Banglejs](https://banglejs.com/)
