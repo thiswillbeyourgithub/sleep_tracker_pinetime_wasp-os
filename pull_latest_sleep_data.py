@@ -10,12 +10,11 @@ mode = "all"  # download "all" files or only "latest"
 
 print("\n\nRunning gc.collect()...")
 mem_cmd = './tools/wasptool --verbose --eval \'wasp.gc.collect()\''
-os.system(mem_cmd)
+subprocess.check_output(shlex.split(mem_cmd))
 
 print("\n\nListing remote files...")
 ls_cmd = './tools/wasptool --verbose --eval \'from shell import ls ; ls(\"/flash/logs/sleep/\")\''
-ls_cmd = shlex.split(ls_cmd)  # properly split args
-out = subprocess.check_output(ls_cmd).decode()
+out = subprocess.check_output(shlex.split(ls_cmd)).decode()
 files = re.findall(r"\d*\.csv", out)
 print(f"Found files {', '.join(files)}")
 
@@ -35,7 +34,7 @@ for fi in to_dl:
         print(f"Downloading file '{fi}'")
         pull_cmd = f'./tools/wasptool --verbose --pull logs/sleep/{fi}'
         try:
-            out = subprocess.check_output(shlex.split(pull_cmd))
+            subprocess.check_output(shlex.split(pull_cmd))
             print(f"Succesfully downloaded to './logs/sleep/{fi}'")
         except Exception as e:
             print(f"Error happenned when donloading {fi}, deleting file")
