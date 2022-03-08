@@ -212,14 +212,15 @@ class SleepTkApp():
         wasp.system.set_alarm(self.next_al, self._trackOnce)
 
     def _trackOnce(self):
-        """get one data point of accelerometer every _FREQ seconds and
-        they are then averaged and stored every _STORE_FREQ seconds"""
+        """get one data point of accelerometer every _FREQ seconds, keep
+        the maximum over each axis then store in a file every
+        _STORE_FREQ seconds"""
         if self._is_tracking:
             buff = self._buff
             xyz = wasp.watch.accel.read_xyz()
-            buff[0] += xyz[0]
-            buff[1] += xyz[1]
-            buff[2] += xyz[2]
+            buff[0] = max(buff[0], xyz[0])
+            buff[1] = max(buff[1], xyz[1])
+            buff[2] = max(buff[2], xyz[2])
             self._data_point_nb += 1
             self._add_accel_alar()
             self._periodicSave()
@@ -237,24 +238,20 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
         wasp.gc.collect()
 
     def _periodicSave(self):
-        """save data after averaging over a window to file
+        """save data after maxpooling over a window to file
         row order in the csv:
             1. arm angle
             2. elapsed times
-            3/4/5. x/y/z average value over _STORE_FREQ seconds
+            3/4/5. x/y/z max value over _STORE_FREQ seconds
          arm angle formula from https://www.nature.com/articles/s41598-018-31266-z
          note: math.atan() is faster than using a taylor serie
         """
         buff = self._buff
         n = self._data_point_nb - self._last_checkpoint
         if n >= _STORE_FREQ / _FREQ:
-            buff[0] /= n  # averages x, y, z
-            buff[1] /= n
-            buff[2] /= n
-
             f = open(self.filep, "ab")
             f.write("{:7f},{},{:7f},{:7f},{:7f}\n".format(
-                math.atan(buff[2] / (buff[0]**2 + buff[1]**2)),  # average arm angle
+                math.atan(buff[2] / (buff[0]**2 + buff[1]**2)),  # estimated arm angle
                 int(wasp.watch.rtc.time() - self._offset),
                 buff[0], buff[1], buff[2]
                 ).encode())
