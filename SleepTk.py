@@ -326,15 +326,21 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
     def _signal_processing(self, data):
         """signal processing over the data read from the local file"""
 
+        # take absolute rate of change of data
+        for i in range(len(data)-1):
+            mem = data[i+1]
+            data[i] = abs(mem-data[i])
+        del i
+
         # remove outliers:
         for x in range(len(data)):
-            data[x] = min(0.0008, data[x])
+            data[x] = min(0.005, data[x])
         del x
         wasp.gc.collect()
         wasp.system.keep_awake()
 
         # smoothen several times
-        for j in range(1):
+        for j in range(5):
             for i in range(1, len(data)-1):
                 data[i] += data[i-1]
                 data[i] /= 2
