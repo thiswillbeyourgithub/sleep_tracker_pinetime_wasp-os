@@ -107,7 +107,10 @@ class SleepTkApp():
 
                 # create one file per recording session:
                 self.filep = "logs/sleep/{}.csv".format(str(self._offset + _TIMESTAMP))
-                self._add_accel_alar()
+
+                # add alarm to log accel data in _FREQ seconds
+                self.next_al = wasp.watch.rtc.time() + _FREQ
+                wasp.system.set_alarm(self.next_al, self._trackOnce)
 
                 # setting up alarm
                 if self._wakeup_enabled:
@@ -205,12 +208,6 @@ class SleepTkApp():
         self._periodicSave()
         wasp.gc.collect()
 
-    def _add_accel_alar(self):
-        """set an alarm, due in _FREQ minutes, to log the accelerometer data
-        once"""
-        self.next_al = wasp.watch.rtc.time() + _FREQ
-        wasp.system.set_alarm(self.next_al, self._trackOnce)
-
     def _trackOnce(self):
         """get one data point of accelerometer every _FREQ seconds, keep
         the maximum over each axis then store in a file every
@@ -222,7 +219,11 @@ class SleepTkApp():
             buff[1] = max(buff[1], xyz[1])
             buff[2] = max(buff[2], xyz[2])
             self._data_point_nb += 1
-            self._add_accel_alar()
+
+            # add alarm to log accel data in _FREQ seconds
+            self.next_al = wasp.watch.rtc.time() + _FREQ
+            wasp.system.set_alarm(self.next_al, self._trackOnce)
+
             self._periodicSave()
             if wasp.watch.battery.level() <= _BATTERY_THRESHOLD:
                 # strop tracking if battery low
