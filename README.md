@@ -34,8 +34,7 @@
 
 ## TODO
 **misc**
-* ask to re download file if size differ
-* use the absolute rate of change to compute best wake up time
+* log heart rate data every X minutes
 * show settings panel after clicking start, instead of a swipe menu
     * add a Button instead of checkbox to manage alarm / gentle alarm / smart alarm / both
         * recommend best wake up time when setting up alarm
@@ -44,7 +43,6 @@
 * add a "nap tracking" mode that records sleep tracking with more precision
 * add a power nap mode that wakes you as soon as there has been no movement for 5 minutes OR (like steelball) when your heart rate drops
 
-* log heart rate data every X minutes?
 * log smart alarm data to file? log user rating of how well he/she felt fresh at wake?
 * ability to send in real time to Bluetooth device the current sleep stage you're probably in. For use in Targeted Memory Reactivation?
 
