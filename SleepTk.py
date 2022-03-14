@@ -35,7 +35,7 @@ _BATTERY_THRESHOLD = const(10)  # under X% of battery, stop tracking and only ke
 
 # user might want to edit this:
 _ANTICIPATE_ALLOWED = const(2400)  # number of seconds SleepTk can wake you up before the alarm clock you set
-_GRADUAL_WAKE = array("H", [1, 2, 3, 4, 5, 8, 13])  # nb of minutes before alarm to send a tiny vibration to make a smoother wake up
+_GRADUAL_WAKE = array("H", [1, 2, 3, 4, 5, 8, 15])  # nb of minutes before alarm to send a tiny vibration to make a smoother wake up
 
 
 class SleepTkApp():
