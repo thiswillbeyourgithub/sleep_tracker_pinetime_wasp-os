@@ -31,7 +31,7 @@ _FONT = fonts.sans18
 _TIMESTAMP = const(946684800)  # unix time and time used by wasp os don't have the same reference date
 _FREQ = const(5)  # get accelerometer data every X seconds, but process and store them only every _STORE_FREQ seconds
 _STORE_FREQ = const(60)  # process data and store to file every X seconds
-_BATTERY_THRESHOLD = const(20)  # under X% of battery, stop tracking and only keep the alarm
+_BATTERY_THRESHOLD = const(10)  # under X% of battery, stop tracking and only keep the alarm
 
 # user might want to edit this:
 _ANTICIPATE_ALLOWED = const(2400)  # number of seconds SleepTk can wake you up before the alarm clock you set
