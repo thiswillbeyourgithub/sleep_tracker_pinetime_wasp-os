@@ -107,6 +107,9 @@ class SleepTkApp():
 
                 # create one file per recording session:
                 self.filep = "logs/sleep/{}.csv".format(str(self._offset + _TIMESTAMP))
+                f = open(self.filep, "wb")
+                f.write(b"")
+                f.close()
 
                 # add alarm to log accel data in _FREQ seconds
                 self.next_al = wasp.watch.rtc.time() + _FREQ
