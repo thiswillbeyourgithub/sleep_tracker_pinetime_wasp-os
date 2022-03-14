@@ -520,6 +520,6 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
         mute = wasp.watch.display.mute
         mute(True)
         wasp.system.wake()
-        wasp.system.keep_awake()
+        mute(True)
         wasp.system.switch(self)
         wasp.watch.vibrator.pulse(duty=60, ms=100)
