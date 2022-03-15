@@ -4,9 +4,9 @@
 ## Features:
 * **sleep tracking**: logs your movement during the night, infers your sleep cycle and write it all down in a `.csv` file
 * **Flexible**: does not make too many assumption regarding time to fall asleep, sleep cycle duration etc. SleepTk tries various data to see what fits best for your profile. If you still want to customize things, all the hardcoded and commented settings are easily accessible at the top of the file.
-* alarm clock: wakes you up at a specific time
-* **gentle alarm clock**: vibrates the watch a tiny bit regularly before wake up time to lift you gently back to consciousness
-* **smart alarm clock**: can wake you up to 40 minutes before the set time to make sure you wake up feeling refreshed.
+* **suggested alarm clock**: suggests wake up time according to average sleep cycles length
+* **gradual alarm clock**: vibrates the watch a tiny bit a few times before the alarm to lift you gently back to consciousness
+* **smart alarm clock (alpha)**: adaptative alarm that wakes you up to 40 minutes before the set time to make sure you wake up feeling refreshed.
 * **privacy friendly**: your data is not sent to anyone, it is stored and analyzed directly on the watch (but you can still download if if needed)
 * open source
 
@@ -29,19 +29,17 @@
 # Screenshots:
 ![start](./screenshots/start_page.png)
 ![settings](./screenshots/settings_page.png)
+![settings2](./screenshots/settings_page2.png)
 ![tracking](./screenshots/tracking_page.png)
 ![night example](./screenshots/example_night.png)
 
 ## TODO
 **misc**
 * log heart rate data every X minutes
-* show settings panel after clicking start, instead of a swipe menu
-    * add a Button instead of checkbox to manage alarm / gentle alarm / smart alarm / both
-        * recommend best wake up time when setting up alarm
 * investigate if downsampling is necessary
 * if self.foreground is called, record the time. Use it to cancel smart alarm if you woke up too many times (more than 2 times in more than 20 minutes apart).
 * add a "nap tracking" mode that records sleep tracking with more precision
-* add a power nap mode that wakes you as soon as there has been no movement for 5 minutes OR (like steelball) when your heart rate drops
+    * add a "power nap" mode that wakes you as soon as there has been no movement for 5 minutes OR (like steelball) when your heart rate drops
 
 * log smart alarm data to file? log user rating of how well he/she felt fresh at wake?
 * ability to send in real time to Bluetooth device the current sleep stage you're probably in. For use in Targeted Memory Reactivation?

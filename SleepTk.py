@@ -27,6 +27,7 @@ _TRACKING = const(0)
 _RINGING = const(1)
 _START = const(2)  # page values:
 _SETTINGS1 = const(3)
+_SETTINGS2 = const(4)
 _FONT = fonts.sans18
 _TIMESTAMP = const(946684800)  # unix time and time used by wasp os don't have the same reference date
 _FREQ = const(5)  # get accelerometer data every X seconds, but process and store them only every _STORE_FREQ seconds
@@ -36,6 +37,8 @@ _BATTERY_THRESHOLD = const(10)  # under X% of battery, stop tracking and only ke
 # user might want to edit this:
 _ANTICIPATE_ALLOWED = const(2400)  # number of seconds SleepTk can wake you up before the alarm clock you set
 _GRADUAL_WAKE = array("H", [1, 2, 3, 4, 5, 8, 15])  # nb of minutes before alarm to send a tiny vibration to make a smoother wake up
+_TIME_TO_FALL_ASLEEP = const(14)  # in minutes, according to https://sleepyti.me/
+_CYCLE_LENGTH = const(90)  # in minutes, according to https://sleepyti.me/
 
 
 class SleepTkApp():
@@ -44,8 +47,9 @@ class SleepTkApp():
     def __init__(self):
         wasp.gc.collect()
         # default values:
-        self._wakeup_enabled = _ON
-        self._wakeup_smart_enabled = _OFF  # activate waking you up at optimal time  based on accelerometer data, at the earliest at _WU_LAT - _WU_SMART
+        self._alarm_state = _ON
+        self._grad_alarm_state = _ON
+        self._smart_alarm_state = _OFF  # activate waking you up at optimal time  based on accelerometer data, at the earliest at _WU_LAT - _WU_SMART
         self._spinval_H = 7  # default wake up time
         self._spinval_M = 30
         self._page = _START
@@ -86,7 +90,7 @@ class SleepTkApp():
 
     def swipe(self, event):
         "navigate between start and various settings page"
-        if self._page >= 3:
+        if self._page >= 2:
             if event[0] == wasp.EventType.RIGHT:
                 self._page -= 1
             else:
@@ -94,6 +98,142 @@ class SleepTkApp():
             self._page = max(self._page, _START)
             self._page = min(self._page, _SETTINGS2)
             self._draw()
+
+    def touch(self, event):
+        """either start trackign or disable it, draw the screen in all cases"""
+        wasp.gc.collect()
+        if self._page == _TRACKING:
+            if self._conf_view is _OFF:
+                if self.btn_off.touch(event):
+                    self._conf_view = widgets.ConfirmationView()
+                    self._conf_view.draw("Stop tracking?")
+                    return
+            else:
+                if self._conf_view.touch(event):
+                    if self._conf_view.value:
+                        self._disable_tracking()
+                        self._page = _START
+                    self._conf_view = _OFF
+
+        elif self._page == _RINGING:
+            if self.btn_al.touch(event):
+                self._disable_tracking()
+                self._page = _START
+
+        elif self._page == _SETTINGS1:
+            if self._alarm_state and (self._spin_H.touch(event) or self._spin_M.touch(event)):
+                self._spinval_H = self._spin_H.value
+                self._spin_H.update()
+                self._spinval_M = self._spin_M.value
+                self._spin_M.update()
+                if self._alarm_state:
+                    draw = wasp.watch.drawable
+                    draw.set_font(_FONT)
+
+                    duration =  (self._read_time(self._spinval_H, self._spinval_M) - wasp.watch.rtc.time() - _TIME_TO_FALL_ASLEEP) // 60
+                    duration = max(duration, 0)  # if alarm too close
+                    draw.string("Total sleep {:02d}h{:02d}m".format(
+                        int(duration // 60),
+                        int(duration % 60),), 0, 180)
+
+                    cycl = (duration) / _CYCLE_LENGTH
+                    draw.string("{} cycles   ".format(str(cycl)[0:5]), 0, 200)
+
+                    cycl_modulo = cycl-int(cycl)
+                    if cycl_modulo > 0.10 and cycl_modulo < 0.90:
+                        draw.string("Not rested!", 0, 220)
+                    else:
+                        draw.string("Well rested", 0, 220)
+
+                    return
+
+            elif self.check_al.touch(event):
+                self._alarm_state = self.check_al.state
+                self.check_al.update()
+
+        elif self._page == _SETTINGS2:
+            if self._alarm_state:
+                if self.check_smart.touch(event):
+                    self._smart_alarm_state = self.check_smart.state
+                    self.check_smart.draw()
+                    return
+                elif self.check_grad.touch(event):
+                    self._grad_alarm_state = self.check_grad.state
+                    self.check_grad.draw()
+                    return
+            if self.btn_sta.touch(event):
+                self._start_tracking()
+
+        self._draw()
+
+    def _draw(self):
+        """GUI"""
+        draw = wasp.watch.drawable
+        draw.fill(0)
+        draw.set_font(_FONT)
+        if self._page == _RINGING:
+            if self._earlier != 0:
+                msg = "WAKE UP ({}m early)".format(str(self._earlier/60)[0:2])
+            else:
+                msg = "WAKE UP"
+            draw.string(msg, 0, 70)
+            self.btn_al = widgets.Button(x=0, y=70, w=240, h=140, label="WAKE UP")
+            self.btn_al.draw()
+        elif self._page == _TRACKING:
+            ti = wasp.watch.time.localtime(self._offset)
+            draw.string('Began at {:02d}:{:02d}'.format(ti[3], ti[4]), 0, 70)
+            if self._alarm_state:
+                word = "Alarm at "
+                if self._smart_alarm_state:
+                    word = "Alarm BEFORE "
+                ti = wasp.watch.time.localtime(self._WU_t)
+                draw.string("{}{:02d}:{:02d}".format(word, ti[3], ti[4]), 0, 90)
+                draw.string("Gradual wake: {}".format(True if self._grad_alarm_state else False), 0, 110)
+            else:
+                draw.string("No alarm set", 0, 90)
+            draw.string("data points: {} / {}".format(str(self._data_point_nb), str(self._data_point_nb * _FREQ // _STORE_FREQ)), 0, 130)
+            self.btn_off = widgets.Button(x=0, y=200, w=240, h=40, label="Stop tracking")
+            self.btn_off.draw()
+        elif self._page == _START:
+            draw.set_font(_FONT)
+            label = 'Sleep tracker with optional wake up alarm, smart alarm up to 40min before, gradual wake up to 15m. Swipe to navigate.'
+            chunks = draw.wrap(label, 240)
+            for i in range(len(chunks)-1):
+                sub = label[chunks[i]:chunks[i+1]].rstrip()
+                draw.string(sub, 0, 60 + 20 * i)
+        elif self._page == _SETTINGS1:
+            self.check_al = widgets.Checkbox(x=0, y=40, label="Wake me up")
+            self.check_al.state = self._alarm_state
+            self.check_al.draw()
+            if self._alarm_state:
+                self._spin_H = widgets.Spinner(30, 70, 0, 23, 2)
+                self._spin_H.value = self._spinval_H
+                self._spin_H.draw()
+                self._spin_M = widgets.Spinner(150, 70, 0, 59, 2, 5)
+                self._spin_M.value = self._spinval_M
+                self._spin_M.draw()
+
+        elif self._page == _SETTINGS2:
+            if self._alarm_state:
+                self.check_grad = widgets.Checkbox(0, 40, "Gradual wake")
+                self.check_grad.state = self._grad_alarm_state
+                self.check_grad.draw()
+                self.check_smart = widgets.Checkbox(x=0, y=80, label="Smart alarm (alpha)")
+                self.check_smart.state = self._smart_alarm_state
+                self.check_smart.draw()
+            else:
+                draw.set_font(_FONT)
+                label = 'Skipping smart and gradual alarm because no regular alarm is set'
+                chunks = draw.wrap(label, 240)
+                for i in range(len(chunks)-1):
+                    sub = label[chunks[i]:chunks[i+1]].rstrip()
+                    draw.string(sub, 0, 50 + 24 * i)
+            self.btn_sta = widgets.Button(x=0, y=200, w=240, h=40, label="Start tracking")
+            self.btn_sta.draw()
+
+        self.stat_bar = widgets.StatusBar()
+        self.stat_bar.clock = True
+        self.stat_bar.draw()
 
     def _start_tracking(self):
         self._is_tracking = True
@@ -112,106 +252,49 @@ class SleepTkApp():
         self.next_al = wasp.watch.rtc.time() + _FREQ
         wasp.system.set_alarm(self.next_al, self._trackOnce)
 
+        if self._grad_alarm_state and not self._alarm_state:
+            # fix incompatible settings
+            self._grad_alarm_state = _OFF
+
         # setting up alarm
-        if self._wakeup_enabled:
-            now = wasp.watch.rtc.get_localtime()
-            yyyy = now[0]
-            mm = now[1]
-            dd = now[2]
-            HH = self._spinval_H
-            MM = self._spinval_M
-            if HH < now[3] or (HH == now[3] and MM <= now[4]):
-                dd += 1
-            self._WU_t = wasp.watch.time.mktime((yyyy, mm, dd, HH, MM, 0, 0, 0, 0))
+        if self._alarm_state:
+            self._WU_t = self._read_time(self._spinval_H, self._spinval_M)
             wasp.system.set_alarm(self._WU_t, self._listen_to_ticks)
 
             # also set alarm to vibrate a tiny bit before wake up time
             # to wake up gradually
-            for t in _GRADUAL_WAKE:
-                wasp.system.set_alarm(self._WU_t - t*60, self._tiny_vibration)
+            if self._grad_alarm_state:
+                for t in _GRADUAL_WAKE:
+                    wasp.system.set_alarm(self._WU_t - t*60, self._tiny_vibration)
 
             # wake up SleepTk 2min before earliest possible wake up
-            if self._wakeup_smart_enabled:
+            if self._smart_alarm_state:
                 self._WU_a = self._WU_t - _ANTICIPATE_ALLOWED - 120
                 wasp.system.set_alarm(self._WU_a, self._smart_alarm_compute)
         wasp.system.notify_level = 1  # silent notifications
+        self._page = _TRACKING
 
-    def touch(self, event):
-        """either start trackign or disable it, draw the screen in all cases"""
-        wasp.gc.collect()
-        no_full_draw = False
-        if self._page == _START:
-            if self.btn_on.touch(event):
-                #self._start_tracking()
-                self._page = _SETTINGS1
-
-        elif self._page == _TRACKING:
-            if self._conf_view is _OFF:
-                if self.btn_off.touch(event):
-                    self._conf_view = widgets.ConfirmationView()
-                    self._conf_view.draw("Stop tracking?")
-                    no_full_draw = True
-            else:
-                if self._conf_view.touch(event):
-                    if self._conf_view.value:
-                        self._disable_tracking()
-                        self._page = _START
-                    self._conf_view = _OFF
-
-        elif self._page == _RINGING:
-            if self.btn_al.touch(event):
-                self._disable_tracking()
-                self._page = _START
-
-        elif self._page == _SETTINGS1:
-            no_full_draw = True
-            disable_all = False
-            if self.check_al.touch(event):
-                if self._wakeup_enabled:
-                    self._wakeup_enabled = _OFF
-                    disable_all = True
-                else:
-                    self._wakeup_enabled = _ON
-                    no_full_draw = False
-                self.check_al.state = self._wakeup_enabled
-                self.check_al.update()
-
-                if disable_all:
-                    self._wakeup_smart_enabled = _OFF
-                    self.check_smart.state = self._wakeup_smart_enabled
-                    self._check_smart = None
-                    self._draw()
-
-            if self.check_al.state:
-                if self.check_smart.touch(event):
-                    if self._wakeup_smart_enabled:
-                        self._wakeup_smart_enabled = _OFF
-                        self.check_smart.state = self._wakeup_smart_enabled
-                        self._check_smart = None
-                    elif self._wakeup_enabled:
-                        self._wakeup_smart_enabled = _ON
-                        self.check_smart.state = self._wakeup_smart_enabled
-                        self.check_smart.update()
-                        self.check_smart.draw()
-                elif self._spin_H.touch(event):
-                    self._spinval_H = self._spin_H.value
-                    self._spin_H.update()
-                elif self._spin_M.touch(event):
-                    self._spinval_M = self._spin_M.value
-                    self._spin_M.update()
-
-        if no_full_draw is False:
-            self._draw()
+    def _read_time(self, HH, MM):
+        "convert time from spinners to seconds"
+        now = wasp.watch.rtc.get_localtime()
+        yyyy = now[0]
+        mm = now[1]
+        dd = now[2]
+        HH = self._spinval_H
+        MM = self._spinval_M
+        if HH < now[3] or (HH == now[3] and MM <= now[4]):
+            dd += 1
+        return wasp.watch.time.mktime((yyyy, mm, dd, HH, MM, 0, 0, 0, 0))
 
     def _disable_tracking(self, keep_main_alarm=False):
         """called by touching "STOP TRACKING" or when computing best alarm time
         to wake up you disables tracking features and alarms"""
         self._is_tracking = False
         wasp.system.cancel_alarm(self.next_al, self._trackOnce)
-        if self._wakeup_enabled:
+        if self._alarm_state:
             if keep_main_alarm is False:  # to keep the alarm when stopping because of low battery
                 wasp.system.cancel_alarm(self._WU_t, self._listen_to_ticks)
-            if self._wakeup_smart_enabled:
+            if self._smart_alarm_state:
                 wasp.system.cancel_alarm(self._WU_a, self._smart_alarm_compute)
         self._periodicSave()
         wasp.gc.collect()
@@ -236,7 +319,7 @@ class SleepTkApp():
             if wasp.watch.battery.level() <= _BATTERY_THRESHOLD:
                 # strop tracking if battery low
                 self._disable_tracking(keep_main_alarm=True)
-                self._wakeup_smart_enabled = _OFF
+                self._smart_alarm_state = _OFF
                 h, m = wasp.watch.time.localtime(wasp.watch.rtc.time())[3:5]
                 wasp.system.notify(wasp.watch.rtc.get_uptime_ms(), {"src": "SleepTk",
                                                           "title": "Bat <20%",
@@ -272,65 +355,6 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             self._last_checkpoint = self._data_point_nb
             wasp.gc.collect()
 
-
-    def _draw(self):
-        """GUI"""
-        draw = wasp.watch.drawable
-        draw.fill(0)
-        draw.set_font(_FONT)
-        if self._page == _RINGING:
-            if self._earlier != 0:
-                msg = "WAKE UP ({}m early)".format(str(self._earlier/60)[0:2])
-            else:
-                msg = "WAKE UP"
-            draw.string(msg, 0, 70)
-            self.btn_al = widgets.Button(x=0, y=70, w=240, h=140, label="WAKE UP")
-            self.btn_al.draw()
-        elif self._page == _TRACKING:
-            ti = wasp.watch.time.localtime(self._offset)
-            draw.string('Started at {:02d}:{:02d}'.format(ti[3], ti[4]), 0, 70)
-            draw.string("data points: {}".format(str(self._data_point_nb)), 0, 90)
-            if self._wakeup_enabled:
-                word = "Alarm at "
-                if self._wakeup_smart_enabled:
-                    word = "Alarm before "
-                ti = wasp.watch.time.localtime(self._WU_t)
-                draw.string("{}{:02d}:{:02d}".format(word, ti[3], ti[4]), 0, 130)
-            else:
-                draw.string("No alarm set", 0, 130)
-            self.btn_off = widgets.Button(x=0, y=200, w=240, h=40, label="Stop tracking")
-            self.btn_off.draw()
-        elif self._page == _START:
-            self.btn_on = widgets.Button(x=0, y=200, w=240, h=40, label="Start tracking")
-            self.btn_on.draw()
-            draw.set_font(_FONT)
-            draw.string('Sleep tracker with' , 0, 60)
-            draw.string('alarm and smart alarm.' , 0, 80)
-            if not self._wakeup_smart_enabled:
-                # no need to remind it after the first time
-                draw.string('Swipe down for settings' , 0, 100)
-            else:
-                draw.string('Wake you up to 40m' , 0, 120)
-                draw.string('earlier.' , 0, 140)
-            draw.string('PRE RELEASE.' , 0, 160)
-        elif self._page == _SETTINGS1:
-            self.check_al = widgets.Checkbox(x=0, y=40, label="Alarm")
-            self.check_al.state = self._wakeup_enabled
-            self.check_al.draw()
-            if self._wakeup_enabled:
-                self._spin_H = widgets.Spinner(30, 120, 0, 23, 2)
-                self._spin_H.value = self._spinval_H
-                self._spin_H.draw()
-                self._spin_M = widgets.Spinner(150, 120, 0, 59, 2, 5)
-                self._spin_M.value = self._spinval_M
-                self._spin_M.draw()
-                self.check_smart = widgets.Checkbox(x=0, y=80, label="Smart alarm")
-                self.check_smart.state = self._wakeup_smart_enabled
-                self.check_smart.draw()
-
-        self.stat_bar = widgets.StatusBar()
-        self.stat_bar.clock = True
-        self.stat_bar.draw()
 
     def _signal_processing(self, data):
         """signal processing over the data read from the local file"""
@@ -476,10 +500,11 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
                                   self._listen_to_ticks)
 
             # replace old gentle alarm by another one
-            for t in _GRADUAL_WAKE:
-                wasp.system.cancel_alarm(WU_t - t*60, self._tiny_vibration)
-                if earlier + t*60 < _ANTICIPATE_ALLOWED:
-                    wasp.system.set_alarm(WU_t - earlier - t*60, self._tiny_vibration)
+            if self._grad_alarm_state:
+                for t in _GRADUAL_WAKE:
+                    wasp.system.cancel_alarm(WU_t - t*60, self._tiny_vibration)
+                    if earlier + t*60 < _ANTICIPATE_ALLOWED:
+                        wasp.system.set_alarm(WU_t - earlier - t*60, self._tiny_vibration)
 
             self._earlier = earlier
             self._page = _TRACKING
