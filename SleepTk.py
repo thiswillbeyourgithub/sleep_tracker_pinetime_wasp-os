@@ -162,7 +162,7 @@ class SleepTkApp():
             no_full_draw = True
             disable_all = False
             if self.check_al.touch(event):
-                if self._wakeup_enabled == _ON:
+                if self._wakeup_enabled:
                     self._wakeup_enabled = _OFF
                     disable_all = True
                 else:
@@ -179,11 +179,11 @@ class SleepTkApp():
 
             if self.check_al.state:
                 if self.check_smart.touch(event):
-                    if self._wakeup_smart_enabled == _ON:
+                    if self._wakeup_smart_enabled:
                         self._wakeup_smart_enabled = _OFF
                         self.check_smart.state = self._wakeup_smart_enabled
                         self._check_smart = None
-                    elif self._wakeup_enabled == _ON:
+                    elif self._wakeup_enabled:
                         self._wakeup_smart_enabled = _ON
                         self.check_smart.state = self._wakeup_smart_enabled
                         self.check_smart.update()
