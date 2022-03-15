@@ -289,31 +289,42 @@ class SleepTkApp():
         """get one data point of accelerometer every _FREQ seconds, keep
         the maximum over each axis then store in a file every
         _STORE_FREQ seconds"""
-        if self._is_tracking:
-            buff = self._buff
-            xyz = wasp.watch.accel.read_xyz()
-            buff[0] = max(buff[0], xyz[0])
-            buff[1] = max(buff[1], xyz[1])
-            buff[2] = max(buff[2], xyz[2])
-            self._data_point_nb += 1
+        try:
+            if self._is_tracking:
+                buff = self._buff
+                xyz = wasp.watch.accel.read_xyz()
+                buff[0] = max(buff[0], xyz[0])
+                buff[1] = max(buff[1], xyz[1])
+                buff[2] = max(buff[2], xyz[2])
+                self._data_point_nb += 1
 
-            # add alarm to log accel data in _FREQ seconds
-            self.next_al = wasp.watch.rtc.time() + _FREQ
-            wasp.system.set_alarm(self.next_al, self._trackOnce)
+                # add alarm to log accel data in _FREQ seconds
+                self.next_al = wasp.watch.rtc.time() + _FREQ
+                wasp.system.set_alarm(self.next_al, self._trackOnce)
 
-            self._periodicSave()
-            if wasp.watch.battery.level() <= _BATTERY_THRESHOLD:
-                # strop tracking if battery low
-                self._disable_tracking(keep_main_alarm=True)
-                self._smart_alarm_state = _OFF
-                h, m = wasp.watch.time.localtime(wasp.watch.rtc.time())[3:5]
-                wasp.system.notify(wasp.watch.rtc.get_uptime_ms(), {"src": "SleepTk",
-                                                          "title": "Bat <20%",
-                                                          "body": "Stopped \
+                self._periodicSave()
+                if wasp.watch.battery.level() <= _BATTERY_THRESHOLD:
+                    # strop tracking if battery low
+                    self._disable_tracking(keep_main_alarm=True)
+                    self._smart_alarm_state = _OFF
+                    h, m = wasp.watch.time.localtime(wasp.watch.rtc.time())[3:5]
+                    wasp.system.notify(wasp.watch.rtc.get_uptime_ms(), {"src": "SleepTk",
+                                                              "title": "Bat <20%",
+                                                              "body": "Stopped \
 tracking sleep at {}h{}m because your battery went below {}%. Alarm kept \
 on.".format(h, m, _BATTERY_THRESHOLD)})
-
-        wasp.gc.collect()
+        except Exception as e:
+            mute = wasp.watch.display.mute
+            mute(False)
+            wasp.system.wake()
+            mute(False)
+            h, m = wasp.watch.time.localtime(wasp.watch.rtc.time())[3:5]
+            wasp.system.notify(wasp.watch.rtc.get_uptime_ms(),
+                    {"src": "SleepTk",
+                     "title": "trackOnce",
+                     "body": "Exception at {}h{}m : {]".format(h, m, e)})
+        finally:
+            wasp.gc.collect()
 
     def _periodicSave(self):
         """save data after maxpooling over a window to file
