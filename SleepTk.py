@@ -29,6 +29,7 @@ _FONT = fonts.sans18
 _TIMESTAMP = const(946684800)  # unix time and time used by wasp os don't have the same reference date
 _FREQ = const(5)  # get accelerometer data every X seconds, but process and store them only every _STORE_FREQ seconds
 _STORE_FREQ = const(30)  # process data and store to file every X seconds
+_MIN_ACCEL = const(-17000)  # minimum value of one accelerator axis
 _BATTERY_THRESHOLD = const(10)  # under X% of battery, stop tracking and only keep the alarm
 
 # user might want to edit this:
@@ -54,7 +55,7 @@ class SleepTkApp():
         self._conf_view = _OFF  # confirmation view
         self._earlier = 0  # number of seconds between the alarm you set manually and the smart alarm time
         self._old_notification_level = wasp.system.notify_level
-        self._buff = array("f", [-16000, -16000, -16000])
+        self._buff = array("f", [_MIN_ACCEL, _MIN_ACCEL, _MIN_ACCEL])
 
         try:
             shell.mkdir("logs/")
@@ -347,9 +348,9 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
                 ).encode())
             f.close()
             del f
-            buff[0] = -16000  # resets x/y/z to 0
-            buff[1] = -16000
-            buff[2] = -16000
+            buff[0] = _MIN_ACCEL  # resets x/y/z to 0
+            buff[1] = _MIN_ACCEL
+            buff[2] = _MIN_ACCEL
             self._last_checkpoint = self._data_point_nb
             wasp.gc.collect()
 
