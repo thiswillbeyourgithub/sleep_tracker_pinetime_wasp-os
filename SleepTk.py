@@ -53,7 +53,7 @@ class SleepTkApp():
         self._conf_view = _OFF  # confirmation view
         self._earlier = 0  # number of seconds between the alarm you set manually and the smart alarm time
         self._old_notification_level = wasp.system.notify_level
-        self._buff = array("f", [_OFF, _OFF, _OFF])
+        self._buff = array("f", [-16000, -16000, -16000])
 
         try:
             shell.mkdir("logs/")
