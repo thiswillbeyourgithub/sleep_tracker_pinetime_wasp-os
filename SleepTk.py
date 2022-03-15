@@ -114,12 +114,10 @@ class SleepTkApp():
                         self._disable_tracking()
                         self._page = _START
                     self._conf_view = _OFF
-
         elif self._page == _RINGING:
             if self.btn_al.touch(event):
                 self._disable_tracking()
                 self._page = _START
-
         elif self._page == _SETTINGS1:
             if self._alarm_state and (self._spin_H.touch(event) or self._spin_M.touch(event)):
                 self._spinval_H = self._spin_H.value
@@ -130,28 +128,22 @@ class SleepTkApp():
                 if self._alarm_state:
                     draw = wasp.watch.drawable
                     draw.set_font(_FONT)
-
                     duration =  (self._read_time(self._spinval_H, self._spinval_M) - wasp.watch.rtc.time() - _TIME_TO_FALL_ASLEEP) // 60
                     duration = max(duration, 0)  # if alarm too close
                     draw.string("Total sleep {:02d}h{:02d}m".format(
                         int(duration // 60),
                         int(duration % 60),), 0, 180)
-
                     cycl = (duration) / _CYCLE_LENGTH
                     draw.string("{} cycles   ".format(str(cycl)[0:5]), 0, 200)
-
                     cycl_modulo = cycl-int(cycl)
                     if cycl_modulo > 0.10 and cycl_modulo < 0.90:
                         draw.string("Not rested!", 0, 220)
                     else:
                         draw.string("Well rested", 0, 220)
-
                     return
-
             elif self.check_al.touch(event):
                 self._alarm_state = self.check_al.state
                 self.check_al.update()
-
         elif self._page == _SETTINGS2:
             if self._alarm_state:
                 if self.check_smart.touch(event):
@@ -164,7 +156,6 @@ class SleepTkApp():
                     return
             if self.btn_sta.touch(event):
                 self._start_tracking()
-
         self._draw()
 
     def _draw(self):
@@ -213,7 +204,6 @@ class SleepTkApp():
                 self._spin_M = widgets.Spinner(150, 70, 0, 59, 2, 5)
                 self._spin_M.value = self._spinval_M
                 self._spin_M.draw()
-
         elif self._page == _SETTINGS2:
             if self._alarm_state:
                 self.check_grad = widgets.Checkbox(0, 40, "Gradual wake")
@@ -231,7 +221,6 @@ class SleepTkApp():
                     draw.string(sub, 0, 50 + 24 * i)
             self.btn_sta = widgets.Button(x=0, y=200, w=240, h=40, label="Start tracking")
             self.btn_sta.draw()
-
         self.stat_bar = widgets.StatusBar()
         self.stat_bar.clock = True
         self.stat_bar.draw()
