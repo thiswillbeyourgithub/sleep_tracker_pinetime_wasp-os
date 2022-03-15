@@ -347,9 +347,9 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
                 ).encode())
             f.close()
             del f
-            buff[0] = 0  # resets x/y/z to 0
-            buff[1] = 0
-            buff[2] = 0
+            buff[0] = -16000  # resets x/y/z to 0
+            buff[1] = -16000
+            buff[2] = -16000
             self._last_checkpoint = self._data_point_nb
             wasp.gc.collect()
 
