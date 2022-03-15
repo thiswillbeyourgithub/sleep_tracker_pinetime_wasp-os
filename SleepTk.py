@@ -456,7 +456,6 @@ BY MISTAKE at {:02d}h{:02d}m".format(t[3], t[4])})
         mute = wasp.watch.display.mute
         mute(True)
         wasp.system.wake()
-        wasp.system.keep_awake()
         wasp.system.switch(self)
         t = wasp.watch.time.localtime(wasp.watch.rtc.time())
         wasp.system.notify(wasp.watch.rtc.get_uptime_ms(),
@@ -538,7 +537,6 @@ BY MISTAKE at {:02d}h{:02d}m".format(t[3], t[4])})
         mute = wasp.watch.display.mute
         mute(True)
         wasp.system.wake()
-        wasp.system.keep_awake()
         wasp.system.switch(self)
         self._draw()
         wasp.system.request_tick(period_ms=1000)
