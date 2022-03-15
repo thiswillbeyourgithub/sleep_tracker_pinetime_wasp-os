@@ -126,6 +126,7 @@ class SleepTkApp():
                 self._spin_H.update()
                 self._spinval_M = self._spin_M.value
                 self._spin_M.update()
+                wasp.watch.vibrator.pulse(25, 15)
                 if self._alarm_state:
                     draw = wasp.watch.drawable
                     draw.set_font(_FONT)
