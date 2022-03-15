@@ -438,6 +438,14 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
     def _smart_alarm_compute(self):
         """computes best wake up time from sleep data"""
         wasp.gc.collect()
+        if not self._smart_alarm_state:
+            t = wasp.watch.time.localtime(wasp.watch.rtc.time())
+            wasp.system.notify(wasp.watch.rtc.get_uptime_ms(),
+                          {"src": "SleepTk",
+                           "title": "Smart alarm computation",
+                           "body": "Started computation for the smart alarm \
+BY MISTAKE at {:02d}h{:02d}m".format(t[3], t[4])})
+            return
         mute = wasp.watch.display.mute
         mute(True)
         wasp.system.wake()
