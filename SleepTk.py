@@ -23,10 +23,10 @@ from micropython import const
 # HARDCODED VARIABLES:
 _ON = const(1)
 _OFF = const(0)
-_START = const(0)  # page values:
-_TRACKING = const(1)
-_SETTINGS = const(2)
-_RINGING = const(3)
+_TRACKING = const(0)
+_RINGING = const(1)
+_START = const(2)  # page values:
+_SETTINGS1 = const(3)
 _FONT = fonts.sans18
 _TIMESTAMP = const(946684800)  # unix time and time used by wasp os don't have the same reference date
 _FREQ = const(5)  # get accelerometer data every X seconds, but process and store them only every _STORE_FREQ seconds
@@ -69,7 +69,7 @@ class SleepTkApp():
         wasp.gc.collect()
         self._draw()
         wasp.system.request_event(wasp.EventMask.TOUCH |
-                                  wasp.EventMask.SWIPE_UPDOWN |
+                                  wasp.EventMask.SWIPE_LEFTRIGHT |
                                   wasp.EventMask.BUTTON)
 
     def background(self):
@@ -85,13 +85,56 @@ class SleepTkApp():
                 wasp.system.navigate(wasp.EventType.HOME)
 
     def swipe(self, event):
-        "switches between start page and settings page"
-        if self._page == _START:
-            self._page = _SETTINGS
+        "navigate between start and various settings page"
+        if self._page >= 3:
+            if event[0] == wasp.EventType.RIGHT:
+                self._page -= 1
+            else:
+                self._page += 1
+            self._page = max(self._page, _START)
+            self._page = min(self._page, _SETTINGS2)
             self._draw()
-        elif self._page == _SETTINGS:
-            self._page = _START
-            self._draw()
+
+    def _start_tracking(self):
+        self._is_tracking = True
+        # accel data not yet written to disk:
+        self._data_point_nb = 0  # total number of data points so far
+        self._last_checkpoint = 0  # to know when to save to file
+        self._offset = int(wasp.watch.rtc.time())  # makes output more compact
+
+        # create one file per recording session:
+        self.filep = "logs/sleep/{}.csv".format(str(self._offset + _TIMESTAMP))
+        f = open(self.filep, "wb")
+        f.write(b"")
+        f.close()
+
+        # add alarm to log accel data in _FREQ seconds
+        self.next_al = wasp.watch.rtc.time() + _FREQ
+        wasp.system.set_alarm(self.next_al, self._trackOnce)
+
+        # setting up alarm
+        if self._wakeup_enabled:
+            now = wasp.watch.rtc.get_localtime()
+            yyyy = now[0]
+            mm = now[1]
+            dd = now[2]
+            HH = self._spinval_H
+            MM = self._spinval_M
+            if HH < now[3] or (HH == now[3] and MM <= now[4]):
+                dd += 1
+            self._WU_t = wasp.watch.time.mktime((yyyy, mm, dd, HH, MM, 0, 0, 0, 0))
+            wasp.system.set_alarm(self._WU_t, self._listen_to_ticks)
+
+            # also set alarm to vibrate a tiny bit before wake up time
+            # to wake up gradually
+            for t in _GRADUAL_WAKE:
+                wasp.system.set_alarm(self._WU_t - t*60, self._tiny_vibration)
+
+            # wake up SleepTk 2min before earliest possible wake up
+            if self._wakeup_smart_enabled:
+                self._WU_a = self._WU_t - _ANTICIPATE_ALLOWED - 120
+                wasp.system.set_alarm(self._WU_a, self._smart_alarm_compute)
+        wasp.system.notify_level = 1  # silent notifications
 
     def touch(self, event):
         """either start trackign or disable it, draw the screen in all cases"""
@@ -99,46 +142,8 @@ class SleepTkApp():
         no_full_draw = False
         if self._page == _START:
             if self.btn_on.touch(event):
-                self._is_tracking = True
-                # accel data not yet written to disk:
-                self._data_point_nb = 0  # total number of data points so far
-                self._last_checkpoint = 0  # to know when to save to file
-                self._offset = int(wasp.watch.rtc.time())  # makes output more compact
-
-                # create one file per recording session:
-                self.filep = "logs/sleep/{}.csv".format(str(self._offset + _TIMESTAMP))
-                f = open(self.filep, "wb")
-                f.write(b"")
-                f.close()
-
-                # add alarm to log accel data in _FREQ seconds
-                self.next_al = wasp.watch.rtc.time() + _FREQ
-                wasp.system.set_alarm(self.next_al, self._trackOnce)
-
-                # setting up alarm
-                if self._wakeup_enabled:
-                    now = wasp.watch.rtc.get_localtime()
-                    yyyy = now[0]
-                    mm = now[1]
-                    dd = now[2]
-                    HH = self._spinval_H
-                    MM = self._spinval_M
-                    if HH < now[3] or (HH == now[3] and MM <= now[4]):
-                        dd += 1
-                    self._WU_t = wasp.watch.time.mktime((yyyy, mm, dd, HH, MM, 0, 0, 0, 0))
-                    wasp.system.set_alarm(self._WU_t, self._listen_to_ticks)
-
-                    # also set alarm to vibrate a tiny bit before wake up time
-                    # to wake up gradually
-                    for t in _GRADUAL_WAKE:
-                        wasp.system.set_alarm(self._WU_t - t*60, self._tiny_vibration)
-
-                    # wake up SleepTk 2min before earliest possible wake up
-                    if self._wakeup_smart_enabled:
-                        self._WU_a = self._WU_t - _ANTICIPATE_ALLOWED - 120
-                        wasp.system.set_alarm(self._WU_a, self._smart_alarm_compute)
-                wasp.system.notify_level = 1  # silent notifications
-                self._page = _TRACKING
+                #self._start_tracking()
+                self._page = _SETTINGS1
 
         elif self._page == _TRACKING:
             if self._conf_view is _OFF:
@@ -158,7 +163,7 @@ class SleepTkApp():
                 self._disable_tracking()
                 self._page = _START
 
-        elif self._page == _SETTINGS:
+        elif self._page == _SETTINGS1:
             no_full_draw = True
             disable_all = False
             if self.check_al.touch(event):
@@ -308,7 +313,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
                 draw.string('Wake you up to 40m' , 0, 120)
                 draw.string('earlier.' , 0, 140)
             draw.string('PRE RELEASE.' , 0, 160)
-        elif self._page == _SETTINGS:
+        elif self._page == _SETTINGS1:
             self.check_al = widgets.Checkbox(x=0, y=40, label="Alarm")
             self.check_al.state = self._wakeup_enabled
             self.check_al.draw()
