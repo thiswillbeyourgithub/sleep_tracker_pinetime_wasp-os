@@ -4,12 +4,9 @@
 """Sleep tracker
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-# https://github.com/thiswillbeyourgithub/sleep_tracker_pinetime_wasp-os
-
-SleepTk is designed to track accelerometer data throughout the night. When
-finished, it will also compute the best time to wake you up, up to 40 minutes
-before the alarm you set up manually.
-
+SleepTk is an alarm clock app designed to track body movement throughout
+the night to optimize sleep. Currently a WIP, more information at
+https://github.com/thiswillbeyourgithub/sleep_tracker_pinetime_wasp-os
 """
 
 import wasp
