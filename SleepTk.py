@@ -332,6 +332,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             1. arm angle
             2. elapsed times
             3/4/5. x/y/z max value over _STORE_FREQ seconds
+            6. battery level
          arm angle formula from https://www.nature.com/articles/s41598-018-31266-z
          note: math.atan() is faster than using a taylor serie
         """
@@ -339,10 +340,10 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
         n = self._data_point_nb - self._last_checkpoint
         if n >= _STORE_FREQ / _FREQ:
             f = open(self.filep, "ab")
-            f.write("{:7f},{},{:7f},{:7f},{:7f}\n".format(
+            f.write("{:7f},{},{:7f},{:7f},{:7f},{}\n".format(
                 math.atan(buff[2] / (buff[0]**2 + buff[1]**2)),  # estimated arm angle
                 int(wasp.watch.rtc.time() - self._offset),
-                buff[0], buff[1], buff[2]
+                buff[0], buff[1], buff[2], wasp.watch.battery.level()
                 ).encode())
             f.close()
             del f
