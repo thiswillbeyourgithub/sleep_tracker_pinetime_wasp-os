@@ -288,15 +288,15 @@ class SleepTkApp():
 
     def _trackOnce(self):
         """get one data point of accelerometer every _FREQ seconds, keep
-        the maximum over each axis then store in a file every
+        the rolling average of each axis then store in a file every
         _STORE_FREQ seconds"""
         try:
             if self._is_tracking:
                 buff = self._buff
                 xyz = wasp.watch.accel.read_xyz()
-                buff[0] = max(buff[0], xyz[0])
-                buff[1] = max(buff[1], xyz[1])
-                buff[2] = max(buff[2], xyz[2])
+                buff[0] = (buff[0] + xyz[0]) / 2
+                buff[1] = (buff[1] + xyz[1]) / 2
+                buff[2] = (buff[2] + xyz[2]) / 2
                 self._data_point_nb += 1
 
                 # add alarm to log accel data in _FREQ seconds
