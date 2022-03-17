@@ -36,7 +36,7 @@
 ## TODO
 **misc**
 * log heart rate data every X minutes
-* investigate if downsampling is necessary
+* implement downsampling
 * if self.foreground is called, record the time. Use it to cancel smart alarm if you woke up too many times (more than 2 times in more than 20 minutes apart).
 * add a "nap tracking" mode that records sleep tracking with more precision
     * add a "power nap" mode that wakes you as soon as there has been no movement for 5 minutes OR (like steelball) when your heart rate drops
