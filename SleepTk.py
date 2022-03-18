@@ -29,7 +29,6 @@ _FONT = fonts.sans18
 _TIMESTAMP = const(946684800)  # unix time and time used by wasp os don't have the same reference date
 _FREQ = const(5)  # get accelerometer data every X seconds, but process and store them only every _STORE_FREQ seconds
 _STORE_FREQ = const(30)  # process data and store to file every X seconds
-_MIN_ACCEL = const(-17000)  # minimum value of one accelerator axis
 _BATTERY_THRESHOLD = const(25)  # under X% of battery, stop tracking and only keep the alarm
 
 # user might want to edit this:
@@ -55,7 +54,7 @@ class SleepTkApp():
         self._conf_view = _OFF  # confirmation view
         self._earlier = 0  # number of seconds between the alarm you set manually and the smart alarm time
         self._old_notification_level = wasp.system.notify_level
-        self._buff = array("f", [_MIN_ACCEL, _MIN_ACCEL, _MIN_ACCEL])
+        self._buff = array("f", [_OFF, _OFF, _OFF])
 
         try:
             shell.mkdir("logs/")
@@ -288,15 +287,15 @@ class SleepTkApp():
 
     def _trackOnce(self):
         """get one data point of accelerometer every _FREQ seconds, keep
-        the rolling average of each axis then store in a file every
+        the average of each axis then store in a file every
         _STORE_FREQ seconds"""
         try:
             if self._is_tracking:
                 buff = self._buff
                 xyz = wasp.watch.accel.read_xyz()
-                buff[0] = (buff[0] + xyz[0]) / 2
-                buff[1] = (buff[1] + xyz[1]) / 2
-                buff[2] = (buff[2] + xyz[2]) / 2
+                buff[0] += xyz[0]
+                buff[1] += xyz[1]
+                buff[2] += xyz[2]
                 self._data_point_nb += 1
 
                 # add alarm to log accel data in _FREQ seconds
@@ -328,9 +327,8 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             wasp.gc.collect()
 
     def _periodicSave(self):
-        """save data after averageing over a window to file
-        row order in the csv:
-            1. arm angle
+        """save data to csv with row order:
+            1. average arm angle
             2. elapsed times
             3/4/5. x/y/z average value over _STORE_FREQ seconds
          arm angle formula from https://www.nature.com/articles/s41598-018-31266-z
@@ -339,6 +337,9 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
         buff = self._buff
         n = self._data_point_nb - self._last_checkpoint
         if n >= _STORE_FREQ / _FREQ:
+            buff[0] /= n
+            buff[1] /= n
+            buff[2] /= n
             f = open(self.filep, "ab")
             f.write("{:7f},{},{:7f},{:7f},{:7f}\n".format(
                 math.atan(buff[2] / (buff[0]**2 + buff[1]**2)),  # estimated arm angle
@@ -347,9 +348,9 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
                 ).encode())
             f.close()
             del f
-            buff[0] = _MIN_ACCEL  # resets x/y/z to 0
-            buff[1] = _MIN_ACCEL
-            buff[2] = _MIN_ACCEL
+            buff[0] = 0  # resets x/y/z to 0
+            buff[1] = 0
+            buff[2] = 0
             self._last_checkpoint = self._data_point_nb
             wasp.gc.collect()
 
