@@ -309,7 +309,7 @@ class SleepTkApp():
                     self._smart_alarm_state = _OFF
                     h, m = wasp.watch.time.localtime(wasp.watch.rtc.time())[3:5]
                     wasp.system.notify(wasp.watch.rtc.get_uptime_ms(), {"src": "SleepTk",
-                                                              "title": "Bat <20%",
+                                                              "title": "Bat low",
                                                               "body": "Stopped \
 tracking sleep at {}h{}m because your battery went below {}%. Alarm kept \
 on.".format(h, m, _BATTERY_THRESHOLD)})
