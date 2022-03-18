@@ -27,8 +27,8 @@ _SETTINGS1 = const(3)
 _SETTINGS2 = const(4)
 _FONT = fonts.sans18
 _TIMESTAMP = const(946684800)  # unix time and time used by wasp os don't have the same reference date
-_FREQ = const(5)  # get accelerometer data every X seconds, but process and store them only every _STORE_FREQ seconds
-_STORE_FREQ = const(30)  # process data and store to file every X seconds
+_FREQ = const(60)  # get accelerometer data every X seconds, but process and store them only every _STORE_FREQ seconds
+_STORE_FREQ = const(300)  # process data and store to file every X seconds
 _BATTERY_THRESHOLD = const(25)  # under X% of battery, stop tracking and only keep the alarm
 
 # user might want to edit this:
