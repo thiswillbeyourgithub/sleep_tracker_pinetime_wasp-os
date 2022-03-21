@@ -315,14 +315,17 @@ tracking sleep at {}h{}m because your battery went below {}%. Alarm kept \
 on.".format(h, m, _BATTERY_THRESHOLD)})
         except Exception as e:
             mute = wasp.watch.display.mute
-            mute(False)
             wasp.system.wake()
             mute(False)
             h, m = wasp.watch.time.localtime(wasp.watch.rtc.time())[3:5]
+            msg = "Exception at {}h{}m : {}".format(h, m, str(e))
+            f = open("smart_alarm_error_{}.txt".format(int(wasp.watch.rtc.time())), "wb")
+            f.write(msg.encode())
+            f.close()
             wasp.system.notify(wasp.watch.rtc.get_uptime_ms(),
                     {"src": "SleepTk",
                      "title": "trackOnce",
-                     "body": "Exception at {}h{}m : {}".format(h, m, str(e))})
+                     "body": msg})
         finally:
             wasp.gc.collect()
 
@@ -520,12 +523,12 @@ BY MISTAKE at {:02d}h{:02d}m".format(t[3], t[4])})
             wasp.gc.collect()
             h, m = wasp.watch.time.localtime(wasp.watch.rtc.time())[3:5]
             msg = "Exception occured at {:02d}h{:02d}m: '{}'%".format(h, m, str(e))
-            wasp.system.notify(wasp.watch.rtc.get_uptime_ms(), {"src": "SleepTk",
-                                                      "title": "Smart alarm error",
-                                                      "body": msg})
             f = open("smart_alarm_error_{}.txt".format(int(wasp.watch.rtc.time())), "wb")
             f.write(msg.encode())
             f.close()
+            wasp.system.notify(wasp.watch.rtc.get_uptime_ms(), {"src": "SleepTk",
+                                                      "title": "Smart alarm error",
+                                                      "body": msg})
         wasp.gc.collect()
 
 
@@ -553,6 +556,5 @@ BY MISTAKE at {:02d}h{:02d}m".format(t[3], t[4])})
         mute = wasp.watch.display.mute
         mute(True)
         wasp.system.wake()
-        mute(True)
         wasp.system.switch(self)
         wasp.watch.vibrator.pulse(duty=60, ms=100)
