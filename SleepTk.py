@@ -343,7 +343,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             buff[1] /= n
             buff[2] /= n
             f = open(self.filep, "ab")
-            f.write("{:7f},{},{:7f},{:7f},{:7f}\n".format(
+            f.write("{:7f},{}\n".format(
                 math.atan(buff[2] / (buff[0]**2 + buff[1]**2)),  # estimated arm angle
                 int(wasp.watch.rtc.time() - self._offset),
                 ).encode())
