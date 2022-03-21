@@ -338,13 +338,13 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
         """
         buff = self._buff
         n = self._data_point_nb - self._last_checkpoint
-        if n >= _STORE_FREQ / _FREQ:
+        if n >= _STORE_FREQ // _FREQ and sum(buff[0:2]) != 0:
             buff[0] /= n
             buff[1] /= n
             buff[2] /= n
             f = open(self.filep, "ab")
             f.write("{:7f},{}\n".format(
-                math.atan(buff[2] / (buff[0]**2 + buff[1]**2)),  # estimated arm angle
+                math.atan(buff[2] / (buff[0]**2 + buff[1]**2 + 0.000000001)),  # estimated arm angle
                 int(wasp.watch.rtc.time() - self._offset),
                 ).encode())
             f.close()
