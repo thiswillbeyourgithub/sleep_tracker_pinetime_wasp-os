@@ -44,10 +44,11 @@
 * log smart alarm data to file? log user rating of how well he/she felt fresh at wake?
 * ability to send in real time to Bluetooth device the current sleep stage you're probably in. For use in Targeted Memory Reactivation?
 
-## Related links:
-* article with detailed implementation : https://www.nature.com/articles/s41598-018-31266-z
-* very interesting research paper on the topic : https://academic.oup.com/sleep/article/42/12/zsz180/5549536
-* interesting study : https://ieeexplore.ieee.org/document/7052479
+## Bibliography and related links:
+* [Estimating sleep parameters using an accelerometer without sleep diary](https://www.nature.com/articles/s41598-018-31266-z)
+* [Sleep stage prediction with raw acceleration and photoplethysmography heart rate data derived from a consumer wearable device ](https://academic.oup.com/sleep/article/42/12/zsz180/5549536)
+* [Sleep stage prediction with raw acceleration and photoplethysmography heart rate data derived from a consumer wearable device ](https://ieeexplore.ieee.org/document/7052479)
+* [Sleep classification from wrist-worn accelerometer data using random forests](https://pubmed.ncbi.nlm.nih.gov/33420133/)
 
 ### Related project:
 * another hackable smartwatch has a similar software: [sleepphasealarm](https://banglejs.com/apps/#sleepphasealarm) and [steelball](https://github.com/jabituyaben/SteelBall) for the [Banglejs](https://banglejs.com/)
