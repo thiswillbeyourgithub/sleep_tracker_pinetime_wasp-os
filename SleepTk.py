@@ -280,6 +280,8 @@ class SleepTkApp():
         if self._alarm_state:
             if keep_main_alarm is False:  # to keep the alarm when stopping because of low battery
                 wasp.system.cancel_alarm(self._WU_t, self._listen_to_ticks)
+                for t in _GRADUAL_WAKE:
+                    wasp.system.cancel_alarm(self._WU_t - t*60, self._tiny_vibration)
             if self._smart_alarm_state:
                 wasp.system.cancel_alarm(self._WU_a, self._smart_alarm_compute)
         self._periodicSave()
