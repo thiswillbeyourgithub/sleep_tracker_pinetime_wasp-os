@@ -284,6 +284,7 @@ class SleepTkApp():
                     wasp.system.cancel_alarm(self._WU_t - t*60, self._tiny_vibration)
             if self._smart_alarm_state:
                 wasp.system.cancel_alarm(self._WU_a, self._smart_alarm_compute)
+                self._smart_alarm_state = _OFF
         self._periodicSave()
         wasp.gc.collect()
 
@@ -310,7 +311,6 @@ class SleepTkApp():
             if wasp.watch.battery.level() <= _BATTERY_THRESHOLD:
                 # strop tracking if battery low
                 self._disable_tracking(keep_main_alarm=True)
-                self._smart_alarm_state = _OFF
                 h, m = wasp.watch.time.localtime(wasp.watch.rtc.time())[3:5]
                 wasp.system.notify(wasp.watch.rtc.get_uptime_ms(), {"src": "SleepTk",
                                                           "title": "Bat low",
