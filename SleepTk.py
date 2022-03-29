@@ -124,7 +124,7 @@ class SleepTkApp():
                 if self._alarm_state:
                     draw = wasp.watch.drawable
                     draw.set_font(_FONT)
-                    duration =  (self._read_time(self._spinval_H, self._spinval_M) - wasp.watch.rtc.time() - _TIME_TO_FALL_ASLEEP) // 60
+                    duration =  (self._read_time(self._spinval_H, self._spinval_M) - wasp.watch.rtc.time() - _TIME_TO_FALL_ASLEEP * 60) // 60
                     duration = max(duration, 0)  # if alarm too close
                     draw.string("Total sleep {:02d}h{:02d}m".format(
                         int(duration // 60),
