@@ -129,9 +129,9 @@ class SleepTkApp():
                     draw.string("Total sleep {:02d}h{:02d}m".format(
                         int(duration // 60),
                         int(duration % 60),), 0, 180)
-                    cycl = (duration) / _CYCLE_LENGTH
-                    draw.string("{} cycles   ".format(str(cycl)[0:5]), 0, 200)
-                    cycl_modulo = cycl-int(cycl)
+                    cycl = duration / _CYCLE_LENGTH
+                    draw.string("{} cycles   ".format(str(cycl)[0:4]), 0, 200)
+                    cycl_modulo = cycl - int(cycl)
                     if cycl_modulo > 0.10 and cycl_modulo < 0.90:
                         draw.string("Not rested!", 0, 220)
                     else:
