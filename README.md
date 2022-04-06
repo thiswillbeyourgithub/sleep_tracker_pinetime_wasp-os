@@ -37,6 +37,7 @@
 **misc**
 * investigate adding snooze feature like in the original `alarms.py` app
 * investigate adding a simple feature to wake you up only after a certain movement threshold was passed
+* investigate using micropython decorator to compute best wake up time
 * add a "nap tracking" mode that records sleep tracking with more precision
     * add a "power nap" mode that wakes you as soon as there has been no movement for 5 minutes OR (like steelball) when your heart rate drops
 * implement downsampling to 15 minutes precision to compute best wake up time
