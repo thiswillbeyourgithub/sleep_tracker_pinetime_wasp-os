@@ -14,6 +14,7 @@ import widgets
 import shell
 import fonts
 import math
+import ppg
 from array import array
 from micropython import const
 
@@ -28,6 +29,7 @@ _SETTINGS2 = const(4)
 _FONT = fonts.sans18
 _TIMESTAMP = const(946684800)  # unix time and time used by wasp os don't have the same reference date
 _FREQ = const(5)  # get accelerometer data every X seconds, but process and store them only every _STORE_FREQ seconds
+_HR_FREQ = const(1800)  # how many seconds between heart rate data
 _STORE_FREQ = const(120)  # process data and store to file every X seconds
 _BATTERY_THRESHOLD = const(15)  # under X% of battery, stop tracking and only keep the alarm, set at -200 or lower to disable
 
@@ -47,6 +49,10 @@ class SleepTkApp():
         self._alarm_state = _ON
         self._grad_alarm_state = _ON
         self._smart_alarm_state = _OFF  # activate waking you up at optimal time  based on accelerometer data, at the earliest at _WU_LAT - _WU_SMART
+        self._track_HR_state = _ON
+        self._last_HR = _OFF
+        self._last_HR_date = _OFF
+        self._track_HR_once = _OFF
         self._spinval_H = 7  # default wake up time
         self._spinval_M = 30
         self._page = _START
@@ -74,6 +80,9 @@ class SleepTkApp():
                                   wasp.EventMask.BUTTON)
 
     def background(self):
+        wasp.watch.hrs.disable()
+        self._track_HR_once = _OFF
+        self._hrdata = None
         wasp.gc.collect()
 
     def press(self, button, state):
@@ -152,6 +161,10 @@ class SleepTkApp():
                     return
             if self.btn_sta.touch(event):
                 self._start_tracking()
+            elif self.btn_HR.touch(event):
+                self.btn_HR.draw()
+                self._track_HR_state = self.btn_HR.state
+                return
         self._draw()
 
     def _draw(self):
@@ -202,10 +215,10 @@ class SleepTkApp():
                 self._spin_M.draw()
         elif self._page == _SETTINGS2:
             if self._alarm_state:
-                self.check_grad = widgets.Checkbox(0, 40, "Gradual wake")
+                self.check_grad = widgets.Checkbox(0, 80, "Gradual wake")
                 self.check_grad.state = self._grad_alarm_state
                 self.check_grad.draw()
-                self.check_smart = widgets.Checkbox(x=0, y=80, label="Smart alarm (alpha)")
+                self.check_smart = widgets.Checkbox(x=0, y=120, label="Smart alarm (alpha)")
                 self.check_smart.state = self._smart_alarm_state
                 self.check_smart.draw()
             else:
@@ -215,6 +228,9 @@ class SleepTkApp():
                 for i in range(len(chunks)-1):
                     sub = label[chunks[i]:chunks[i+1]].rstrip()
                     draw.string(sub, 0, 50 + 24 * i)
+            self.btn_HR = widgets.Checkbox(x=0, y=40, label="Heart rate tracking")
+            self.btn_HR.state = self._track_HR_state
+            self.btn_HR.draw()
             self.btn_sta = widgets.Button(x=0, y=200, w=240, h=40, label="Start tracking")
             self.btn_sta.draw()
         self.stat_bar = widgets.StatusBar()
@@ -285,6 +301,8 @@ class SleepTkApp():
             if self._smart_alarm_state:
                 wasp.system.cancel_alarm(self._WU_a, self._smart_alarm_compute)
                 self._smart_alarm_state = _OFF
+        self._track_HR_state = _OFF
+        wasp.watch.hrs.disable()
         self._periodicSave()
         wasp.gc.collect()
 
@@ -317,12 +335,20 @@ class SleepTkApp():
                                                           "body": "Stopped \
 tracking sleep at {}h{}m because your battery went below {}%. Alarm kept \
 on.".format(h, m, _BATTERY_THRESHOLD)})
+            elif self._track_HR_state:
+                if wasp.watch.rtc.time() - self._last_HR_date > _HR_FREQ and not self._track_HR_once:
+                    wasp.watch.hrs.enable()
+                    self._hrdata = ppg.PPG(wasp.watch.hrs.read_hrs())
+                    self._track_HR_once = _ON
+                    wasp.system.request_tick(1000 // 8)
+
         wasp.gc.collect()
 
     def _periodicSave(self):
         """save data to csv with row order:
             1. average arm angle
             2. elapsed times
+            3. heart rate if present
          arm angle formula from https://www.nature.com/articles/s41598-018-31266-z
          note: math.atan() is faster than using a taylor serie
         """
@@ -332,10 +358,16 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             buff[0] /= n
             buff[1] /= n
             buff[2] /= n
+            if self._last_HR != _OFF:
+                bpm = ",{}".format(self._last_HR)
+                self._last_HR = _OFF
+            else:
+                bpm = ""
             f = open(self.filep, "ab")
-            f.write("{:7f},{}\n".format(
+            f.write("{:7f},{}{}\n".format(
                 math.atan(buff[2] / (buff[0]**2 + buff[1]**2))*180/3.1415926535,  # estimated arm angle
                 int(wasp.watch.rtc.time() - self._offset),
+                bpm
                 ).encode())
             f.close()
             del f
@@ -534,9 +566,34 @@ BY MISTAKE at {:02d}h{:02d}m".format(t[3], t[4])})
         wasp.system.request_tick(period_ms=1000)
 
     def tick(self, ticks):
-        """vibrate to wake you up"""
+        """vibrate to wake you up OR track heart rate using code from heart.py"""
         if self._page == _RINGING:
             wasp.watch.vibrator.pulse(duty=50, ms=500)
+        elif self._track_HR_once:
+            t = wasp.machine.Timer(id=1, period=8000000)
+            mute = wasp.watch.display.mute
+            t.start()
+            self._subtick(1)
+            wasp.system.keep_awake()
+            mute(True)
+            while t.time() < 41666:
+                pass
+            self._subtick(1)
+            while t.time() < 83332:
+                pass
+            self._subtick(1)
+            t.stop()
+            del t
+
+            if len(self._hrdata.data) >= 240:  # 10 seconds passed
+                self._last_HR = self._hrdata.get_heart_rate()
+                self._last_HR_date = int(wasp.watch.rtc.time())
+                self._track_HR_once = _OFF
+                wasp.watch.hrs.disable()
+
+    def _subtick(self, ticks):
+        """track heart rate at 24Hz"""
+        self._hrdata.preprocess(wasp.watch.hrs.read_hrs())
 
     def _tiny_vibration(self):
         """vibrate just a tiny bit before waking up, to gradually return
