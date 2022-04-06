@@ -49,7 +49,7 @@ class SleepTkApp():
         self._alarm_state = _ON
         self._grad_alarm_state = _ON
         self._smart_alarm_state = _OFF  # activate waking you up at optimal time  based on accelerometer data, at the earliest at _WU_LAT - _WU_SMART
-        self._track_HR_state = _ON
+        self._track_HR_state = _OFF
         self._last_HR = _OFF
         self._last_HR_date = _OFF
         self._track_HR_once = _OFF
