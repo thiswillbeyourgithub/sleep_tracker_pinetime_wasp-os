@@ -108,11 +108,13 @@ class SleepTkApp():
     def touch(self, event):
         """either start trackign or disable it, draw the screen in all cases"""
         wasp.gc.collect()
+        draw = wasp.watch.drawable
         if self._page == _TRACKING:
             if self._conf_view is _OFF:
                 if self.btn_off.touch(event):
                     self._conf_view = widgets.ConfirmationView()
                     self._conf_view.draw("Stop tracking?")
+                    draw.reset()
                     return
             else:
                 if self._conf_view.touch(event):
@@ -120,6 +122,7 @@ class SleepTkApp():
                         self._disable_tracking()
                         self._page = _START
                     self._conf_view = _OFF
+                draw.reset()
         elif self._page == _RINGING:
             if self.btn_al.touch(event):
                 self._disable_tracking()
@@ -131,7 +134,6 @@ class SleepTkApp():
                 self._spinval_M = self._spin_M.value
                 self._spin_M.update()
                 if self._alarm_state:
-                    draw = wasp.watch.drawable
                     draw.set_font(_FONT)
                     duration =  (self._read_time(self._spinval_H, self._spinval_M) - wasp.watch.rtc.time() - _TIME_TO_FALL_ASLEEP * 60) // 60
                     duration = max(duration, 0)  # if alarm too close
@@ -180,6 +182,7 @@ class SleepTkApp():
             draw.string(msg, 0, 70)
             self.btn_al = widgets.Button(x=0, y=70, w=240, h=140, label="WAKE UP")
             self.btn_al.draw()
+            draw.reset()
         elif self._page == _TRACKING:
             ti = wasp.watch.time.localtime(self._offset)
             draw.string('Began at {:02d}:{:02d}'.format(ti[3], ti[4]), 0, 70)
@@ -195,6 +198,7 @@ class SleepTkApp():
             draw.string("data points: {} / {}".format(str(self._data_point_nb), str(self._data_point_nb * _FREQ // _STORE_FREQ)), 0, 130)
             self.btn_off = widgets.Button(x=0, y=200, w=240, h=40, label="Stop tracking")
             self.btn_off.draw()
+            draw.reset()
         elif self._page == _START:
             draw.set_font(_FONT)
             label = 'Sleep tracker with optional wake up alarm, smart alarm up to 40min before, gradual wake up to 15m. Swipe to navigate.'
@@ -202,6 +206,7 @@ class SleepTkApp():
             for i in range(len(chunks)-1):
                 sub = label[chunks[i]:chunks[i+1]].rstrip()
                 draw.string(sub, 0, 60 + 20 * i)
+            draw.reset()
         elif self._page == _SETTINGS1:
             self.check_al = widgets.Checkbox(x=0, y=40, label="Wake me up")
             self.check_al.state = self._alarm_state
@@ -213,6 +218,7 @@ class SleepTkApp():
                 self._spin_M = widgets.Spinner(150, 70, 0, 59, 2, 5)
                 self._spin_M.value = self._spinval_M
                 self._spin_M.draw()
+            draw.reset()
         elif self._page == _SETTINGS2:
             if self._alarm_state:
                 self.check_grad = widgets.Checkbox(0, 80, "Gradual wake")
@@ -228,11 +234,13 @@ class SleepTkApp():
                 for i in range(len(chunks)-1):
                     sub = label[chunks[i]:chunks[i+1]].rstrip()
                     draw.string(sub, 0, 50 + 24 * i)
+            draw.reset()
             self.btn_HR = widgets.Checkbox(x=0, y=40, label="Heart rate tracking")
             self.btn_HR.state = self._track_HR_state
             self.btn_HR.draw()
             self.btn_sta = widgets.Button(x=0, y=200, w=240, h=40, label="Start tracking")
             self.btn_sta.draw()
+            draw.reset()
         self.stat_bar = widgets.StatusBar()
         self.stat_bar.clock = True
         self.stat_bar.draw()
