@@ -53,15 +53,8 @@ class SleepTkApp():
         self._last_HR = _OFF
         self._last_HR_date = _OFF
         self._track_HR_once = _OFF
-
-        # suggest wake up time, on the basis of 7h30m of sleep + time to fall asleep
-        (H, M) = wasp.watch.time.localtime()[3:5]
-        M += 30 + _TIME_TO_FALL_ASLEEP
-        while M % 5 != 0:
-            M += 1
-        self._spinval_H = (H + 7) % 24 + (M // 60)
-        self._spinval_M = M % 60
-
+        self._spinval_H = _OFF
+        self._spinval_M = _OFF
         self._page = _START
         self._is_tracking = _OFF
         self._conf_view = _OFF  # confirmation view
@@ -222,6 +215,14 @@ class SleepTkApp():
             self.check_al.state = self._alarm_state
             self.check_al.draw()
             if self._alarm_state:
+                if (self._spinval_H, self._spinval_M) == (_OFF, _OFF):
+                    # suggest wake up time, on the basis of 7h30m of sleep + time to fall asleep
+                    (H, M) = wasp.watch.rtc.get_localtime()[3:5]
+                    M += 30 + _TIME_TO_FALL_ASLEEP
+                    while M % 5 != 0:
+                        M += 1
+                    self._spinval_H = ((H + 7) % 24 + (M // 60)) % 24
+                    self._spinval_M = M % 60
                 self._spin_H = widgets.Spinner(30, 70, 0, 23, 2)
                 self._spin_H.value = self._spinval_H
                 self._spin_H.draw()
@@ -299,7 +300,7 @@ class SleepTkApp():
 
     def _read_time(self, HH, MM):
         "convert time from spinners to seconds"
-        (Y, Mo, d, h, m) = wasp.watch.time.localtime()[0:5]
+        (Y, Mo, d, h, m) = wasp.watch.rtc.get_localtime()[0:5]
         HH = self._spinval_H
         MM = self._spinval_M
         if HH < h or (HH == h and MM <= m):
@@ -322,6 +323,9 @@ class SleepTkApp():
         self._track_HR_state = _OFF
         wasp.watch.hrs.disable()
         self._periodicSave()
+        if self._page == _RINGING:  # reset values
+            self._spinval_H = _OFF
+            self._spinval_M = _OFF
         wasp.gc.collect()
 
     def _trackOnce(self):
