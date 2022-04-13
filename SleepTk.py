@@ -134,20 +134,8 @@ class SleepTkApp():
                 self._spinval_M = self._spin_M.value
                 self._spin_M.update()
                 if self._alarm_state:
-                    draw.set_font(_FONT)
-                    duration =  (self._read_time(self._spinval_H, self._spinval_M) - wasp.watch.rtc.time() - _TIME_TO_FALL_ASLEEP * 60) // 60
-                    duration = max(duration, 0)  # if alarm too close
-                    draw.string("Total sleep {:02d}h{:02d}m".format(
-                        int(duration // 60),
-                        int(duration % 60),), 0, 180)
-                    cycl = duration / _CYCLE_LENGTH
-                    draw.string("{} cycles   ".format(str(cycl)[0:4]), 0, 200)
-                    cycl_modulo = cycl - int(cycl)
-                    if cycl_modulo > 0.10 and cycl_modulo < 0.90:
-                        draw.string("Not rested!", 0, 220)
-                    else:
-                        draw.string("Well rested", 0, 220)
-                    return
+                    self._draw_duration(draw)
+                return
             elif self.check_al.touch(event):
                 self._alarm_state = self.check_al.state
                 self.check_al.update()
@@ -168,6 +156,21 @@ class SleepTkApp():
                 self._track_HR_state = self.btn_HR.state
                 return
         self._draw()
+
+    def _draw_duration(self, draw):
+        draw.set_font(_FONT)
+        duration =  (self._read_time(self._spinval_H, self._spinval_M) - wasp.watch.rtc.time() - _TIME_TO_FALL_ASLEEP * 60) // 60
+        duration = max(duration, 0)  # if alarm too close
+        draw.string("Total sleep {:02d}h{:02d}m".format(
+            int(duration // 60),
+            int(duration % 60),), 0, 180)
+        cycl = duration / _CYCLE_LENGTH
+        draw.string("{} cycles   ".format(str(cycl)[0:4]), 0, 200)
+        cycl_modulo = cycl % 1
+        if cycl_modulo > 0.10 and cycl_modulo < 0.90:
+            draw.string("Not rested!", 0, 220)
+        else:
+            draw.string("Well rested", 0, 220)
 
     def _draw(self):
         """GUI"""
@@ -218,6 +221,8 @@ class SleepTkApp():
                 self._spin_M = widgets.Spinner(150, 70, 0, 59, 2, 5)
                 self._spin_M.value = self._spinval_M
                 self._spin_M.draw()
+                if self._alarm_state:
+                    self._draw_duration(draw)
             draw.reset()
         elif self._page == _SETTINGS2:
             if self._alarm_state:
