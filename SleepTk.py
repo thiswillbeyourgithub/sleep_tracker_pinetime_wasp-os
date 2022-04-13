@@ -292,15 +292,12 @@ class SleepTkApp():
 
     def _read_time(self, HH, MM):
         "convert time from spinners to seconds"
-        now = wasp.watch.rtc.get_localtime()
-        yyyy = now[0]
-        mm = now[1]
-        dd = now[2]
+        (Y, Mo, d, h, m) = wasp.watch.rtc.get_localtime()[0:5]
         HH = self._spinval_H
         MM = self._spinval_M
-        if HH < now[3] or (HH == now[3] and MM <= now[4]):
-            dd += 1
-        return wasp.watch.time.mktime((yyyy, mm, dd, HH, MM, 0, 0, 0, 0))
+        if HH < h or (HH == h and MM <= m):
+            d += 1
+        return wasp.watch.time.mktime((Y, Mo, d, HH, MM, 0, 0, 0, 0))
 
     def _disable_tracking(self, keep_main_alarm=False):
         """called by touching "STOP TRACKING" or when computing best alarm time
