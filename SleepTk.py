@@ -53,8 +53,15 @@ class SleepTkApp():
         self._last_HR = _OFF
         self._last_HR_date = _OFF
         self._track_HR_once = _OFF
-        self._spinval_H = 7  # default wake up time
-        self._spinval_M = 30
+
+        # suggest wake up time, on the basis of 7h30m of sleep + time to fall asleep
+        (H, M) = wasp.watch.time.localtime()[3:5]
+        M += 30 + _TIME_TO_FALL_ASLEEP
+        while M % 5 != 0:
+            M += 1
+        self._spinval_H = (H + 7) % 24 + (M // 60)
+        self._spinval_M = M % 60
+
         self._page = _START
         self._is_tracking = _OFF
         self._conf_view = _OFF  # confirmation view
@@ -159,11 +166,11 @@ class SleepTkApp():
 
     def _draw_duration(self, draw):
         draw.set_font(_FONT)
-        duration =  (self._read_time(self._spinval_H, self._spinval_M) - wasp.watch.rtc.time() - _TIME_TO_FALL_ASLEEP * 60) / 60
-        duration = max(duration, 0)  # if alarm too close
+        duration = (self._read_time(self._spinval_H, self._spinval_M) - wasp.watch.rtc.time()) / 60 - _TIME_TO_FALL_ASLEEP
+        assert duration >= _TIME_TO_FALL_ASLEEP
         draw.string("Total sleep {:02d}h{:02d}m".format(
             int(duration // 60),
-            int(duration % 60),), 0, 180)
+            int(duration % 60)), 0, 180)
         cycl = duration / _CYCLE_LENGTH
         draw.string("{} cycles   ".format(str(cycl)[0:4]), 0, 200)
         cycl_modulo = cycl % 1
@@ -292,7 +299,7 @@ class SleepTkApp():
 
     def _read_time(self, HH, MM):
         "convert time from spinners to seconds"
-        (Y, Mo, d, h, m) = wasp.watch.rtc.get_localtime()[0:5]
+        (Y, Mo, d, h, m) = wasp.watch.time.localtime()[0:5]
         HH = self._spinval_H
         MM = self._spinval_M
         if HH < h or (HH == h and MM <= m):
