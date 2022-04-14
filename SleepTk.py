@@ -210,6 +210,9 @@ class SleepTkApp():
                 sub = label[chunks[i]:chunks[i+1]].rstrip()
                 draw.string(sub, 0, 60 + 20 * i)
             draw.reset()
+            # reset spinval values between runs
+            self._spinval_H = _OFF
+            self._spinval_M = _OFF
         elif self._page == _SETTINGS1:
             self.check_al = widgets.Checkbox(x=0, y=40, label="Wake me up")
             self.check_al.state = self._alarm_state
@@ -323,9 +326,6 @@ class SleepTkApp():
         self._track_HR_state = _OFF
         wasp.watch.hrs.disable()
         self._periodicSave()
-        if self._page == _RINGING:  # reset values
-            self._spinval_H = _OFF
-            self._spinval_M = _OFF
         wasp.gc.collect()
 
     def _trackOnce(self):
