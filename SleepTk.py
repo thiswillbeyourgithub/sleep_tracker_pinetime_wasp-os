@@ -16,28 +16,28 @@ import fonts
 import math
 import ppg
 from array import array
-import micropython
+from micropython import const
 
 # HARDCODED VARIABLES:
-_ON = micropython.const(1)
-_OFF = micropython.const(0)
-_TRACKING = micropython.const(0)
-_RINGING = micropython.const(1)
-_START = micropython.const(2)  # page values:
-_SETTINGS1 = micropython.const(3)
-_SETTINGS2 = micropython.const(4)
+_ON = const(1)
+_OFF = const(0)
+_TRACKING = const(0)
+_RINGING = const(1)
+_START = const(2)  # page values:
+_SETTINGS1 = const(3)
+_SETTINGS2 = const(4)
 _FONT = fonts.sans18
-_TIMESTAMP = micropython.const(946684800)  # unix time and time used by wasp os don't have the same reference date
-_FREQ = micropython.const(5)  # get accelerometer data every X seconds, but process and store them only every _STORE_FREQ seconds
-_HR_FREQ = micropython.const(1800)  # how many seconds between heart rate data
-_STORE_FREQ = micropython.const(120)  # process data and store to file every X seconds
-_BATTERY_THRESHOLD = micropython.const(15)  # under X% of battery, stop tracking and only keep the alarm, set at -200 or lower to disable
+_TIMESTAMP = const(946684800)  # unix time and time used by wasp os don't have the same reference date
+_FREQ = const(5)  # get accelerometer data every X seconds, but process and store them only every _STORE_FREQ seconds
+_HR_FREQ = const(1800)  # how many seconds between heart rate data
+_STORE_FREQ = const(120)  # process data and store to file every X seconds
+_BATTERY_THRESHOLD = const(15)  # under X% of battery, stop tracking and only keep the alarm, set at -200 or lower to disable
 
 # user might want to edit this:
-_ANTICIPATE_ALLOWED = micropython.const(2400)  # number of seconds SleepTk can wake you up before the alarm clock you set
+_ANTICIPATE_ALLOWED = const(2400)  # number of seconds SleepTk can wake you up before the alarm clock you set
 _GRADUAL_WAKE = array("H", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 15])  # nb of minutes before alarm to send a tiny vibration to make a smoother wake up
-_TIME_TO_FALL_ASLEEP = micropython.const(14)  # in minutes, according to https://sleepyti.me/
-_CYCLE_LENGTH = micropython.const(90)  # in minutes, default of 90 or 100, according to https://sleepyti.me/  # currently used only to display best wake up time, not to compute smart alarm!
+_TIME_TO_FALL_ASLEEP = const(14)  # in minutes, according to https://sleepyti.me/
+_CYCLE_LENGTH = const(90)  # in minutes, default of 90 or 100, according to https://sleepyti.me/  # currently used only to display best wake up time, not to compute smart alarm!
 
 
 class SleepTkApp():
@@ -366,7 +366,6 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
 
         wasp.gc.collect()
 
-    @micropython.native
     def _periodicSave(self):
         """save data to csv with row order:
             1. average arm angle
@@ -456,13 +455,11 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
     def _smart_alarm_start(self):
         SmartAlarm(self)
 
-
 class SmartAlarm():
     def __init__(self, sleeptk):
         self.sleeptk = sleeptk
         self._smart_alarm_compute()
 
-    @micropython.native
     def _smart_alarm_compute(self):
         """computes best wake up time from sleep data"""
         wasp.gc.collect()
@@ -549,7 +546,6 @@ BY MISTAKE at {:02d}h{:02d}m".format(t[3], t[4])})
                                                       "body": msg})
         wasp.gc.collect()
 
-    @micropython.native
     def _signal_processing(self, data):
         """signal processing over the data read from the local file"""
 
