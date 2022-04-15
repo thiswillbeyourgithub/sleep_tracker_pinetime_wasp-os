@@ -16,28 +16,28 @@ import fonts
 import math
 import ppg
 from array import array
-from micropython import const
+import micropython
 
 # HARDCODED VARIABLES:
-_ON = const(1)
-_OFF = const(0)
-_TRACKING = const(0)
-_RINGING = const(1)
-_START = const(2)  # page values:
-_SETTINGS1 = const(3)
-_SETTINGS2 = const(4)
+_ON = micropython.const(1)
+_OFF = micropython.const(0)
+_TRACKING = micropython.const(0)
+_RINGING = micropython.const(1)
+_START = micropython.const(2)  # page values:
+_SETTINGS1 = micropython.const(3)
+_SETTINGS2 = micropython.const(4)
 _FONT = fonts.sans18
-_TIMESTAMP = const(946684800)  # unix time and time used by wasp os don't have the same reference date
-_FREQ = const(5)  # get accelerometer data every X seconds, but process and store them only every _STORE_FREQ seconds
-_HR_FREQ = const(1800)  # how many seconds between heart rate data
-_STORE_FREQ = const(120)  # process data and store to file every X seconds
-_BATTERY_THRESHOLD = const(15)  # under X% of battery, stop tracking and only keep the alarm, set at -200 or lower to disable
+_TIMESTAMP = micropython.const(946684800)  # unix time and time used by wasp os don't have the same reference date
+_FREQ = micropython.const(5)  # get accelerometer data every X seconds, but process and store them only every _STORE_FREQ seconds
+_HR_FREQ = micropython.const(1800)  # how many seconds between heart rate data
+_STORE_FREQ = micropython.const(120)  # process data and store to file every X seconds
+_BATTERY_THRESHOLD = micropython.const(15)  # under X% of battery, stop tracking and only keep the alarm, set at -200 or lower to disable
 
 # user might want to edit this:
-_ANTICIPATE_ALLOWED = const(2400)  # number of seconds SleepTk can wake you up before the alarm clock you set
+_ANTICIPATE_ALLOWED = micropython.const(2400)  # number of seconds SleepTk can wake you up before the alarm clock you set
 _GRADUAL_WAKE = array("H", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 15])  # nb of minutes before alarm to send a tiny vibration to make a smoother wake up
-_TIME_TO_FALL_ASLEEP = const(14)  # in minutes, according to https://sleepyti.me/
-_CYCLE_LENGTH = const(90)  # in minutes, default of 90 or 100, according to https://sleepyti.me/  # currently used only to display best wake up time, not to compute smart alarm!
+_TIME_TO_FALL_ASLEEP = micropython.const(14)  # in minutes, according to https://sleepyti.me/
+_CYCLE_LENGTH = micropython.const(90)  # in minutes, default of 90 or 100, according to https://sleepyti.me/  # currently used only to display best wake up time, not to compute smart alarm!
 
 
 class SleepTkApp():
@@ -297,7 +297,7 @@ class SleepTkApp():
             # wake up SleepTk 2min before earliest possible wake up
             if self._smart_alarm_state:
                 self._WU_a = self._WU_t - _ANTICIPATE_ALLOWED - 120
-                wasp.system.set_alarm(self._WU_a, self._smart_alarm_compute)
+                wasp.system.set_alarm(self._WU_a, self._smart_alarm_start)
         wasp.system.notify_level = 1  # silent notifications
         self._page = _TRACKING
 
@@ -321,7 +321,7 @@ class SleepTkApp():
                 for t in _GRADUAL_WAKE:
                     wasp.system.cancel_alarm(self._WU_t - t*60, self._tiny_vibration)
             if self._smart_alarm_state:
-                wasp.system.cancel_alarm(self._WU_a, self._smart_alarm_compute)
+                wasp.system.cancel_alarm(self._WU_a, self._smart_alarm_start)
                 self._smart_alarm_state = _OFF
         self._track_HR_state = _OFF
         wasp.watch.hrs.disable()
@@ -366,6 +366,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
 
         wasp.gc.collect()
 
+    @micropython.native
     def _periodicSave(self):
         """save data to csv with row order:
             1. average arm angle
@@ -399,6 +400,156 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             self._last_checkpoint = self._data_point_nb
             wasp.gc.collect()
 
+
+    def _listen_to_ticks(self):
+        """listen to ticks every second, telling the watch to vibrate"""
+        wasp.gc.collect()
+        wasp.system.notify_level = self._old_notification_level  # restore notification level
+        self._page = _RINGING
+        mute = wasp.watch.display.mute
+        mute(True)
+        wasp.system.wake()
+        wasp.system.switch(self)
+        self._draw()
+        wasp.system.request_tick(period_ms=1000)
+
+    def tick(self, ticks):
+        """vibrate to wake you up OR track heart rate using code from heart.py"""
+        if self._page == _RINGING:
+            wasp.watch.vibrator.pulse(duty=50, ms=500)
+        elif self._track_HR_once:
+            t = wasp.machine.Timer(id=1, period=8000000)
+            mute = wasp.watch.display.mute
+            t.start()
+            self._subtick(1)
+            wasp.system.keep_awake()
+            mute(True)
+            while t.time() < 41666:
+                pass
+            self._subtick(1)
+            while t.time() < 83332:
+                pass
+            self._subtick(1)
+            t.stop()
+            del t
+
+            if len(self._hrdata.data) >= 240:  # 10 seconds passed
+                self._last_HR = self._hrdata.get_heart_rate()
+                self._last_HR_date = int(wasp.watch.rtc.time())
+                self._track_HR_once = _OFF
+                wasp.watch.hrs.disable()
+
+    def _subtick(self, ticks):
+        """track heart rate at 24Hz"""
+        self._hrdata.preprocess(wasp.watch.hrs.read_hrs())
+
+    def _tiny_vibration(self):
+        """vibrate just a tiny bit before waking up, to gradually return
+        to consciousness"""
+        wasp.gc.collect()
+        mute = wasp.watch.display.mute
+        mute(True)
+        wasp.system.wake()
+        wasp.system.switch(self)
+        wasp.watch.vibrator.pulse(duty=60, ms=100)
+
+    def _smart_alarm_start(self):
+        SmartAlarm(self)
+
+
+class SmartAlarm():
+    def __init__(self, sleeptk):
+        self.sleeptk = sleeptk
+        self._smart_alarm_compute()
+
+    @micropython.native
+    def _smart_alarm_compute(self):
+        """computes best wake up time from sleep data"""
+        wasp.gc.collect()
+        if not self.sleeptk._smart_alarm_state:
+            t = wasp.watch.time.localtime(wasp.watch.rtc.time())
+            wasp.system.notify(wasp.watch.rtc.get_uptime_ms(),
+                          {"src": "SleepTk",
+                           "title": "Smart alarm computation",
+                           "body": "Started computation for the smart alarm \
+BY MISTAKE at {:02d}h{:02d}m".format(t[3], t[4])})
+            return
+        mute = wasp.watch.display.mute
+        mute(True)
+        wasp.system.wake()
+        wasp.system.switch(self.sleeptk)
+        t = wasp.watch.time.localtime(wasp.watch.rtc.time())
+        wasp.system.notify(wasp.watch.rtc.get_uptime_ms(),
+                      {"src": "SleepTk",
+                       "title": "Starting smart alarm computation",
+                       "body": "Starting computation for the smart alarm at {:02d}h{:02d}m".format(t[3], t[4])}
+                      )
+        try:
+            start_time = wasp.watch.rtc.time()
+            # stop tracking to save memory, keep the alarm just in case
+            #self.sleeptk._disable_tracking(keep_main_alarm=True)
+
+            # read file one character at a time, to get only the 1st
+            # value of each row, which is the arm angle
+            data = array("f")
+            buff = b""
+            f = open(self.sleeptk.filep, "rb")
+            skip = False
+            while True:
+                char = f.read(1)
+                if char == b",":  # start ignoring after the first col
+                    skip = True
+                    continue
+                if char == b"\n":
+                    skip = False  # stop skipping because reading a new line
+                    data.append(float(buff))
+                    buff = b""
+                    continue
+                if char == b"":  # end of file
+                    data.append(float(buff))
+                    break
+                if not skip:  # digit of arm angle value
+                    buff += char
+
+            f.close()
+            del f, char, buff
+            wasp.gc.collect()
+            wasp.system.keep_awake()
+
+            earlier, cycle = self.sleeptk._signal_processing(data)
+            WU_t = self.sleeptk._WU_t
+            wasp.gc.collect()
+
+            # add new alarm
+            wasp.system.set_alarm(max(WU_t - earlier, int(wasp.watch.rtc.time()) + 3),  # not before right now, to make sure it rings
+                                  self.sleeptk._listen_to_ticks)
+
+            # replace old gentle alarm by another one
+            if self.sleeptk._grad_alarm_state:
+                for t in _GRADUAL_WAKE:
+                    wasp.system.cancel_alarm(WU_t - t*60, self.sleeptk._tiny_vibration)
+                    if earlier + t*60 < _ANTICIPATE_ALLOWED:
+                        wasp.system.set_alarm(WU_t - earlier - t*60, self.sleeptk._tiny_vibration)
+
+            self.sleeptk._earlier = earlier
+            self.sleeptk._page = _TRACKING
+            wasp.system.notify(wasp.watch.rtc.get_uptime_ms(), {"src": "SleepTk",
+                                                      "title": "Finished smart alarm computation",
+                                                      "body": "Finished computing best wake up time in {:2f}s. Sleep cycle: {:.2f}h".format(wasp.watch.rtc.time() - start_time, cycle)
+                                                      })
+        except Exception as e:
+            wasp.gc.collect()
+            h, m = wasp.watch.time.localtime(wasp.watch.rtc.time())[3:5]
+            msg = "Exception occured at {:02d}h{:02d}m: '{}'%".format(h, m, str(e))
+            f = open("smart_alarm_error_{}.txt".format(int(wasp.watch.rtc.time())), "wb")
+            f.write(msg.encode())
+            f.close()
+            wasp.system.notify(wasp.watch.rtc.get_uptime_ms(), {"src": "SleepTk",
+                                                      "title": "Smart alarm error",
+                                                      "body": msg})
+        wasp.gc.collect()
+
+    @micropython.native
     def _signal_processing(self, data):
         """signal processing over the data read from the local file"""
 
@@ -473,8 +624,8 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
         # sleep cycle duration is the average time distance between those N peaks
         cycle = sum([x_maximas[i+1] - x_maximas[i] for i in range(len(x_maximas) -1)]) / N * _STORE_FREQ
 
-        last_peak = self._offset + x_maximas[-1] * _STORE_FREQ
-        WU_t = self._WU_t
+        last_peak = self.sleeptk._offset + x_maximas[-1] * _STORE_FREQ
+        WU_t = self.sleeptk._WU_t
 
         # check if too late, already woken up:
         if last_peak + cycle > WU_t:
@@ -484,145 +635,6 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
         if last_peak + cycle < WU_t - _ANTICIPATE_ALLOWED:
             earlier = _ANTICIPATE_ALLOWED
         else:  # will wake you up at computed time
-            earlier = last_peak - self._offset + cycle
+            earlier = last_peak - self.sleeptk._offset + cycle
         wasp.system.keep_awake()
         return (earlier, cycle)
-
-    def _smart_alarm_compute(self):
-        """computes best wake up time from sleep data"""
-        wasp.gc.collect()
-        if not self._smart_alarm_state:
-            t = wasp.watch.time.localtime(wasp.watch.rtc.time())
-            wasp.system.notify(wasp.watch.rtc.get_uptime_ms(),
-                          {"src": "SleepTk",
-                           "title": "Smart alarm computation",
-                           "body": "Started computation for the smart alarm \
-BY MISTAKE at {:02d}h{:02d}m".format(t[3], t[4])})
-            return
-        mute = wasp.watch.display.mute
-        mute(True)
-        wasp.system.wake()
-        wasp.system.switch(self)
-        t = wasp.watch.time.localtime(wasp.watch.rtc.time())
-        wasp.system.notify(wasp.watch.rtc.get_uptime_ms(),
-                      {"src": "SleepTk",
-                       "title": "Starting smart alarm computation",
-                       "body": "Starting computation for the smart alarm at {:02d}h{:02d}m".format(t[3], t[4])}
-                      )
-        try:
-            start_time = wasp.watch.rtc.time()
-            # stop tracking to save memory, keep the alarm just in case
-            #self._disable_tracking(keep_main_alarm=True)
-
-            # read file one character at a time, to get only the 1st
-            # value of each row, which is the arm angle
-            data = array("f")
-            buff = b""
-            f = open(self.filep, "rb")
-            skip = False
-            while True:
-                char = f.read(1)
-                if char == b",":  # start ignoring after the first col
-                    skip = True
-                    continue
-                if char == b"\n":
-                    skip = False  # stop skipping because reading a new line
-                    data.append(float(buff))
-                    buff = b""
-                    continue
-                if char == b"":  # end of file
-                    data.append(float(buff))
-                    break
-                if not skip:  # digit of arm angle value
-                    buff += char
-
-            f.close()
-            del f, char, buff
-            wasp.gc.collect()
-            wasp.system.keep_awake()
-
-            earlier, cycle = self._signal_processing(data)
-            WU_t = self._WU_t
-            wasp.gc.collect()
-
-            # add new alarm
-            wasp.system.set_alarm(max(WU_t - earlier, int(wasp.watch.rtc.time()) + 3),  # not before right now, to make sure it rings
-                                  self._listen_to_ticks)
-
-            # replace old gentle alarm by another one
-            if self._grad_alarm_state:
-                for t in _GRADUAL_WAKE:
-                    wasp.system.cancel_alarm(WU_t - t*60, self._tiny_vibration)
-                    if earlier + t*60 < _ANTICIPATE_ALLOWED:
-                        wasp.system.set_alarm(WU_t - earlier - t*60, self._tiny_vibration)
-
-            self._earlier = earlier
-            self._page = _TRACKING
-            wasp.system.notify(wasp.watch.rtc.get_uptime_ms(), {"src": "SleepTk",
-                                                      "title": "Finished smart alarm computation",
-                                                      "body": "Finished computing best wake up time in {:2f}s. Sleep cycle: {:.2f}h".format(wasp.watch.rtc.time() - start_time, cycle)
-                                                      })
-        except Exception as e:
-            wasp.gc.collect()
-            h, m = wasp.watch.time.localtime(wasp.watch.rtc.time())[3:5]
-            msg = "Exception occured at {:02d}h{:02d}m: '{}'%".format(h, m, str(e))
-            f = open("smart_alarm_error_{}.txt".format(int(wasp.watch.rtc.time())), "wb")
-            f.write(msg.encode())
-            f.close()
-            wasp.system.notify(wasp.watch.rtc.get_uptime_ms(), {"src": "SleepTk",
-                                                      "title": "Smart alarm error",
-                                                      "body": msg})
-        wasp.gc.collect()
-
-
-    def _listen_to_ticks(self):
-        """listen to ticks every second, telling the watch to vibrate"""
-        wasp.gc.collect()
-        wasp.system.notify_level = self._old_notification_level  # restore notification level
-        self._page = _RINGING
-        mute = wasp.watch.display.mute
-        mute(True)
-        wasp.system.wake()
-        wasp.system.switch(self)
-        self._draw()
-        wasp.system.request_tick(period_ms=1000)
-
-    def tick(self, ticks):
-        """vibrate to wake you up OR track heart rate using code from heart.py"""
-        if self._page == _RINGING:
-            wasp.watch.vibrator.pulse(duty=50, ms=500)
-        elif self._track_HR_once:
-            t = wasp.machine.Timer(id=1, period=8000000)
-            mute = wasp.watch.display.mute
-            t.start()
-            self._subtick(1)
-            wasp.system.keep_awake()
-            mute(True)
-            while t.time() < 41666:
-                pass
-            self._subtick(1)
-            while t.time() < 83332:
-                pass
-            self._subtick(1)
-            t.stop()
-            del t
-
-            if len(self._hrdata.data) >= 240:  # 10 seconds passed
-                self._last_HR = self._hrdata.get_heart_rate()
-                self._last_HR_date = int(wasp.watch.rtc.time())
-                self._track_HR_once = _OFF
-                wasp.watch.hrs.disable()
-
-    def _subtick(self, ticks):
-        """track heart rate at 24Hz"""
-        self._hrdata.preprocess(wasp.watch.hrs.read_hrs())
-
-    def _tiny_vibration(self):
-        """vibrate just a tiny bit before waking up, to gradually return
-        to consciousness"""
-        wasp.gc.collect()
-        mute = wasp.watch.display.mute
-        mute(True)
-        wasp.system.wake()
-        wasp.system.switch(self)
-        wasp.watch.vibrator.pulse(duty=60, ms=100)
