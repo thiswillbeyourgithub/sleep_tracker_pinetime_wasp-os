@@ -150,6 +150,7 @@ class SleepTkApp():
                     self.check_grad.draw()
                     return
             if self.btn_sta.touch(event):
+                draw.fill()
                 self._start_tracking()
             elif self.btn_HR.touch(event):
                 self.btn_HR.draw()
