@@ -28,7 +28,6 @@
 * the notifications are set to "silent" during the tracking session and are restored to the previously used level when the alarm is ringing
 
 # Screenshots:
-![start](./screenshots/start_page.png)
 ![settings](./screenshots/settings_page.png)
 ![settings2](./screenshots/settings_page2.png)
 ![tracking](./screenshots/tracking_page.png)

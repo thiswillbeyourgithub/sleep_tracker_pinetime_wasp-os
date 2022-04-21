@@ -23,9 +23,8 @@ _ON = const(1)
 _OFF = const(0)
 _TRACKING = const(0)
 _RINGING = const(1)
-_START = const(2)  # page values:
-_SETTINGS1 = const(3)
-_SETTINGS2 = const(4)
+_SETTINGS1 = const(2)
+_SETTINGS2 = const(3)
 _FONT = fonts.sans18
 _TIMESTAMP = const(946684800)  # unix time and time used by wasp os don't have the same reference date
 _FREQ = const(5)  # get accelerometer data every X seconds, but process and store them only every _STORE_FREQ seconds
@@ -55,7 +54,7 @@ class SleepTkApp():
         self._track_HR_once = _OFF
         self._spinval_H = _OFF
         self._spinval_M = _OFF
-        self._page = _START
+        self._page = _SETTINGS1
         self._is_tracking = _OFF
         self._conf_view = _OFF  # confirmation view
         self._earlier = 0  # number of seconds between the alarm you set manually and the smart alarm time
@@ -90,20 +89,20 @@ class SleepTkApp():
         if state:
             if self._page == _RINGING:
                 self._disable_tracking()
-                self._page = _START
+                self._page = _SETTINGS1
             else:
                 wasp.system.navigate(wasp.EventType.HOME)
 
     def swipe(self, event):
-        "navigate between start and various settings page"
-        if self._page >= 2:
+        "navigate between settings page"
+        if self._page == _SETTINGS1:
+            if event[0] == wasp.EventType.LEFT:
+                self._page = _SETTINGS2
+                self._draw()
+        elif self._page == _SETTINGS2:
             if event[0] == wasp.EventType.RIGHT:
-                self._page -= 1
-            else:
-                self._page += 1
-            self._page = max(self._page, _START)
-            self._page = min(self._page, _SETTINGS2)
-            self._draw()
+                self._page = _SETTINGS1
+                self._draw()
 
     def touch(self, event):
         """either start trackign or disable it, draw the screen in all cases"""
@@ -120,13 +119,13 @@ class SleepTkApp():
                 if self._conf_view.touch(event):
                     if self._conf_view.value:
                         self._disable_tracking()
-                        self._page = _START
+                        self._page = _SETTINGS1
                     self._conf_view = _OFF
                 draw.reset()
         elif self._page == _RINGING:
             if self.btn_al.touch(event):
                 self._disable_tracking()
-                self._page = _START
+                self._page = _SETTINGS1
         elif self._page == _SETTINGS1:
             if self._alarm_state and (self._spin_H.touch(event) or self._spin_M.touch(event)):
                 self._spinval_H = self._spin_H.value
@@ -203,18 +202,10 @@ class SleepTkApp():
             self.btn_off = widgets.Button(x=0, y=200, w=240, h=40, label="Stop tracking")
             self.btn_off.draw()
             draw.reset()
-        elif self._page == _START:
-            draw.set_font(_FONT)
-            label = 'Sleep tracker with optional wake up alarm, smart alarm up to 40min before, gradual wake up to 15m. Swipe to navigate.'
-            chunks = draw.wrap(label, 240)
-            for i in range(len(chunks)-1):
-                sub = label[chunks[i]:chunks[i+1]].rstrip()
-                draw.string(sub, 0, 60 + 20 * i)
-            draw.reset()
+        elif self._page == _SETTINGS1:
             # reset spinval values between runs
             self._spinval_H = _OFF
             self._spinval_M = _OFF
-        elif self._page == _SETTINGS1:
             self.check_al = widgets.Checkbox(x=0, y=40, label="Wake me up")
             self.check_al.state = self._alarm_state
             self.check_al.draw()
