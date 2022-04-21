@@ -36,6 +36,7 @@
 
 ## TODO
 **misc**
+* write sleep duration and cycle during the night
 * remove duplicate variables that store spinner values
 * investigate adding snooze feature like in the original `alarms.py` app
 * investigate adding a simple feature to wake you up only after a certain movement threshold was passed
