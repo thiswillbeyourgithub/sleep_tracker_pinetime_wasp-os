@@ -241,7 +241,7 @@ class SleepTkApp():
                 chunks = draw.wrap(label, 240)
                 for i in range(len(chunks)-1):
                     sub = label[chunks[i]:chunks[i+1]].rstrip()
-                    draw.string(sub, 0, 50 + 24 * i)
+                    draw.string(sub, 0, 80 + 20 * i)
             draw.reset()
             self.btn_HR = widgets.Checkbox(x=0, y=40, label="Heart rate tracking")
             self.btn_HR.state = self._track_HR_state
