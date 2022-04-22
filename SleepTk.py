@@ -67,6 +67,8 @@ class SleepTkApp():
         wasp.gc.collect()
         # default values:
         self._alarm_state = _ON
+        self._tracking_enabled_state = _ON
+
         self._grad_alarm_state = _ON
         self._smart_alarm_state = _OFF  # activate waking you up at optimal time  based on accelerometer data, at the earliest at _WU_LAT - _WU_SMART
         self._track_HR_state = _OFF
@@ -188,6 +190,10 @@ class SleepTkApp():
                 self.btn_HR.draw()
                 self._track_HR_state = self.btn_HR.state
                 return
+            elif self.check_track.touch(event):
+                self._tracking_enabled_state = self.check_track.state
+                self.check_track.draw()
+                return
         self._draw()
 
     def _draw_duration(self, draw):
@@ -280,6 +286,9 @@ class SleepTkApp():
                 self.check_smart = widgets.Checkbox(x=0, y=120, label="Smart alarm (alpha)")
                 self.check_smart.state = self._smart_alarm_state
                 self.check_smart.draw()
+                self.check_track = widgets.Checkbox(x=0, y=160, label="Track")
+                self.check_track.state = self._tracking_enabled_state
+                self.check_track.draw()
             draw.reset()
             self.btn_HR = widgets.Checkbox(x=0, y=40, label="Heart rate tracking")
             self.btn_HR.state = self._track_HR_state
@@ -305,9 +314,10 @@ class SleepTkApp():
         f.write(b"")
         f.close()
 
-        # add alarm to log accel data in _FREQ seconds
-        self.next_al = wasp.watch.rtc.time() + _FREQ
-        wasp.system.set_alarm(self.next_al, self._trackOnce)
+        # if enabled, add alarm to log accel data in _FREQ seconds
+        if self._tracking_enabled_state:
+            self.next_al = wasp.watch.rtc.time() + _FREQ
+            wasp.system.set_alarm(self.next_al, self._trackOnce)
 
         if self._grad_alarm_state and not self._alarm_state:
             # fix incompatible settings
