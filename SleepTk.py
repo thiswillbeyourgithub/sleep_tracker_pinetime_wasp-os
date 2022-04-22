@@ -70,6 +70,7 @@ class SleepTkApp():
         self._grad_alarm_state = _ON
         self._smart_alarm_state = _OFF  # activate waking you up at optimal time  based on accelerometer data, at the earliest at _WU_LAT - _WU_SMART
         self._track_HR_state = _OFF
+        self._hrdata = None
         self._last_HR = _OFF
         self._last_HR_date = _OFF
         self._track_HR_once = _OFF
@@ -104,7 +105,6 @@ class SleepTkApp():
 
     def background(self):
         wasp.watch.hrs.disable()
-        self._track_HR_once = _OFF
         self._hrdata = None
         wasp.gc.collect()
 
@@ -392,14 +392,12 @@ tracking sleep at {}h{}m because your battery went below {}%. Alarm kept \
 on.".format(h, m, _BATTERY_THRESHOLD)})
             elif self._track_HR_state:
                 if wasp.watch.rtc.time() - self._last_HR_date > _HR_FREQ and not self._track_HR_once:
-                    wasp.watch.hrs.enable()
-                    self._hrdata = ppg.PPG(wasp.watch.hrs.read_hrs())
-                    self._track_HR_once = _ON
                     mute = wasp.watch.display.mute
                     mute(True)
                     wasp.system.wake()
                     mute(True)
                     wasp.system.switch(self)
+                    self._track_HR_once = _ON
                     wasp.system.request_tick(1000 // 8)
 
         wasp.gc.collect()
@@ -454,6 +452,9 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
         if self._page == _RINGING:
             wasp.watch.vibrator.pulse(duty=50, ms=500)
         elif self._track_HR_once:
+            wasp.watch.hrs.enable()
+            if self._hrdata is None:
+                self._hrdata = ppg.PPG(wasp.watch.hrs.read_hrs())
             t = wasp.machine.Timer(id=1, period=8000000)
             mute = wasp.watch.display.mute
             t.start()
