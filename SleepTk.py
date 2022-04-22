@@ -333,7 +333,9 @@ class SleepTkApp():
         self.btn_al = None
         self.btn_off = None
         self.btn_HR = None
-        del self.btn_sta, self.btn_al, self.btn_off, self.btn_HR
+        self._spin_H = None
+        self._spin_M = None
+        del self.btn_sta, self.btn_al, self.btn_off, self.btn_HR, self._spin_H, self._spin_M
 
     def _read_time(self, HH, MM):
         "convert time from spinners to seconds"
