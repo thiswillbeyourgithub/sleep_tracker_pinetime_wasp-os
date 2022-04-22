@@ -99,9 +99,16 @@ class SleepTkApp():
         wasp.system.request_event(wasp.EventMask.TOUCH |
                                   wasp.EventMask.SWIPE_LEFTRIGHT |
                                   wasp.EventMask.BUTTON)
+        if self._page == _TRACKING and self._track_HR_once:
+            wasp.system.request_tick(1000 // 8)
 
     def sleep(self):
         return True
+
+    def wake(self):
+        self._draw()
+        if self._page == _TRACKING and self._track_HR_once:
+            wasp.system.request_tick(1000 // 8)
 
     def background(self):
         wasp.watch.hrs.disable()
