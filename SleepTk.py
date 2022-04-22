@@ -76,7 +76,7 @@ class SleepTkApp():
         self._state_spinval_M = _OFF
 
         self._hrdata = None
-        self._last_HR = _OFF
+        self._last_HR = _OFF  # if _OFF, no HR to write, if "?": error during last HR, else: heart rate
         self._last_HR_printed = "?"
         self._last_HR_date = _OFF
         self._track_HR_once = _OFF
