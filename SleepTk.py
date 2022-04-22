@@ -513,7 +513,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             wasp.system.keep_awake()
             if len(self._hrdata.data) >= 720:  # 30 seconds passed
                 bpm = self._hrdata.get_heart_rate()
-                if bpm < 150 and bpm > 30:
+                if bpm < 100 and bpm > 40:
                     # if HR was already computed since last periodicSave,
                     # then average the two values
                     if self._last_HR != _OFF and self._last_HR != "?":
