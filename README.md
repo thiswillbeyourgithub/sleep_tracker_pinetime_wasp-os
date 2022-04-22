@@ -8,6 +8,7 @@
 * **Gradual wake**: vibrates the watch a tiny bit a few times before the alarm to lift you gently back to consciousness.
 * **Smart alarm clock (alpha)**: adaptative alarm that wakes you at the best time of your sleep cycle (up to 40 minutes before the set time) to make sure you wake up feeling refreshed.
 * **Heart tracking**: tracks your heart rate throughout the night.
+* **Insomnia insights**: if you turn on the screen during the night, SleepTk will tell you how long you slept and in what part of the sleep cycle you are supposed to be.
 * **Privacy friendly**: your data is not sent to anyone, it is stored and analyzed directly on the watch (but you can still download it if needed).
 * **Open source**
 
