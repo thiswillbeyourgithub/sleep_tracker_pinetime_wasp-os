@@ -18,7 +18,7 @@ import ppg
 from array import array
 from micropython import const
 
-# 2-bit RLE, 60x60, 225 bytes, kindly designed by Emanuel Lofler (https://github.com/plan5)
+# 2-bit RLE, 60x60, 225 bytes, kindly designed by Emanuel Löffler (https://github.com/plan5)
 icon = (
     b'\x02'
     b'<<'

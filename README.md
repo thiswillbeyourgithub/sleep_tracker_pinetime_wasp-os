@@ -12,7 +12,7 @@
 * **Open source**
 
 ## Credits:
-* Many thanks to Emanuel Loffler (https://github.com/plan5) who kindly created the logo.
+* Many thanks to Emanuel Löffler (https://github.com/plan5) who kindly created the logo.
 
 ## **How to install**:
 *(for now you need my slightly forked wasp-os that allows to use accelerometer data)*
