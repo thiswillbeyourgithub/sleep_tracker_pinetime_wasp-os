@@ -455,7 +455,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             buff[1] /= n
             buff[2] /= n
             if self._last_HR != _OFF:
-                bpm = ",{}".format(self._last_HR)
+                bpm = ",{}".format(str(self._last_HR))
                 self._last_HR = _OFF
             else:
                 bpm = ""
