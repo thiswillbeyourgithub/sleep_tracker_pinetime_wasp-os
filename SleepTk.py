@@ -284,12 +284,13 @@ class SleepTkApp():
                 self.check_grad = widgets.Checkbox(0, 80, "Gradual wake")
                 self.check_grad.state = self._grad_alarm_state
                 self.check_grad.draw()
-                self.check_smart = widgets.Checkbox(x=0, y=120, label="Smart alarm (alpha)")
-                self.check_smart.state = self._smart_alarm_state
-                self.check_smart.draw()
-                self.check_track = widgets.Checkbox(x=0, y=160, label="Track")
+                self.check_track = widgets.Checkbox(x=0, y=120, label="Body tracking")
                 self.check_track.state = self._tracking_enabled_state
                 self.check_track.draw()
+                if self._tracking_enabled_state:
+                    self.check_smart = widgets.Checkbox(x=0, y=160, label="Smart alarm (alpha)")
+                    self.check_smart.state = self._smart_alarm_state
+                    self.check_smart.draw()
             draw.reset()
             self.btn_HR = widgets.Checkbox(x=0, y=40, label="Heart rate tracking")
             self.btn_HR.state = self._track_HR_state
