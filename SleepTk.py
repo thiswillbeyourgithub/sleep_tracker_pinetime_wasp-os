@@ -284,7 +284,7 @@ class SleepTkApp():
             self.btn_HR = widgets.Checkbox(x=0, y=40, label="Heart rate tracking")
             self.btn_HR.state = self._track_HR_state
             self.btn_HR.draw()
-            self.btn_sta = widgets.Button(x=0, y=200, w=240, h=40, label="Start tracking")
+            self.btn_sta = widgets.Button(x=0, y=200, w=240, h=40, label="Start")
             self.btn_sta.draw()
             draw.reset()
         self.stat_bar = widgets.StatusBar()
