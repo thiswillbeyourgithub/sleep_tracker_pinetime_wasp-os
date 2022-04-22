@@ -1,6 +1,7 @@
 #!/usr/local/bin/python3
 
 
+import time
 import os
 import subprocess
 import shlex
@@ -17,6 +18,8 @@ ls_cmd = './tools/wasptool --verbose --eval \'from shell import ls ; ls(\"/flash
 out = subprocess.check_output(shlex.split(ls_cmd)).decode()
 files = re.findall(r"\d*\.csv", out)
 print(f"Found files {', '.join(files)}")
+
+reset_cmd = './tools/wasptool --verbose --reset'
 
 
 if mode == "latest":
@@ -41,4 +44,9 @@ for fi in to_dl:
         except Exception as e:
             print(f"Error happened while downloading {fi}, deleting local incomplete file")
             os.system(f"rm ./logs/sleep/{fi}")
+        if mode == "all":
+            print("Restarting watch.")
+            out = subprocess.check_output(shlex.split(reset_cmd))
+            time.sleep(10)
+
     print("\n\n")
