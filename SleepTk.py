@@ -72,6 +72,7 @@ class SleepTkApp():
         self._track_HR_state = _OFF
         self._hrdata = None
         self._last_HR = _OFF
+        self._last_HR_printed = "?"
         self._last_HR_date = _OFF
         self._track_HR_once = _OFF
         self._spinval_H = _OFF
@@ -240,6 +241,8 @@ class SleepTkApp():
             draw.string("data points: {} / {}".format(str(self._data_point_nb), str(self._data_point_nb * _FREQ // _STORE_FREQ)), 0, 110)
             if self._track_HR_once:
                 draw.string("(Currently tracking HR)", 0, 170)
+            if self._track_HR_state:
+                draw.string("HR:{}".format(self._last_HR_printed), 200, 50)
             self.btn_off = widgets.Button(x=0, y=200, w=240, h=40, label="Stop tracking")
             self.btn_off.draw()
             draw.reset()
@@ -492,6 +495,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
                     # keep trying to read HR
                     self._last_HR = "?"
                     self._hrdata = None
+                self._last_HR_printed = self._last_HR
 
     def _subtick(self, ticks):
         """track heart rate at 24Hz"""
