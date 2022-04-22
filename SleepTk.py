@@ -440,18 +440,21 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             t = wasp.machine.Timer(id=1, period=8000000)
             mute = wasp.watch.display.mute
             t.start()
-            self._subtick(1)
             wasp.system.keep_awake()
+            self._subtick(1)
             mute(True)
             while t.time() < 41666:
                 pass
+            wasp.system.keep_awake()
             self._subtick(1)
             while t.time() < 83332:
                 pass
+            wasp.system.keep_awake()
             self._subtick(1)
             t.stop()
             del t
 
+            wasp.system.keep_awake()
             if len(self._hrdata.data) >= 240:  # 10 seconds passed
                 self._last_HR = self._hrdata.get_heart_rate()
                 self._last_HR_date = int(wasp.watch.rtc.time())
