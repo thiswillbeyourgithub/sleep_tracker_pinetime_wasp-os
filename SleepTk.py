@@ -184,18 +184,25 @@ class SleepTkApp():
 
     def _draw_duration(self, draw):
         draw.set_font(_FONT)
-        duration = (self._read_time(self._spinval_H, self._spinval_M) - wasp.watch.rtc.time()) / 60 - _TIME_TO_FALL_ASLEEP
-        assert duration >= _TIME_TO_FALL_ASLEEP
+        if self._page == _SETTINGS1:
+            duration = (self._read_time(self._spinval_H, self._spinval_M) - wasp.watch.rtc.time()) / 60 - _TIME_TO_FALL_ASLEEP
+            assert duration >= _TIME_TO_FALL_ASLEEP
+            y = 180
+        elif self._page == _TRACKING:
+            duration = (wasp.watch.rtc.time() - self._offset) / 60  # time slept
+            y = 130
+
         draw.string("Total sleep {:02d}h{:02d}m".format(
             int(duration // 60),
-            int(duration % 60)), 0, 180)
+            int(duration % 60)), 0, y + 20)
         cycl = duration / _CYCLE_LENGTH
-        draw.string("{} cycles   ".format(str(cycl)[0:4]), 0, 200)
         cycl_modulo = cycl % 1
-        if cycl_modulo > 0.10 and cycl_modulo < 0.90:
-            draw.string("Not rested!", 0, 220)
-        else:
-            draw.string("Well rested", 0, 220)
+        draw.string("{} cycles   ".format(str(cycl)[0:4]), 0, y)
+        if duration > 30 and not self._track_HR_once:
+            if cycl_modulo > 0.10 and cycl_modulo < 0.90:
+                draw.string("Not rested!", 0, y + 40)
+            else:
+                draw.string("Well rested", 0, y + 40)
 
     def _draw(self):
         """GUI"""
@@ -213,22 +220,23 @@ class SleepTkApp():
             draw.reset()
         elif self._page == _TRACKING:
             ti = wasp.watch.time.localtime(self._offset)
-            draw.string('Began at {:02d}:{:02d}'.format(ti[3], ti[4]), 0, 70)
+            draw.string('Began at {:02d}:{:02d}'.format(ti[3], ti[4]), 0, 50)
             if self._alarm_state:
                 word = "Alarm at "
                 if self._smart_alarm_state:
                     word = "Alarm BEFORE "
                 ti = wasp.watch.time.localtime(self._WU_t)
-                draw.string("{}{:02d}:{:02d}".format(word, ti[3], ti[4]), 0, 90)
-                draw.string("Gradual wake: {}".format(True if self._grad_alarm_state else False), 0, 110)
+                draw.string("{}{:02d}:{:02d}".format(word, ti[3], ti[4]), 0, 70)
+                draw.string("Gradual wake: {}".format(True if self._grad_alarm_state else False), 0, 90)
             else:
-                draw.string("No alarm set", 0, 90)
-            draw.string("data points: {} / {}".format(str(self._data_point_nb), str(self._data_point_nb * _FREQ // _STORE_FREQ)), 0, 130)
+                draw.string("No alarm set", 0, 70)
+            draw.string("data points: {} / {}".format(str(self._data_point_nb), str(self._data_point_nb * _FREQ // _STORE_FREQ)), 0, 110)
             if self._track_HR_once:
-                draw.string("(Currently tracking HR)", 0, 150)
+                draw.string("(Currently tracking HR)", 0, 170)
             self.btn_off = widgets.Button(x=0, y=200, w=240, h=40, label="Stop tracking")
             self.btn_off.draw()
             draw.reset()
+            self._draw_duration(draw)
         elif self._page == _SETTINGS1:
             # reset spinval values between runs
             self._spinval_H = _OFF
