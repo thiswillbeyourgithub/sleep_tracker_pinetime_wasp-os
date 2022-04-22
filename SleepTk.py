@@ -174,28 +174,31 @@ class SleepTkApp():
                 self._state_alarm = self.check_al.state
                 self.check_al.update()
         elif self._page == _SETTINGS2:
-            if self._state_alarm:
-                if self.check_smart.touch(event):
-                    self._state_smart_alarm = self.check_smart.state
-                    self.check_smart.draw()
+            if self._state_body_tracking:
+                if self.btn_HR.touch(event):
+                    self.btn_HR.draw()
+                    self._state_HR_tracking = self.btn_HR.state
                     return
-                elif self.check_grad.touch(event):
+            if self._state_alarm:
+                if self.check_grad.touch(event):
                     self._state_gradual_wake = self.check_grad.state
                     self.check_grad.draw()
                     return
+                if self._state_body_tracking:
+                    if self.check_smart.touch(event):
+                        self._state_smart_alarm = self.check_smart.state
+                        self.check_smart.draw()
+                        return
             if self.btn_sta.touch(event):
                 draw.fill()
                 draw.string("Loading", 0, 100)
                 self._start_tracking()
-            elif self.btn_HR.touch(event):
-                self.btn_HR.draw()
-                self._state_HR_tracking = self.btn_HR.state
-                return
-            elif self.check_track.touch(event):
-                self._state_body_tracking = self.check_track.state
-                self.check_track.draw()
+            elif self.check_body_tracking.touch(event):
+                self._state_body_tracking = self.check_body_tracking.state
+                self.check_body_tracking.draw()
                 if not self._state_body_tracking:
                     self._state_smart_alarm = _OFF
+                    self._state_HR_tracking = _OFF
         self._draw()
 
     def _draw_duration(self, draw):
@@ -281,21 +284,21 @@ class SleepTkApp():
                     self._draw_duration(draw)
             draw.reset()
         elif self._page == _SETTINGS2:
+            self.check_body_tracking = widgets.Checkbox(x=0, y=40, label="Body tracking")
+            self.check_body_tracking.state = self._state_body_tracking
+            self.check_body_tracking.draw()
+            if self._state_body_tracking:
+                self.btn_HR = widgets.Checkbox(x=0, y=80, label="Heart rate tracking")
+                self.btn_HR.state = self._state_HR_tracking
+                self.btn_HR.draw()
             if self._state_alarm:
-                self.check_grad = widgets.Checkbox(0, 80, "Gradual wake")
+                self.check_grad = widgets.Checkbox(0, 120, "Gradual wake")
                 self.check_grad.state = self._state_gradual_wake
                 self.check_grad.draw()
-                self.check_track = widgets.Checkbox(x=0, y=120, label="Body tracking")
-                self.check_track.state = self._state_body_tracking
-                self.check_track.draw()
                 if self._state_body_tracking:
                     self.check_smart = widgets.Checkbox(x=0, y=160, label="Smart alarm (alpha)")
                     self.check_smart.state = self._state_smart_alarm
                     self.check_smart.draw()
-            draw.reset()
-            self.btn_HR = widgets.Checkbox(x=0, y=40, label="Heart rate tracking")
-            self.btn_HR.state = self._state_HR_tracking
-            self.btn_HR.draw()
             self.btn_sta = widgets.Button(x=0, y=200, w=240, h=40, label="Start")
             self.btn_sta.draw()
             draw.reset()
@@ -307,7 +310,7 @@ class SleepTkApp():
         # save some memory
         self.check_al = None
         self.check_smart = None
-        self.check_track = None
+        self.check_body_tracking = None
         self.check_grad = None
         self.btn_sta = None
         self.btn_al = None
@@ -315,7 +318,7 @@ class SleepTkApp():
         self.btn_HR = None
         self._spin_H = None
         self._spin_M = None
-        del self.check_al, self.check_smart, self.check_track, self.check_grad, self.btn_sta, self.btn_al, self.btn_off, self.btn_HR, self._spin_H, self._spin_M
+        del self.check_al, self.check_smart, self.check_body_tracking, self.check_grad, self.btn_sta, self.btn_al, self.btn_off, self.btn_HR, self._spin_H, self._spin_M
 
         self._currently_tracking = True
 
