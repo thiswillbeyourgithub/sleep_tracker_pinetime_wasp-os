@@ -522,6 +522,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
                     self._last_HR = "?"
                     self._hrdata = None
                 self._last_HR_printed = self._last_HR
+                wasp.system.switch(self)
 
     def _subtick(self, ticks):
         """track heart rate at 24Hz"""
