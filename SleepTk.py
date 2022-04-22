@@ -483,7 +483,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             del t
 
             wasp.system.keep_awake()
-            if len(self._hrdata.data) >= 240:  # 10 seconds passed
+            if len(self._hrdata.data) >= 720:  # 30 seconds passed
                 bpm = self._hrdata.get_heart_rate()
                 if bpm < 150 and bpm > 30:
                     self._last_HR = bpm
