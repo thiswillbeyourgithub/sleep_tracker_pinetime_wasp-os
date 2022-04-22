@@ -329,9 +329,9 @@ class SleepTkApp():
                 self._WU_a = self._WU_t - _ANTICIPATE_ALLOWED - 120
                 wasp.system.set_alarm(self._WU_a, self._smart_alarm_start)
 
-        # don't track heart rate right away, wait 60s
+        # don't track heart rate right away, wait a few seconds
         if self._track_HR_state:
-            self._last_HR_date = int(wasp.watch.rtc.time()) + 60
+            self._last_HR_date = int(wasp.watch.rtc.time()) + 10
         wasp.system.notify_level = 1  # silent notifications
         self._page = _TRACKING
 
