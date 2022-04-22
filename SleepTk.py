@@ -270,13 +270,6 @@ class SleepTkApp():
                 self.check_smart = widgets.Checkbox(x=0, y=120, label="Smart alarm (alpha)")
                 self.check_smart.state = self._smart_alarm_state
                 self.check_smart.draw()
-            else:
-                draw.set_font(_FONT)
-                label = 'Skipping smart and gradual alarm because no regular alarm is set'
-                chunks = draw.wrap(label, 240)
-                for i in range(len(chunks)-1):
-                    sub = label[chunks[i]:chunks[i+1]].rstrip()
-                    draw.string(sub, 0, 80 + 20 * i)
             draw.reset()
             self.btn_HR = widgets.Checkbox(x=0, y=40, label="Heart rate tracking")
             self.btn_HR.state = self._track_HR_state
