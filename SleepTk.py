@@ -346,7 +346,7 @@ class SleepTkApp():
         if self._state_alarm:
             self._old_notification_level = wasp.system.notify_level
             self._WU_t = self._read_time(self._state_spinval_H, self._state_spinval_M)
-            wasp.system.set_alarm(self._WU_t, self._listen_to_ticks)
+            wasp.system.set_alarm(self._WU_t, self._activate_ticks_to_ring)
 
             # also set alarm to vibrate a tiny bit before wake up time
             # to wake up gradually
@@ -382,7 +382,7 @@ class SleepTkApp():
             wasp.system.cancel_alarm(self.next_al, self._trackOnce)
         if self._state_alarm:
             if keep_main_alarm is False:  # to keep the alarm when stopping because of low battery
-                wasp.system.cancel_alarm(self._WU_t, self._listen_to_ticks)
+                wasp.system.cancel_alarm(self._WU_t, self._activate_ticks_to_ring)
                 for t in _GRADUAL_WAKE:
                     wasp.system.cancel_alarm(self._WU_t - t*60, self._tiny_vibration)
             if self._state_smart_alarm:
@@ -467,7 +467,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             self._last_checkpoint = self._data_point_nb
             wasp.gc.collect()
 
-    def _listen_to_ticks(self):
+    def _activate_ticks_to_ring(self):
         """listen to ticks every second, telling the watch to vibrate"""
         wasp.gc.collect()
         wasp.system.notify_level = self._old_notification_level  # restore notification level
@@ -601,7 +601,7 @@ BY MISTAKE at {:02d}h{:02d}m".format(t[3], t[4])})
 
             # add new alarm
             wasp.system.set_alarm(max(WU_t - earlier, int(wasp.watch.rtc.time()) + 3),  # not before right now, to make sure it rings
-                                  self.sleeptk._listen_to_ticks)
+                                  self.sleeptk._activate_ticks_to_ring)
 
             # replace old gentle alarm by another one
             if self.sleeptk._grad_alarm_state:
