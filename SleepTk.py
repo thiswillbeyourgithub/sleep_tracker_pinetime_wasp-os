@@ -301,7 +301,21 @@ class SleepTkApp():
         self.stat_bar.draw()
 
     def _start_tracking(self):
+        # save some memory
+        self.check_al = None
+        self.check_smart = None
+        self.check_track = None
+        self.check_grad = None
+        self.btn_sta = None
+        self.btn_al = None
+        self.btn_off = None
+        self.btn_HR = None
+        self._spin_H = None
+        self._spin_M = None
+        del self.check_al, self.check_smart, self.check_track, self.check_grad, self.btn_sta, self.btn_al, self.btn_off, self.btn_HR, self._spin_H, self._spin_M
+
         self._is_tracking = True
+
         # accel data not yet written to disk:
         self._data_point_nb = 0  # total number of data points so far
         self._last_checkpoint = 0  # to know when to save to file
@@ -344,15 +358,6 @@ class SleepTkApp():
             self._last_HR_date = int(wasp.watch.rtc.time()) + 10
         wasp.system.notify_level = 1  # silent notifications
         self._page = _TRACKING
-
-        # save some memory
-        self.btn_sta = None
-        self.btn_al = None
-        self.btn_off = None
-        self.btn_HR = None
-        self._spin_H = None
-        self._spin_M = None
-        del self.btn_sta, self.btn_al, self.btn_off, self.btn_HR, self._spin_H, self._spin_M
 
     def _read_time(self, HH, MM):
         "convert time from spinners to seconds"
