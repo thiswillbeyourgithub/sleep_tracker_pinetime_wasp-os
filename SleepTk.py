@@ -99,6 +99,9 @@ class SleepTkApp():
                                   wasp.EventMask.SWIPE_LEFTRIGHT |
                                   wasp.EventMask.BUTTON)
 
+    def sleep(self):
+        return True
+
     def background(self):
         wasp.watch.hrs.disable()
         self._track_HR_once = _OFF
