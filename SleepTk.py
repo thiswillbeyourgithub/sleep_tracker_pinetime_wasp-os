@@ -473,10 +473,17 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
 
             wasp.system.keep_awake()
             if len(self._hrdata.data) >= 240:  # 10 seconds passed
-                self._last_HR = self._hrdata.get_heart_rate()
-                self._last_HR_date = int(wasp.watch.rtc.time())
-                self._track_HR_once = _OFF
-                wasp.watch.hrs.disable()
+                bpm = self._hrdata.get_heart_rate()
+                if bpm < 150 and bpm > 30:
+                    self._last_HR = bpm
+                    self._last_HR_date = int(wasp.watch.rtc.time())
+                    self._track_HR_once = _OFF
+                    wasp.watch.hrs.disable()
+                else:
+                    # in case of invalid data, write it in the file but
+                    # keep trying to read HR
+                    self._last_HR = "?"
+                    self._hrdata = None
 
     def _subtick(self, ticks):
         """track heart rate at 24Hz"""
