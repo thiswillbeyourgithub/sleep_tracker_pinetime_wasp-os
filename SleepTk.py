@@ -193,7 +193,8 @@ class SleepTkApp():
             elif self.check_track.touch(event):
                 self._tracking_enabled_state = self.check_track.state
                 self.check_track.draw()
-                return
+                if not self._tracking_enabled_state:
+                    self._smart_alarm_state = _OFF
         self._draw()
 
     def _draw_duration(self, draw):
