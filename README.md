@@ -22,12 +22,13 @@
 * compile `wasp-os`: `make submodules && make softdevice && make BOARD=pinetime all && echo "SUCCESS"`
 * upload it to your pinetime: `./tools/ota-dfu/dfu.py -z build-pinetime/micropython.zip -a XX:XX:XX:XX:XX:XX --legacy`
 * reboot the watch and enjoy `SleepTk`
-* *optional: download your latest sleep data using the script `pull_latest_sleep_data.py`*
+* *optional: download your latest sleep data using the script `pull_sleep_data.py`*
+* *optional: delete all the sleep data present in your watch using the script `rm_sleep_data.py`*
 
 ### Note to reader:
 * If you're interested or have any kind of things to say about this, **please** open an issue and tell me all about it :)
 * Status as of end of February 2022: *UI (**done**), regular alarm (**done**), smart alarm (**mostly done but untested**)*
-* you can download your sleep data file using the file `pull_latest_sleep_data`. A suggested workflow to load it into [pandas](https://pypi.org/project/pandas/) can be found at the bottom of the page.
+* you can download your sleep data file using the file `pull_sleep_data`. A suggested workflow to load it into [pandas](https://pypi.org/project/pandas/) can be found at the bottom of the page.
 * the notifications are set to "silent" during the tracking session and are restored to the previously used level when the alarm is ringing
 
 # Screenshots:
