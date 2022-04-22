@@ -412,7 +412,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
         """
         buff = self._buff
         n = self._data_point_nb - self._last_checkpoint
-        if n >= _STORE_FREQ // _FREQ:
+        if n >= _STORE_FREQ // _FREQ and not self._track_HR_once:
             buff[0] /= n
             buff[1] /= n
             buff[2] /= n
