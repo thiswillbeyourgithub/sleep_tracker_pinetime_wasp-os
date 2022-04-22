@@ -65,26 +65,27 @@ class SleepTkApp():
 
     def __init__(self):
         wasp.gc.collect()
-        # default values:
-        self._alarm_state = _ON
-        self._tracking_enabled_state = _ON
 
-        self._grad_alarm_state = _ON
-        self._smart_alarm_state = _OFF  # activate waking you up at optimal time  based on accelerometer data, at the earliest at _WU_LAT - _WU_SMART
-        self._track_HR_state = _OFF
+        # default button state
+        self._state_alarm = _ON
+        self._state_body_tracking = _ON
+        self._state_gradual_wake = _ON
+        self._state_smart_alarm = _OFF
+        self._state_HR_tracking = _OFF
+        self._state_spinval_H = _OFF
+        self._state_spinval_M = _OFF
+
         self._hrdata = None
         self._last_HR = _OFF
         self._last_HR_printed = "?"
         self._last_HR_date = _OFF
         self._track_HR_once = _OFF
-        self._spinval_H = _OFF
-        self._spinval_M = _OFF
+
         self._page = _SETTINGS1
-        self._is_tracking = _OFF
+        self._currently_tracking = _OFF
         self._conf_view = _OFF  # confirmation view
-        self._earlier = 0  # number of seconds between the alarm you set manually and the smart alarm time
-        self._old_notification_level = wasp.system.notify_level
-        self._buff = array("f", [_OFF, _OFF, _OFF])
+        self._smart_offset = _OFF  # number of seconds between the alarm you set manually and the smart alarm time
+        self._buff = array("f", [_OFF, _OFF, _OFF])  # contains accelerometer values
 
         try:
             shell.mkdir("logs/")
@@ -161,25 +162,25 @@ class SleepTkApp():
                 self._disable_tracking()
                 self._page = _SETTINGS1
         elif self._page == _SETTINGS1:
-            if self._alarm_state and (self._spin_H.touch(event) or self._spin_M.touch(event)):
-                self._spinval_H = self._spin_H.value
+            if self._state_alarm and (self._spin_H.touch(event) or self._spin_M.touch(event)):
+                self._state_spinval_H = self._spin_H.value
                 self._spin_H.update()
-                self._spinval_M = self._spin_M.value
+                self._state_spinval_M = self._spin_M.value
                 self._spin_M.update()
-                if self._alarm_state:
+                if self._state_alarm:
                     self._draw_duration(draw)
                 return
             elif self.check_al.touch(event):
-                self._alarm_state = self.check_al.state
+                self._state_alarm = self.check_al.state
                 self.check_al.update()
         elif self._page == _SETTINGS2:
-            if self._alarm_state:
+            if self._state_alarm:
                 if self.check_smart.touch(event):
-                    self._smart_alarm_state = self.check_smart.state
+                    self._state_smart_alarm = self.check_smart.state
                     self.check_smart.draw()
                     return
                 elif self.check_grad.touch(event):
-                    self._grad_alarm_state = self.check_grad.state
+                    self._state_gradual_wake = self.check_grad.state
                     self.check_grad.draw()
                     return
             if self.btn_sta.touch(event):
@@ -188,19 +189,19 @@ class SleepTkApp():
                 self._start_tracking()
             elif self.btn_HR.touch(event):
                 self.btn_HR.draw()
-                self._track_HR_state = self.btn_HR.state
+                self._state_HR_tracking = self.btn_HR.state
                 return
             elif self.check_track.touch(event):
-                self._tracking_enabled_state = self.check_track.state
+                self._state_body_tracking = self.check_track.state
                 self.check_track.draw()
-                if not self._tracking_enabled_state:
-                    self._smart_alarm_state = _OFF
+                if not self._state_body_tracking:
+                    self._state_smart_alarm = _OFF
         self._draw()
 
     def _draw_duration(self, draw):
         draw.set_font(_FONT)
         if self._page == _SETTINGS1:
-            duration = (self._read_time(self._spinval_H, self._spinval_M) - wasp.watch.rtc.time()) / 60 - _TIME_TO_FALL_ASLEEP
+            duration = (self._read_time(self._state_spinval_H, self._state_spinval_M) - wasp.watch.rtc.time()) / 60 - _TIME_TO_FALL_ASLEEP
             assert duration >= _TIME_TO_FALL_ASLEEP
             y = 180
         elif self._page == _TRACKING:
@@ -225,8 +226,8 @@ class SleepTkApp():
         draw.fill(0)
         draw.set_font(_FONT)
         if self._page == _RINGING:
-            if self._earlier != 0:
-                msg = "WAKE UP ({}m early)".format(str(self._earlier/60)[0:2])
+            if self._smart_offset != 0:
+                msg = "WAKE UP ({}m early)".format(str(self._smart_offset/60)[0:2])
             else:
                 msg = "WAKE UP"
             draw.string(msg, 0, 70)
@@ -236,19 +237,19 @@ class SleepTkApp():
         elif self._page == _TRACKING:
             ti = wasp.watch.time.localtime(self._offset)
             draw.string('Began at {:02d}:{:02d}'.format(ti[3], ti[4]), 0, 50)
-            if self._alarm_state:
+            if self._state_alarm:
                 word = "Alarm at "
-                if self._smart_alarm_state:
+                if self._state_smart_alarm:
                     word = "Alarm BEFORE "
                 ti = wasp.watch.time.localtime(self._WU_t)
                 draw.string("{}{:02d}:{:02d}".format(word, ti[3], ti[4]), 0, 70)
-                draw.string("Gradual wake: {}".format(True if self._grad_alarm_state else False), 0, 90)
+                draw.string("Gradual wake: {}".format(True if self._state_gradual_wake else False), 0, 90)
             else:
                 draw.string("No alarm set", 0, 70)
             draw.string("data points: {} / {}".format(str(self._data_point_nb), str(self._data_point_nb * _FREQ // _STORE_FREQ)), 0, 110)
             if self._track_HR_once:
                 draw.string("(Currently tracking HR)", 0, 170)
-            if self._track_HR_state:
+            if self._state_HR_tracking:
                 draw.string("HR:{}".format(self._last_HR_printed), 160, 170)
             self.btn_off = widgets.Button(x=0, y=200, w=240, h=40, label="Stop tracking")
             self.btn_off.draw()
@@ -256,44 +257,44 @@ class SleepTkApp():
             self._draw_duration(draw)
         elif self._page == _SETTINGS1:
             # reset spinval values between runs
-            self._spinval_H = _OFF
-            self._spinval_M = _OFF
+            self._state_spinval_H = _OFF
+            self._state_spinval_M = _OFF
             self.check_al = widgets.Checkbox(x=0, y=40, label="Wake me up")
-            self.check_al.state = self._alarm_state
+            self.check_al.state = self._state_alarm
             self.check_al.draw()
-            if self._alarm_state:
-                if (self._spinval_H, self._spinval_M) == (_OFF, _OFF):
+            if self._state_alarm:
+                if (self._state_spinval_H, self._state_spinval_M) == (_OFF, _OFF):
                     # suggest wake up time, on the basis of 7h30m of sleep + time to fall asleep
                     (H, M) = wasp.watch.rtc.get_localtime()[3:5]
                     M += 30 + _TIME_TO_FALL_ASLEEP
                     while M % 5 != 0:
                         M += 1
-                    self._spinval_H = ((H + 7) % 24 + (M // 60)) % 24
-                    self._spinval_M = M % 60
+                    self._state_spinval_H = ((H + 7) % 24 + (M // 60)) % 24
+                    self._state_spinval_M = M % 60
                 self._spin_H = widgets.Spinner(30, 70, 0, 23, 2)
-                self._spin_H.value = self._spinval_H
+                self._spin_H.value = self._state_spinval_H
                 self._spin_H.draw()
                 self._spin_M = widgets.Spinner(150, 70, 0, 59, 2, 5)
-                self._spin_M.value = self._spinval_M
+                self._spin_M.value = self._state_spinval_M
                 self._spin_M.draw()
-                if self._alarm_state:
+                if self._state_alarm:
                     self._draw_duration(draw)
             draw.reset()
         elif self._page == _SETTINGS2:
-            if self._alarm_state:
+            if self._state_alarm:
                 self.check_grad = widgets.Checkbox(0, 80, "Gradual wake")
-                self.check_grad.state = self._grad_alarm_state
+                self.check_grad.state = self._state_gradual_wake
                 self.check_grad.draw()
                 self.check_track = widgets.Checkbox(x=0, y=120, label="Body tracking")
-                self.check_track.state = self._tracking_enabled_state
+                self.check_track.state = self._state_body_tracking
                 self.check_track.draw()
-                if self._tracking_enabled_state:
+                if self._state_body_tracking:
                     self.check_smart = widgets.Checkbox(x=0, y=160, label="Smart alarm (alpha)")
-                    self.check_smart.state = self._smart_alarm_state
+                    self.check_smart.state = self._state_smart_alarm
                     self.check_smart.draw()
             draw.reset()
             self.btn_HR = widgets.Checkbox(x=0, y=40, label="Heart rate tracking")
-            self.btn_HR.state = self._track_HR_state
+            self.btn_HR.state = self._state_HR_tracking
             self.btn_HR.draw()
             self.btn_sta = widgets.Button(x=0, y=200, w=240, h=40, label="Start")
             self.btn_sta.draw()
@@ -316,7 +317,7 @@ class SleepTkApp():
         self._spin_M = None
         del self.check_al, self.check_smart, self.check_track, self.check_grad, self.btn_sta, self.btn_al, self.btn_off, self.btn_HR, self._spin_H, self._spin_M
 
-        self._is_tracking = True
+        self._currently_tracking = True
 
         # accel data not yet written to disk:
         self._data_point_nb = 0  # total number of data points so far
@@ -331,34 +332,35 @@ class SleepTkApp():
         f.close()
 
         # if enabled, add alarm to log accel data in _FREQ seconds
-        if self._tracking_enabled_state:
+        if self._state_body_tracking:
             self.next_al = wasp.watch.rtc.time() + _FREQ
             wasp.system.set_alarm(self.next_al, self._trackOnce)
         else:
             self.next_al = None
 
-        if self._grad_alarm_state and not self._alarm_state:
+        if self._state_gradual_wake and not self._state_alarm:
             # fix incompatible settings
-            self._grad_alarm_state = _OFF
+            self._state_gradual_wake = _OFF
 
         # setting up alarm
-        if self._alarm_state:
-            self._WU_t = self._read_time(self._spinval_H, self._spinval_M)
+        if self._state_alarm:
+            self._old_notification_level = wasp.system.notify_level
+            self._WU_t = self._read_time(self._state_spinval_H, self._state_spinval_M)
             wasp.system.set_alarm(self._WU_t, self._listen_to_ticks)
 
             # also set alarm to vibrate a tiny bit before wake up time
             # to wake up gradually
-            if self._grad_alarm_state:
+            if self._state_gradual_wake:
                 for t in _GRADUAL_WAKE:
                     wasp.system.set_alarm(self._WU_t - t*60, self._tiny_vibration)
 
             # wake up SleepTk 2min before earliest possible wake up
-            if self._smart_alarm_state:
+            if self._state_smart_alarm:
                 self._WU_a = self._WU_t - _ANTICIPATE_ALLOWED - 120
                 wasp.system.set_alarm(self._WU_a, self._smart_alarm_start)
 
         # don't track heart rate right away, wait a few seconds
-        if self._track_HR_state:
+        if self._state_HR_tracking:
             self._last_HR_date = int(wasp.watch.rtc.time()) + 10
         wasp.system.notify_level = 1  # silent notifications
         self._page = _TRACKING
@@ -366,8 +368,8 @@ class SleepTkApp():
     def _read_time(self, HH, MM):
         "convert time from spinners to seconds"
         (Y, Mo, d, h, m) = wasp.watch.rtc.get_localtime()[0:5]
-        HH = self._spinval_H
-        MM = self._spinval_M
+        HH = self._state_spinval_H
+        MM = self._state_spinval_M
         if HH < h or (HH == h and MM <= m):
             d += 1
         return wasp.watch.time.mktime((Y, Mo, d, HH, MM, 0, 0, 0, 0))
@@ -375,27 +377,27 @@ class SleepTkApp():
     def _disable_tracking(self, keep_main_alarm=False):
         """called by touching "STOP TRACKING" or when computing best alarm time
         to wake up you disables tracking features and alarms"""
-        self._is_tracking = False
+        self._currently_tracking = False
         if self.next_al:
             wasp.system.cancel_alarm(self.next_al, self._trackOnce)
-        if self._alarm_state:
+        if self._state_alarm:
             if keep_main_alarm is False:  # to keep the alarm when stopping because of low battery
                 wasp.system.cancel_alarm(self._WU_t, self._listen_to_ticks)
                 for t in _GRADUAL_WAKE:
                     wasp.system.cancel_alarm(self._WU_t - t*60, self._tiny_vibration)
-            if self._smart_alarm_state:
+            if self._state_smart_alarm:
                 wasp.system.cancel_alarm(self._WU_a, self._smart_alarm_start)
-                self._smart_alarm_state = _OFF
+                self._state_smart_alarm = _OFF
         wasp.watch.hrs.disable()
         self._periodicSave()
-        self._track_HR_state = _OFF
+        self._state_HR_tracking = _OFF
         wasp.gc.collect()
 
     def _trackOnce(self):
         """get one data point of accelerometer every _FREQ seconds, keep
         the average of each axis then store in a file every
         _STORE_FREQ seconds"""
-        if self._is_tracking:
+        if self._currently_tracking:
             buff = self._buff
             xyz = wasp.watch.accel.read_xyz()
             if xyz == (0, 0, 0):
@@ -420,7 +422,7 @@ class SleepTkApp():
                                                           "body": "Stopped \
 tracking sleep at {}h{}m because your battery went below {}%. Alarm kept \
 on.".format(h, m, _BATTERY_THRESHOLD)})
-            elif self._track_HR_state:
+            elif self._state_HR_tracking:
                 if wasp.watch.rtc.time() - self._last_HR_date > _HR_FREQ and not self._track_HR_once:
                     mute = wasp.watch.display.mute
                     mute(True)
