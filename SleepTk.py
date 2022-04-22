@@ -125,6 +125,9 @@ class SleepTkApp():
             if self._page == _RINGING:
                 self._disable_tracking()
                 self._page = _SETTINGS1
+            elif self._page == _TRACKING:
+                # disable pressing to exit, use swipe up instead
+                self._draw()
             else:
                 wasp.system.navigate(wasp.EventType.HOME)
 
