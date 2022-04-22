@@ -242,7 +242,7 @@ class SleepTkApp():
             if self._track_HR_once:
                 draw.string("(Currently tracking HR)", 0, 170)
             if self._track_HR_state:
-                draw.string("HR:{}".format(self._last_HR_printed), 160, 50)
+                draw.string("HR:{}".format(self._last_HR_printed), 160, 170)
             self.btn_off = widgets.Button(x=0, y=200, w=240, h=40, label="Stop tracking")
             self.btn_off.draw()
             draw.reset()
