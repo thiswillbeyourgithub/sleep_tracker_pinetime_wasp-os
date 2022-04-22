@@ -512,23 +512,23 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
 
             wasp.system.keep_awake()
             if len(self._hrdata.data) >= 720:  # 30 seconds passed
-                bpm = self._hrdata.get_heart_rate()
-                if bpm < 100 and bpm > 40:
+                bpm = int(self._hrdata.get_heart_rate())
+                if not isinstance(int, bpm):
+                    # in case of invalid data, write it in the file but
+                    # keep trying to read HR
+                    self._last_HR = "?"
+                    self._hrdata = None
+                elif bpm < 100 and bpm > 40:
                     # if HR was already computed since last periodicSave,
                     # then average the two values
-                    if self._last_HR != _OFF and self._last_HR != "?":
-                        self._last_HR = (int(self._last_HR) + bpm) // 2
+                    if self._last_HR != _OFF and self._last_HR != "?" and isinstance(int, self._last_HR):
+                        self._last_HR = (self._last_HR + bpm) // 2
                     else:
                         self._last_HR = bpm
                     self._last_HR_date = int(wasp.watch.rtc.time())
                     self._track_HR_once = _OFF
                     self._hrdata = None
                     wasp.watch.hrs.disable()
-                else:
-                    # in case of invalid data, write it in the file but
-                    # keep trying to read HR
-                    self._last_HR = "?"
-                    self._hrdata = None
                 self._last_HR_printed = self._last_HR
                 wasp.system.switch(self)
 
