@@ -314,6 +314,13 @@ class SleepTkApp():
         wasp.system.notify_level = 1  # silent notifications
         self._page = _TRACKING
 
+        # save some memory
+        self.btn_sta = None
+        self.btn_al = None
+        self.btn_off = None
+        self.btn_HR = None
+        del self.btn_sta, self.btn_al, self.btn_off, self.btn_HR
+
     def _read_time(self, HH, MM):
         "convert time from spinners to seconds"
         (Y, Mo, d, h, m) = wasp.watch.rtc.get_localtime()[0:5]
