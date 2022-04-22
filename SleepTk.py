@@ -489,6 +489,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
                     self._last_HR = bpm
                     self._last_HR_date = int(wasp.watch.rtc.time())
                     self._track_HR_once = _OFF
+                    self._hrdata = None
                     wasp.watch.hrs.disable()
                 else:
                     # in case of invalid data, write it in the file but
