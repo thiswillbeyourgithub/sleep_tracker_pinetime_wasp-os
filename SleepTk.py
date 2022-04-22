@@ -47,12 +47,12 @@ _SETTINGS1 = const(2)
 _SETTINGS2 = const(3)
 _FONT = fonts.sans18
 _TIMESTAMP = const(946684800)  # unix time and time used by wasp os don't have the same reference date
+
+# user might want to edit this:
 _FREQ = const(5)  # get accelerometer data every X seconds, but process and store them only every _STORE_FREQ seconds
 _HR_FREQ = const(1800)  # how many seconds between heart rate data
 _STORE_FREQ = const(120)  # process data and store to file every X seconds
 _BATTERY_THRESHOLD = const(15)  # under X% of battery, stop tracking and only keep the alarm, set at -200 or lower to disable
-
-# user might want to edit this:
 _ANTICIPATE_ALLOWED = const(2400)  # number of seconds SleepTk can wake you up before the alarm clock you set
 _GRADUAL_WAKE = array("H", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 15])  # nb of minutes before alarm to send a tiny vibration to make a smoother wake up
 _TIME_TO_FALL_ASLEEP = const(14)  # in minutes, according to https://sleepyti.me/
