@@ -383,9 +383,9 @@ class SleepTkApp():
             if self._smart_alarm_state:
                 wasp.system.cancel_alarm(self._WU_a, self._smart_alarm_start)
                 self._smart_alarm_state = _OFF
-        self._track_HR_state = _OFF
         wasp.watch.hrs.disable()
         self._periodicSave()
+        self._track_HR_state = _OFF
         wasp.gc.collect()
 
     def _trackOnce(self):
