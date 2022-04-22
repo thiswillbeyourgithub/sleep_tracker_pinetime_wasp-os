@@ -174,6 +174,7 @@ class SleepTkApp():
                     return
             if self.btn_sta.touch(event):
                 draw.fill()
+                draw.string("Loading", 0, 100)
                 self._start_tracking()
             elif self.btn_HR.touch(event):
                 self.btn_HR.draw()
