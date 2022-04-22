@@ -334,6 +334,8 @@ class SleepTkApp():
         if self._tracking_enabled_state:
             self.next_al = wasp.watch.rtc.time() + _FREQ
             wasp.system.set_alarm(self.next_al, self._trackOnce)
+        else:
+            self.next_al = None
 
         if self._grad_alarm_state and not self._alarm_state:
             # fix incompatible settings
@@ -374,7 +376,8 @@ class SleepTkApp():
         """called by touching "STOP TRACKING" or when computing best alarm time
         to wake up you disables tracking features and alarms"""
         self._is_tracking = False
-        wasp.system.cancel_alarm(self.next_al, self._trackOnce)
+        if self.next_al:
+            wasp.system.cancel_alarm(self.next_al, self._trackOnce)
         if self._alarm_state:
             if keep_main_alarm is False:  # to keep the alarm when stopping because of low battery
                 wasp.system.cancel_alarm(self._WU_t, self._listen_to_ticks)
