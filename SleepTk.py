@@ -220,6 +220,8 @@ class SleepTkApp():
             else:
                 draw.string("No alarm set", 0, 90)
             draw.string("data points: {} / {}".format(str(self._data_point_nb), str(self._data_point_nb * _FREQ // _STORE_FREQ)), 0, 130)
+            if self._track_HR_once:
+                draw.string("(Currently tracking HR)", 0, 150)
             self.btn_off = widgets.Button(x=0, y=200, w=240, h=40, label="Stop tracking")
             self.btn_off.draw()
             draw.reset()
