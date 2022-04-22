@@ -382,6 +382,11 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
                     wasp.watch.hrs.enable()
                     self._hrdata = ppg.PPG(wasp.watch.hrs.read_hrs())
                     self._track_HR_once = _ON
+                    mute = wasp.watch.display.mute
+                    mute(True)
+                    wasp.system.wake()
+                    mute(True)
+                    wasp.system.switch(self)
                     wasp.system.request_tick(1000 // 8)
 
         wasp.gc.collect()
@@ -418,7 +423,6 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             buff[2] = 0
             self._last_checkpoint = self._data_point_nb
             wasp.gc.collect()
-
 
     def _listen_to_ticks(self):
         """listen to ticks every second, telling the watch to vibrate"""
