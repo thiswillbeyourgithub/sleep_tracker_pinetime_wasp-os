@@ -296,7 +296,6 @@ class SleepTkApp():
                 draw.string("HR:{}".format(self._last_HR_printed), 160, 170)
             self.btn_off = widgets.Button(x=0, y=200, w=240, h=40, label="Stop")
             self.btn_off.update(txt=_FONT_COLOR, frame=0, bg=0)
-            draw.reset()
             self._draw_duration(draw)
         elif self._page == _SETTINGS1:
             # reset spinval values between runs
@@ -322,7 +321,6 @@ class SleepTkApp():
                 self._spin_M.draw()
                 if self._state_alarm:
                     self._draw_duration(draw)
-            draw.reset()
         elif self._page == _SETTINGS2:
             self.check_body_tracking = widgets.Checkbox(x=0, y=40, label="Movement tracking")
             self.check_body_tracking.state = self._state_body_tracking
@@ -341,7 +339,7 @@ class SleepTkApp():
                     self.check_smart.draw()
             self.btn_sta = widgets.Button(x=0, y=200, w=240, h=40, label="Start")
             self.btn_sta.draw()
-            draw.reset()
+        draw.reset()
 
     def _start_tracking(self):
         # save some memory
