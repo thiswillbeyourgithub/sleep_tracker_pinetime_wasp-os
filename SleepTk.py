@@ -505,7 +505,8 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             wasp.gc.collect()
 
     def _activate_ticks_to_ring(self):
-        """listen to ticks every second, telling the watch to vibrate"""
+        """listen to ticks every second, telling the watch to vibrate and
+        completely wake the user up"""
         wasp.gc.collect()
         wasp.system.notify_level = self._old_notification_level  # restore notification level
         self._page = _RINGING
