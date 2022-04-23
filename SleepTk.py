@@ -138,14 +138,15 @@ class SleepTkApp():
 
     def press(self, button, state):
         "stop ringing alarm if pressed physical button"
-        if state:
-            if self._page == _RINGING:
-                self._try_stop_alarm()
-            elif self._page == _TRACKING:
-                # disable pressing to exit, use swipe up instead
-                self._draw()
-            else:
-                wasp.system.navigate(wasp.EventType.HOME)
+        if not state:
+            return
+        if self._page == _RINGING:
+            self._try_stop_alarm()
+        elif self._page == _TRACKING:
+            # disable pressing to exit, use swipe up instead
+            self._draw()
+        else:
+            wasp.system.navigate(wasp.EventType.HOME)
 
     def swipe(self, event):
         "navigate between settings page"
