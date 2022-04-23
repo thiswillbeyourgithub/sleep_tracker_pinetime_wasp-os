@@ -468,8 +468,6 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
                 mute(True)
                 wasp.system.switch(self)
                 wasp.system.request_tick(1000 // 8)
-            else:
-                wasp.system.sleep()
 
         wasp.gc.collect()
 
@@ -551,6 +549,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
                     # keep trying to read HR
                     self._last_HR = "?"
                     self._hrdata = None
+                    self._last_HR_printed = self._last_HR
                 elif bpm < 100 and bpm > 40:
                     # if HR was already computed since last periodicSave,
                     # then average the two values
@@ -558,12 +557,12 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
                         self._last_HR = (self._last_HR + bpm) // 2
                     else:
                         self._last_HR = bpm
+                    self._last_HR_printed = self._last_HR
                     self._last_HR_date = int(wasp.watch.rtc.time())
                     self._track_HR_once = _OFF
                     self._hrdata = None
                     wasp.watch.hrs.disable()
-                    wasp.system.sleep()
-                self._last_HR_printed = self._last_HR
+                    return wasp.system.sleep()
                 wasp.system.switch(self)
 
     def _subtick(self, ticks):
