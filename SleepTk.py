@@ -50,6 +50,8 @@ _FONT_COLOR = const(0xf800)  # red font to reduce eye strain at night
 _TIMESTAMP = const(946684800)  # unix time and time used by wasp os don't have the same reference date
 
 # user might want to edit this:
+_STOP_LIMIT = const(10)  # number of times to swipe or press the button to turn off ringing
+_SNOOZE_TIME = const(300)  # number of seconds to snooze for
 _FREQ = const(5)  # get accelerometer data every X seconds, but process and store them only every _STORE_FREQ seconds
 _HR_FREQ = const(600)  # how many seconds between heart rate data, this has to be at least 120
 _STORE_FREQ = const(300)  # process data and store to file every X seconds
@@ -75,6 +77,7 @@ class SleepTkApp():
         self._state_HR_tracking = _OFF
         self._state_spinval_H = _OFF
         self._state_spinval_M = _OFF
+        self.n_swipe = 0 # number of time swiped, to turn off alarm
 
         self._hrdata = None
         self._last_HR = _OFF  # if _OFF, no HR to write, if "?": error during last HR, else: heart rate
@@ -103,6 +106,7 @@ class SleepTkApp():
         self._draw()
         wasp.system.request_event(wasp.EventMask.TOUCH |
                                   wasp.EventMask.SWIPE_LEFTRIGHT |
+                                  wasp.EventMask.SWIPE_UPDOWN |
                                   wasp.EventMask.BUTTON)
         if self._page == _TRACKING and self._track_HR_once:
             wasp.system.request_tick(1000 // 8)
@@ -120,12 +124,21 @@ class SleepTkApp():
         self._hrdata = None
         wasp.gc.collect()
 
+    def _try_stop_alarm(self):
+        """If button or swipe more than _STOP_LIMIT, then stop ringing"""
+        self.n_swipe += 1
+        if self.n_swipe > _STOP_LIMIT:
+            self._disable_tracking()
+            self._page = _SETTINGS1
+        draw = wasp.watch.drawable
+        draw.set_color(_FONT_COLOR)
+        draw.string("{} to stop".format(_STOP_LIMIT - self.n_swipe), 0, 70)
+
     def press(self, button, state):
         "stop ringing alarm if pressed physical button"
         if state:
             if self._page == _RINGING:
-                self._disable_tracking()
-                self._page = _SETTINGS1
+                self._try_stop_alarm()
             elif self._page == _TRACKING:
                 # disable pressing to exit, use swipe up instead
                 self._draw()
@@ -142,6 +155,8 @@ class SleepTkApp():
             if event[0] == wasp.EventType.RIGHT:
                 self._page = _SETTINGS1
                 self._draw()
+        elif self._page == _RINGING:
+            self._try_stop_alarm()
 
     def touch(self, event):
         """either start trackign or disable it, draw the screen in all cases"""
@@ -163,8 +178,9 @@ class SleepTkApp():
                 draw.reset()
         elif self._page == _RINGING:
             if self.btn_al.touch(event):
-                self._disable_tracking()
-                self._page = _SETTINGS1
+                self._page = _TRACKING
+                wasp.system.set_alarm(int(wasp.watch.rtc.time()) + _SNOOZE_TIME, self._activate_ticks_to_ring)
+                wasp.system.sleep()
         elif self._page == _SETTINGS1:
             if self._state_alarm and (self._spin_H.touch(event) or self._spin_M.touch(event)):
                 self._state_spinval_H = self._spin_H.value
@@ -239,8 +255,8 @@ class SleepTkApp():
                 msg = "WAKE UP ({}m early)".format(str(self._smart_offset/60)[0:2])
             else:
                 msg = "WAKE UP"
-            draw.string(msg, 0, 70)
-            self.btn_al = widgets.Button(x=0, y=70, w=240, h=140, label="WAKE UP")
+            draw.string(msg, 0, 50)
+            self.btn_al = widgets.Button(x=0, y=90, w=240, h=120, label="SNOOZE")
             self.btn_al.draw()
             draw.reset()
         elif self._page == _TRACKING:

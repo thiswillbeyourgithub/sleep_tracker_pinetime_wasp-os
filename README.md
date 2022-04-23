@@ -41,7 +41,6 @@
 ## TODO
 **misc**
 * greatly simplify the code by simply adding a large tick function every second instead of managing tons of counters.
-* investigate adding snooze feature like in the original `alarms.py` app
 * investigate adding a simple feature to wake you up only after a certain movement threshold was passed
 * add a "nap tracking" mode that records sleep tracking with more precision
     * add a "power nap" mode that wakes you as soon as there has been no movement for 5 minutes OR (like steelball) when your heart rate drops
