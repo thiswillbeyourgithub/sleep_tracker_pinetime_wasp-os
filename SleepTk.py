@@ -140,6 +140,8 @@ class SleepTkApp():
         "stop ringing alarm if pressed physical button"
         if not state:
             return
+        mute = wasp.watch.display.mute
+        mute(False)
         if self._page == _RINGING:
             self._try_stop_alarm()
         elif self._page == _TRACKING:
@@ -150,6 +152,8 @@ class SleepTkApp():
 
     def swipe(self, event):
         "navigate between settings page"
+        mute = wasp.watch.display.mute
+        mute(False)
         if self._page == _SETTINGS1:
             if event[0] == wasp.EventType.LEFT:
                 self._page = _SETTINGS2
@@ -171,6 +175,8 @@ class SleepTkApp():
         """either start trackign or disable it, draw the screen in all cases"""
         wasp.gc.collect()
         draw = wasp.watch.drawable
+        mute = wasp.watch.display.mute
+        mute(False)
         if self._page == _TRACKING:
             if self._conf_view is _OFF:
                 if self.btn_off.touch(event):
