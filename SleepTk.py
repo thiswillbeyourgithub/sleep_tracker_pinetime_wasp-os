@@ -114,6 +114,7 @@ class SleepTkApp():
 
     def sleep(self):
         self._stop_trial = 0
+        wasp.gc.collect()
         return True
 
     def background(self):
