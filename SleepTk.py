@@ -532,6 +532,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
 
     def tick(self, ticks):
         """vibrate to wake you up OR track heart rate using code from heart.py"""
+        wasp.gc.collect()
         if self._page == _RINGING:
             wasp.watch.vibrator.pulse(duty=50, ms=500)
         elif self._track_HR_once:
@@ -556,7 +557,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             del t
 
             wasp.system.keep_awake()
-            if len(self._hrdata.data) >= 720:  # 30 seconds passed
+            if len(self._hrdata.data) >= 360:  # 15 seconds passed
                 bpm = int(self._hrdata.get_heart_rate())
                 if not isinstance(int, bpm):
                     # in case of invalid data, write it in the file but
