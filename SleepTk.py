@@ -431,15 +431,18 @@ class SleepTkApp():
                                                           "body": "Stopped \
 tracking sleep at {}h{}m because your battery went below {}%. Alarm kept \
 on.".format(h, m, _BATTERY_THRESHOLD)})
-            elif self._state_HR_tracking:
-                if wasp.watch.rtc.time() - self._last_HR_date > _HR_FREQ and not self._track_HR_once:
-                    mute = wasp.watch.display.mute
-                    mute(True)
-                    wasp.system.wake()
-                    mute(True)
-                    wasp.system.switch(self)
-                    self._track_HR_once = _ON
-                    wasp.system.request_tick(1000 // 8)
+            elif self._state_HR_tracking and \
+                    wasp.watch.rtc.time() - self._last_HR_date > _HR_FREQ and \
+                    not self._track_HR_once:
+                mute = wasp.watch.display.mute
+                mute(True)
+                wasp.system.wake()
+                mute(True)
+                wasp.system.switch(self)
+                self._track_HR_once = _ON
+                wasp.system.request_tick(1000 // 8)
+            else:
+                wasp.system.sleep()
 
         wasp.gc.collect()
 
@@ -532,6 +535,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
                     self._track_HR_once = _OFF
                     self._hrdata = None
                     wasp.watch.hrs.disable()
+                    wasp.system.sleep()
                 self._last_HR_printed = self._last_HR
                 wasp.system.switch(self)
 
@@ -548,6 +552,8 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
         wasp.system.wake()
         wasp.system.switch(self)
         wasp.watch.vibrator.pulse(duty=60, ms=100)
+        if not self._track_HR_once:
+            wasp.system.sleep()
 
     def _smart_alarm_start(self):
         SmartAlarm(self)
@@ -631,6 +637,8 @@ BY MISTAKE at {:02d}h{:02d}m".format(t[3], t[4])})
                                                       "title": "Finished smart alarm computation",
                                                       "body": "Finished computing best wake up time in {:2f}s. Sleep cycle: {:.2f}h".format(wasp.watch.rtc.time() - start_time, cycle)
                                                       })
+            if not self.sleeptk._track_HR_once:
+                wasp.system.sleep()
         except Exception as e:
             wasp.gc.collect()
             h, m = wasp.watch.time.localtime(wasp.watch.rtc.time())[3:5]
