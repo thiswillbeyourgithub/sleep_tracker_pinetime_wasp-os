@@ -391,8 +391,13 @@ class SleepTkApp():
 
             # wake up SleepTk 2min before earliest possible wake up
             if self._state_smart_alarm:
+                if not SmartAlarm in locals():
+                    raise Exception("SmartAlarm was removed in previous run to save memory. Restart the watch to use it.")
                 self._WU_a = self._WU_t - _ANTICIPATE_ALLOWED - 120
                 wasp.system.set_alarm(self._WU_a, self._smart_alarm_start)
+            else:
+                SmartAlarm = None
+                del SmartAlarm
 
         # don't track heart rate right away, wait a few seconds
         if self._state_HR_tracking:
