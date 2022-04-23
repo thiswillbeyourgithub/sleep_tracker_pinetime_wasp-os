@@ -255,7 +255,7 @@ class SleepTkApp():
         draw.set_color(_FONT_COLOR)
         if self._page == _RINGING:
             if self._smart_offset != 0:
-                msg = "WAKE UP ({}m early)".format(str(self._smart_offset/60)[0:2])
+                msg = "WAKE UP ({}m early)".format(str(self._smart_offset//60)[0:2])
             else:
                 msg = "WAKE UP"
             draw.string(msg, 0, 50)
