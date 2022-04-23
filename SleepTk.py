@@ -540,11 +540,11 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             if self._hrdata is None:
                 self._hrdata = ppg.PPG(wasp.watch.hrs.read_hrs())
             t = wasp.machine.Timer(id=1, period=8000000)
-            mute = wasp.watch.display.mute
             t.start()
+            mute = wasp.watch.display.mute
             wasp.system.keep_awake()
-            self._subtick(1)
             mute(True)
+            self._subtick(1)
             while t.time() < 41666:
                 pass
             wasp.system.keep_awake()
