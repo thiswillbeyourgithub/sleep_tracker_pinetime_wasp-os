@@ -553,8 +553,9 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
 
             wasp.system.keep_awake()
             if len(self._hrdata.data) >= 360:  # 15 seconds passed
-                bpm = int(self._hrdata.get_heart_rate())
-                if not isinstance(int, bpm):
+                bpm = self._hrdata.get_heart_rate()
+                bpm = int(bpm) if bpm is not None else None
+                if bpm is None:
                     # in case of invalid data, write it in the file but
                     # keep trying to read HR
                     self._last_HR = "?"
