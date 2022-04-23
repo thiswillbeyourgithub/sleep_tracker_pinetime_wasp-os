@@ -77,7 +77,6 @@ class SleepTkApp():
         self._state_HR_tracking = _OFF
         self._state_spinval_H = _OFF
         self._state_spinval_M = _OFF
-        self.n_swipe = 0 # number of time swiped, to turn off alarm
 
         self._hrdata = None
         self._last_HR = _OFF  # if _OFF, no HR to write, if "?": error during last HR, else: heart rate
@@ -114,6 +113,7 @@ class SleepTkApp():
             wasp.system.request_tick(1000 // 8)
 
     def sleep(self):
+        self._stop_trial = 0
         return True
 
     def wake(self):
@@ -128,13 +128,13 @@ class SleepTkApp():
 
     def _try_stop_alarm(self):
         """If button or swipe more than _STOP_LIMIT, then stop ringing"""
-        self.n_swipe += 1
-        if self.n_swipe > _STOP_LIMIT:
+        self._stop_trial += 1
+        if self._stop_trial > _STOP_LIMIT:
             self._disable_tracking()
             self._page = _SETTINGS1
         draw = wasp.watch.drawable
         draw.set_color(_FONT_COLOR)
-        draw.string("{} to stop".format(_STOP_LIMIT - self.n_swipe), 0, 70)
+        draw.string("{} to stop".format(_STOP_LIMIT - self._stop_trial), 0, 70)
 
     def press(self, button, state):
         "stop ringing alarm if pressed physical button"
@@ -389,6 +389,7 @@ class SleepTkApp():
             self._last_HR_date = int(wasp.watch.rtc.time()) + 10
         wasp.system.notify_level = 1  # silent notifications
         self._page = _TRACKING
+        self._stop_trial = 0
 
     def _read_time(self, HH, MM):
         "convert time from spinners to seconds"
