@@ -188,7 +188,8 @@ class SleepTkApp():
         elif self._page == _RINGING:
             if self.btn_al.touch(event):
                 self._page = _TRACKING
-                wasp.system.set_alarm(int(wasp.watch.rtc.time()) + _SNOOZE_TIME, self._activate_ticks_to_ring)
+                self._WU_t = int(wasp.watch.rtc.time()) + _SNOOZE_TIME
+                wasp.system.set_alarm(self._WU_t, self._activate_ticks_to_ring)
                 wasp.system.sleep()
         elif self._page == _SETTINGS1:
             if self._state_alarm and (self._spin_H.touch(event) or self._spin_M.touch(event)):
