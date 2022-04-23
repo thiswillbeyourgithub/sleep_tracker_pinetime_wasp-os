@@ -46,6 +46,7 @@ _RINGING = const(1)
 _SETTINGS1 = const(2)
 _SETTINGS2 = const(3)
 _FONT = fonts.sans18
+_FONT_COLOR = const(0xf800)  # red font to reduce eye strain at night
 _TIMESTAMP = const(946684800)  # unix time and time used by wasp os don't have the same reference date
 
 # user might want to edit this:
@@ -211,6 +212,7 @@ class SleepTkApp():
             assert duration >= _TIME_TO_FALL_ASLEEP
             y = 180
         elif self._page == _TRACKING:
+            draw.set_color(_FONT_COLOR)
             duration = (wasp.watch.rtc.time() - self._offset) / 60  # time slept
             y = 130
 
@@ -231,6 +233,7 @@ class SleepTkApp():
         draw = wasp.watch.drawable
         draw.fill(0)
         draw.set_font(_FONT)
+        draw.set_color(_FONT_COLOR)
         if self._page == _RINGING:
             if self._smart_offset != 0:
                 msg = "WAKE UP ({}m early)".format(str(self._smart_offset/60)[0:2])
@@ -258,7 +261,7 @@ class SleepTkApp():
             if self._state_HR_tracking:
                 draw.string("HR:{}".format(self._last_HR_printed), 160, 170)
             self.btn_off = widgets.Button(x=0, y=200, w=240, h=40, label="Stop")
-            self.btn_off.draw()
+            self.btn_off.update(txt=_FONT_COLOR, frame=0, bg=0)
             draw.reset()
             self._draw_duration(draw)
         elif self._page == _SETTINGS1:
