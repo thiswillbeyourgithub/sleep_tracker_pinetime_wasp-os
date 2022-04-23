@@ -202,6 +202,7 @@ class SleepTkApp():
             elif self.check_al.touch(event):
                 self._state_alarm = self.check_al.state
                 self.check_al.update()
+            return
         elif self._page == _SETTINGS2:
             if self._state_body_tracking:
                 if self.btn_HR.touch(event):
