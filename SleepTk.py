@@ -154,12 +154,18 @@ class SleepTkApp():
             if event[0] == wasp.EventType.LEFT:
                 self._page = _SETTINGS2
                 self._draw()
+            else:
+                return True
         elif self._page == _SETTINGS2:
             if event[0] == wasp.EventType.RIGHT:
                 self._page = _SETTINGS1
                 self._draw()
+            else:
+                return True
         elif self._page == _RINGING:
             self._try_stop_alarm()
+        else:
+            return True
 
     def touch(self, event):
         """either start trackign or disable it, draw the screen in all cases"""
