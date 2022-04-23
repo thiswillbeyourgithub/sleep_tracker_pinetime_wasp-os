@@ -112,8 +112,6 @@ class SleepTkApp():
                                   wasp.EventMask.BUTTON)
         if self._page == _TRACKING and self._track_HR_once:
             wasp.system.request_tick(1000 // 8)
-        else:
-            wasp.system.request_tick(1000)  # tick at least once
 
     def sleep(self):
         self._stop_trial = 0
@@ -586,8 +584,6 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
                     self._hrdata = None
                     wasp.watch.hrs.disable()
                     wasp.system.sleep()
-        else:
-            wasp.system.sleep()  # stop receiving ticks if not used
 
     def _subtick(self, ticks):
         """track heart rate at 24Hz"""
