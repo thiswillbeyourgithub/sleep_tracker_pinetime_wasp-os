@@ -50,6 +50,7 @@ _FONT_COLOR = const(0xf800)  # red font to reduce eye strain at night
 _TIMESTAMP = const(946684800)  # unix time and time used by wasp os don't have the same reference date
 
 # user might want to edit this:
+_KILL_BT = const(1)  # set to 0 to disable turning off bluetooth while tracking to save battery (you have to reboot the watch to reactivate BT)
 _STOP_LIMIT = const(10)  # number of times to swipe or press the button to turn off ringing
 _SNOOZE_TIME = const(300)  # number of seconds to snooze for
 _FREQ = const(5)  # get accelerometer data every X seconds, but process and store them only every _STORE_FREQ seconds
@@ -409,6 +410,13 @@ class SleepTkApp():
         if self._state_HR_tracking:
             self._last_HR_date = int(wasp.watch.rtc.time()) + 10
         wasp.system.notify_level = 1  # silent notifications
+
+        # kill bluetooth
+        if _KILL_BT:
+            import ble
+            if ble.enabled():
+                ble.disable()
+
         self._page = _TRACKING
         self._stop_trial = 0
 
