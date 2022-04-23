@@ -116,11 +116,6 @@ class SleepTkApp():
         self._stop_trial = 0
         return True
 
-    def wake(self):
-        self._draw()
-        if self._page == _TRACKING and self._track_HR_once:
-            wasp.system.request_tick(1000 // 8)
-
     def background(self):
         wasp.watch.hrs.disable()
         self._hrdata = None
