@@ -6,6 +6,7 @@ import os
 import subprocess
 import shlex
 import re
+from tqdm import tqdm
 
 mode = "all"  # download "all" files or only "latest"
 
@@ -30,7 +31,7 @@ else:
     raise Exception("Wrong value for 'mode'")
 
 print("\n\n")
-for fi in to_dl:
+for fi in tqdm(to_dl):
     if os.path.exists(f"./logs/sleep/{fi}"):
         print(f"Skipping file {fi}: already exists")
     else:

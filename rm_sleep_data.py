@@ -4,6 +4,7 @@ import time
 import subprocess
 import shlex
 import re
+from tqdm import tqdm
 
 print("\n\nRunning gc.collect()...")
 mem_cmd = './tools/wasptool --verbose --eval \'wasp.gc.collect()\''
@@ -20,19 +21,19 @@ reset_cmd = './tools/wasptool --verbose --reset'
 to_rm = files
 
 print("\n\n")
-for fi in to_rm:
-    print(f"Removing file '{fi}'")
+for fi in tqdm(to_rm):
+    tqdm.write(f"Removing file '{fi}'")
     rm_cmd = f'./tools/wasptool --verbose --eval \'from shell import rm ; rm(\"logs/sleep/{fi}\")\''
     try:
         out = subprocess.check_output(shlex.split(rm_cmd))
         if b"Watch reported error" in out:
             raise Exception("Watch reported error")
-        print(f"Succesfully removed to './logs/sleep/{fi}'")
+        tqdm.write(f"Succesfully removed to './logs/sleep/{fi}'")
     except Exception as e:
-        print(f"Error happened while removing {fi}")
+        tqdm.write(f"Error happened while removing {fi}")
 
-    print("Restarting watch.")
+    tqdm.write("Restarting watch.")
     out = subprocess.check_output(shlex.split(reset_cmd))
     time.sleep(10)
 
-    print("\n\n")
+    tqdm.write("\n\n")
