@@ -101,6 +101,8 @@ class SleepTkApp():
             pass
 
     def foreground(self):
+        self.stat_bar = widgets.StatusBar()
+        self.stat_bar.clock = True
         self._conf_view = _OFF
         wasp.gc.collect()
         self._draw()
@@ -248,6 +250,7 @@ class SleepTkApp():
         """GUI"""
         draw = wasp.watch.drawable
         draw.fill(0)
+        self.stat_bar.draw()
         draw.set_font(_FONT)
         draw.set_color(_FONT_COLOR)
         if self._page == _RINGING:
@@ -324,9 +327,6 @@ class SleepTkApp():
             self.btn_sta = widgets.Button(x=0, y=200, w=240, h=40, label="Start")
             self.btn_sta.draw()
             draw.reset()
-        self.stat_bar = widgets.StatusBar()
-        self.stat_bar.clock = True
-        self.stat_bar.draw()
 
     def _start_tracking(self):
         # save some memory
