@@ -322,7 +322,7 @@ class SleepTkApp():
                     self._draw_duration(draw)
             draw.reset()
         elif self._page == _SETTINGS2:
-            self.check_body_tracking = widgets.Checkbox(x=0, y=40, label="Body tracking")
+            self.check_body_tracking = widgets.Checkbox(x=0, y=40, label="Movement tracking")
             self.check_body_tracking.state = self._state_body_tracking
             self.check_body_tracking.draw()
             if self._state_body_tracking:
