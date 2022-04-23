@@ -248,6 +248,8 @@ class SleepTkApp():
 
     def _draw(self):
         """GUI"""
+        mute = wasp.watch.display.mute
+        mute(False)
         draw = wasp.watch.drawable
         draw.fill(0)
         self.stat_bar.draw()
