@@ -461,12 +461,12 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             elif self._state_HR_tracking and \
                     wasp.watch.rtc.time() - self._last_HR_date > _HR_FREQ and \
                     not self._track_HR_once:
+                self._track_HR_once = _ON
                 mute = wasp.watch.display.mute
                 mute(True)
                 wasp.system.wake()
                 mute(True)
                 wasp.system.switch(self)
-                self._track_HR_once = _ON
                 wasp.system.request_tick(1000 // 8)
             else:
                 wasp.system.sleep()
