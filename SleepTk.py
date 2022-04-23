@@ -528,6 +528,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
     def tick(self, ticks):
         """vibrate to wake you up OR track heart rate using code from heart.py"""
         wasp.gc.collect()
+        wasp.system.switch(self)
         if self._page == _RINGING:
             wasp.watch.vibrator.pulse(duty=50, ms=500)
         elif self._track_HR_once:
@@ -574,7 +575,6 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
                     self._hrdata = None
                     wasp.watch.hrs.disable()
                     return wasp.system.sleep()
-                wasp.system.switch(self)
 
     def _subtick(self, ticks):
         """track heart rate at 24Hz"""
