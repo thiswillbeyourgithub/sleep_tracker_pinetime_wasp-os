@@ -3,14 +3,14 @@
 
 ## Features:
 * **Sleep tracking**: logs your movement during the night, infers your sleep cycle and write it all down in a `.csv` file.
+* **Heart tracking**: tracks your heart rate throughout the night.
 * **Flexible**: does not make too many assumption regarding time to fall asleep, sleep cycle duration etc. SleepTk tries various data to see what fits best for your profile. If you still want to customize things, all the hardcoded and commented settings are easily accessible at the top of the file.
-* **Suggests best alarm time**: suggests wake up time according to average sleep cycles length.
+* **Privacy friendly**: your data is not sent to anyone, it is stored and analyzed directly on the watch (but you can still download it if needed).
+* **Completely open source**
+* **Best alarm time suggestion**: suggests wake up time according to average sleep cycles length.
 * **Gradual wake**: vibrates the watch a tiny bit a few times before the alarm to lift you gently back to consciousness.
 * **Smart alarm clock (alpha)**: adaptative alarm that wakes you at the best time of your sleep cycle (up to 40 minutes before the set time) to make sure you wake up feeling refreshed.
-* **Heart tracking**: tracks your heart rate throughout the night.
 * **Insomnia insights**: if you turn on the screen during the night, SleepTk will tell you how long you slept and in what part of the sleep cycle you are supposed to be.
-* **Privacy friendly**: your data is not sent to anyone, it is stored and analyzed directly on the watch (but you can still download it if needed).
-* **Open source**
 
 ## Credits:
 * Many thanks to Emanuel Löffler (https://github.com/plan5) who kindly created the logo.
