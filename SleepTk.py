@@ -79,10 +79,9 @@ _CYCLE_LENGTH = const(90)
 # sleep cycle length in minutes. Currently used only to display best wake up
 # time but not to compute smart alarm! (default: 90 or 100, according to
 # https://sleepyti.me/)
-_SLEEP_GOAL_H = const(7)
-_SLEEP_GOAL_M = const(30)
-# suggests to sleep for this amount of hours and this amount of minutes.
-# (default: 7 30 for 7 hours and 30 minutes, which is about 5 sleep cycle.)
+_SLEEP_GOAL_CYCLE = const(5)
+# number of sleep cycle you wish to sleep. With _CYCLE_LENGTH this is used
+# to suggest best wake up time to user when setting the alarm. (default: 5)
 ##################################################
 
 
@@ -331,10 +330,12 @@ class SleepTkApp():
                 if (self._state_spinval_H, self._state_spinval_M) == (_OFF, _OFF):
                     # suggest wake up time, on the basis of desired sleep goal + time to fall asleep
                     (H, M) = wasp.watch.rtc.get_localtime()[3:5]
-                    M += _SLEEP_GOAL_M + _TIME_TO_FALL_ASLEEP
+                    goal_h = _SLEEP_GOAL_CYCLE * _CYCLE_LENGTH // 60
+                    goal_m = _SLEEP_GOAL_CYCLE * _CYCLE_LENGTH % 60
+                    M += goal_m + _TIME_TO_FALL_ASLEEP
                     while M % 5 != 0:
                         M += 1
-                    self._state_spinval_H = ((H + _SLEEP_GOAL_H) % 24 + (M // 60)) % 24
+                    self._state_spinval_H = ((H + goal_h) % 24 + (M // 60)) % 24
                     self._state_spinval_M = M % 60
                 self._spin_H = widgets.Spinner(30, 70, 0, 23, 2)
                 self._spin_H.value = self._state_spinval_H
