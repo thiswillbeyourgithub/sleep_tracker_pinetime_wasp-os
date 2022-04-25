@@ -385,6 +385,7 @@ class SleepTkApp():
         self._data_point_nb = 0  # total number of data points so far
         self._last_checkpoint = 0  # to know when to save to file
         self._track_start_time = int(wasp.watch.rtc.time())  # makes output more compact
+        self._last_HR_printed = "?"
         wasp.watch.accel.reset()
 
         # create one file per recording session:
