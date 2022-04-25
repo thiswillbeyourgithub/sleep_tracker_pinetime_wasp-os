@@ -49,18 +49,37 @@ _FONT = fonts.sans18
 _FONT_COLOR = const(0xf800)  # red font to reduce eye strain at night
 _TIMESTAMP = const(946684800)  # unix time and time used by wasp os don't have the same reference date
 
-# user might want to edit this:
-_KILL_BT = const(1)  # set to 0 to disable turning off bluetooth while tracking to save battery (you have to reboot the watch to reactivate BT)
-_STOP_LIMIT = const(10)  # number of times to swipe or press the button to turn off ringing
-_SNOOZE_TIME = const(300)  # number of seconds to snooze for
-_FREQ = const(5)  # get accelerometer data every X seconds, but process and store them only every _STORE_FREQ seconds
-_HR_FREQ = const(600)  # how many seconds between heart rate data, this has to be at least 120
-_STORE_FREQ = const(300)  # process data and store to file every X seconds
-_BATTERY_THRESHOLD = const(15)  # under X% of battery, stop tracking and only keep the alarm, set at -200 or lower to disable
-_ANTICIPATE_ALLOWED = const(2400)  # number of seconds SleepTk can wake you up before the alarm clock you set
-_GRADUAL_WAKE = array("H", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 15])  # nb of minutes before alarm to send a tiny vibration to make a smoother wake up
-_TIME_TO_FALL_ASLEEP = const(14)  # in minutes, according to https://sleepyti.me/
-_CYCLE_LENGTH = const(90)  # in minutes, default of 90 or 100, according to https://sleepyti.me/  # currently used only to display best wake up time, not to compute smart alarm!
+## USER SETTINGS #################################
+_KILL_BT = const(1)
+# set to 0 to disable turning off bluetooth while tracking to save battery
+# (you have to reboot the watch to reactivate BT, default: 1)
+_STOP_LIMIT = const(10)
+# number of times to swipe or press the button to turn off ringing (default: 10)
+_SNOOZE_TIME = const(300)
+# number of seconds to snooze for (default: 5 minutes)
+_FREQ = const(5)
+# get accelerometer data every X seconds, but process and store them only
+# every _STORE_FREQ seconds (default: 5)
+_HR_FREQ = const(600)
+# how many seconds between heart rate data (default: 600, minimum 120)
+_STORE_FREQ = const(300)
+# process data and store to file every X seconds (default: 300)
+_BATTERY_THRESHOLD = const(15)
+# under X% of battery, stop tracking and only keep the alarm, set at -200
+# or lower to disable (default: 15)
+_ANTICIPATE_ALLOWED = const(2400)
+# number of seconds SleepTk can wake you up before the alarm clock you set
+# only relevant if smart_alarm is enabled. (default: 2400)
+_GRADUAL_WAKE = array("H", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 15])
+# nb of minutes before alarm to send a tiny vibration, designed to wake
+# you more gently. (default: array("H", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 15]) )
+_TIME_TO_FALL_ASLEEP = const(14)
+# minutes you take to fall asleep (default: 14, according to https://sleepyti.me/)
+_CYCLE_LENGTH = const(90)
+# sleep cycle length in minutes. Currently used only to display best wake up
+# time but not to compute smart alarm! (default: 90 or 100, according to
+# https://sleepyti.me/)
+##################################################
 
 
 class SleepTkApp():
