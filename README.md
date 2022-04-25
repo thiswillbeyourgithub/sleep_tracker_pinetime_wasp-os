@@ -18,9 +18,9 @@
 
 ## **How to install**:
 *(for now you need my slightly forked wasp-os that allows to use accelerometer data)*
-* download the latest [forked wasp-os](https://github.com/thiswillbeyourgithub/wasp-os)
-* download the latest [SleepTk.py](./SleepTk.py)
-* put the latest app in `wasp-os/wasp/apps/SleepTk.py`
+* download the latest [forked wasp-os](https://github.com/thiswillbeyourgithub/wasp-os), or at least implement the relevant commits (09a5ff2).
+* download the latest [SleepTk.py](./SleepTk.py) and put it in `wasp-os/wasp/apps/SleepTk.py`
+* open `SleepTk.py` to edit the user settings (at the top of the file)
 * compile `wasp-os`: `make submodules && make softdevice && make BOARD=pinetime all && echo "SUCCESS"`
 * upload it to your pinetime: `./tools/ota-dfu/dfu.py -z build-pinetime/micropython.zip -a XX:XX:XX:XX:XX:XX --legacy`
 * reboot the watch and enjoy `SleepTk`
