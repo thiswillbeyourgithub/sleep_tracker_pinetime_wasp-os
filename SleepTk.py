@@ -212,7 +212,7 @@ class SleepTkApp():
                     self._conf_view = _OFF
                 draw.reset()
         elif self._page == _RINGING:
-            if self.btn_al.touch(event):
+            if self.btn_snooz.touch(event):
                 if self._track_HR_once:  # if currently tracking HR, stop
                     self._track_HR_once = _OFF
                     self._hrdata = None
@@ -300,8 +300,8 @@ class SleepTkApp():
             else:
                 msg = "WAKE UP"
             draw.string(msg, 0, 50)
-            self.btn_al = widgets.Button(x=0, y=90, w=240, h=120, label="SNOOZE")
-            self.btn_al.draw()
+            self.btn_snooz = widgets.Button(x=0, y=90, w=240, h=120, label="SNOOZE")
+            self.btn_snooz.draw()
             draw.reset()
         elif self._page == _TRACKING:
             ti = wasp.watch.time.localtime(self._track_start_time)
@@ -376,12 +376,12 @@ class SleepTkApp():
         self.check_body_tracking = None
         self.check_grad = None
         self.btn_sta = None
-        self.btn_al = None
+        self.btn_snooz = None
         self.btn_off = None
         self.btn_HR = None
         self._spin_H = None
         self._spin_M = None
-        del self.check_al, self.check_smart, self.check_body_tracking, self.check_grad, self.btn_sta, self.btn_al, self.btn_off, self.btn_HR, self._spin_H, self._spin_M
+        del self.check_al, self.check_smart, self.check_body_tracking, self.check_grad, self.btn_sta, self.btn_snooz, self.btn_off, self.btn_HR, self._spin_H, self._spin_M
 
         self._currently_tracking = True
 
