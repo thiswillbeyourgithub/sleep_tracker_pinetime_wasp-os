@@ -213,6 +213,10 @@ class SleepTkApp():
                 draw.reset()
         elif self._page == _RINGING:
             if self.btn_al.touch(event):
+                if self._track_HR_once:  # if currently tracking HR, stop
+                    self._track_HR_once = _OFF
+                    self._hrdata = None
+                    wasp.watch.hrs.disable()
                 self._page = _TRACKING
                 self._WU_t = int(wasp.watch.rtc.time()) + _SNOOZE_TIME
                 wasp.system.set_alarm(self._WU_t, self._activate_ticks_to_ring)
