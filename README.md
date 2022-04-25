@@ -29,7 +29,7 @@
 
 ### Note to reader:
 * If you're interested or have any kind of things to say about this, **please** open an issue and tell me all about it :)
-* Status as of end of February 2022: *UI (**done**), regular alarm (**done**), smart alarm (**mostly done but untested**)*
+* Status as of end of May 2022: *UI (**done**), regular alarm (**done**), heart tracking (**done** but might be a bit dodgy), smart alarm (**mostly done but untested**)*
 * you can download your sleep data file using the file `pull_sleep_data`. A suggested workflow to load it into [pandas](https://pypi.org/project/pandas/) can be found at the bottom of the page.
 * the notifications are set to "silent" during the tracking session and are restored to the previously used level when the alarm is ringing
 
