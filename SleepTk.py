@@ -82,7 +82,7 @@ _CYCLE_LENGTH = const(90)
 _SLEEP_GOAL_H = const(7)
 _SLEEP_GOAL_M = const(30)
 # suggests to sleep for this amount of hours and this amount of minutes.
-# (default: 7 30 for 7 hours and 30 minutes)
+# (default: 7 30 for 7 hours and 30 minutes, which is about 5 sleep cycle.)
 ##################################################
 
 
