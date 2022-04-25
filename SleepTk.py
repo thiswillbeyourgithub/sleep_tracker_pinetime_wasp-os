@@ -358,7 +358,7 @@ class SleepTkApp():
                 self.check_grad.state = self._state_gradual_wake
                 self.check_grad.draw()
                 if self._state_body_tracking:
-                    self.check_smart = widgets.Checkbox(x=0, y=160, label="Smart alarm (alpha)")
+                    self.check_smart = widgets.Checkbox(x=0, y=160, label="Smart alarm")
                     self.check_smart.state = self._state_smart_alarm
                     self.check_smart.draw()
             self.btn_sta = widgets.Button(x=0, y=200, w=240, h=40, label="Start")
