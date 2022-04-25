@@ -47,6 +47,7 @@
 * investigate adding a simple feature to wake you up only after a certain movement threshold was passed
 * add a "nap tracking" mode that records sleep tracking with more precision
     * add a "power nap" mode that wakes you as soon as there has been no movement for 5 minutes OR (like steelball) when your heart rate drops
+* implement a simple Neural Network or decision tree to compute best wake up time, using one found in the scientific literature.
 * implement downsampling to 15 minutes precision to compute best wake up time
 * if self.foreground is called, record the time. Use it to cancel smart alarm if you woke up too many times (more than 2 times in more than 20 minutes apart).
 
