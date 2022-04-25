@@ -244,7 +244,7 @@ class SleepTkApp():
             y = 180
         elif self._page == _TRACKING:
             draw.set_color(_FONT_COLOR)
-            duration = (wasp.watch.rtc.time() - self._offset) / 60  # time slept
+            duration = (wasp.watch.rtc.time() - self._track_start_time) / 60  # time slept
             y = 130
 
         draw.string("Total sleep {:02d}h{:02d}m".format(
@@ -278,7 +278,7 @@ class SleepTkApp():
             self.btn_al.draw()
             draw.reset()
         elif self._page == _TRACKING:
-            ti = wasp.watch.time.localtime(self._offset)
+            ti = wasp.watch.time.localtime(self._track_start_time)
             draw.string('Began at {:02d}:{:02d}'.format(ti[3], ti[4]), 0, 50)
             if self._state_alarm:
                 word = "Alarm at "
@@ -360,11 +360,11 @@ class SleepTkApp():
         # accel data not yet written to disk:
         self._data_point_nb = 0  # total number of data points so far
         self._last_checkpoint = 0  # to know when to save to file
-        self._offset = int(wasp.watch.rtc.time())  # makes output more compact
+        self._track_start_time = int(wasp.watch.rtc.time())  # makes output more compact
         wasp.watch.accel.reset()
 
         # create one file per recording session:
-        self.filep = "logs/sleep/{}.csv".format(str(self._offset + _TIMESTAMP))
+        self.filep = "logs/sleep/{}.csv".format(str(self._track_start_time + _TIMESTAMP))
         f = open(self.filep, "wb")
         f.write(b"")
         f.close()
@@ -508,7 +508,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             f = open(self.filep, "ab")
             f.write("{:7f},{}{}\n".format(
                 math.atan(buff[2] / (buff[0]**2 + buff[1]**2))*180/3.1415926535,  # estimated arm angle
-                int(wasp.watch.rtc.time() - self._offset),
+                int(wasp.watch.rtc.time() - self._track_start_time),
                 bpm
                 ).encode())
             f.close()
@@ -769,7 +769,7 @@ BY MISTAKE at {:02d}h{:02d}m".format(t[3], t[4])})
         # sleep cycle duration is the average time distance between those N peaks
         cycle = sum([x_maximas[i+1] - x_maximas[i] for i in range(len(x_maximas) -1)]) / N * _STORE_FREQ
 
-        last_peak = self.sleeptk._offset + x_maximas[-1] * _STORE_FREQ
+        last_peak = self.sleeptk._track_start_time + x_maximas[-1] * _STORE_FREQ
         WU_t = self.sleeptk._WU_t
 
         # check if too late, already woken up:
@@ -780,6 +780,6 @@ BY MISTAKE at {:02d}h{:02d}m".format(t[3], t[4])})
         if last_peak + cycle < WU_t - _ANTICIPATE_ALLOWED:
             earlier = _ANTICIPATE_ALLOWED
         else:  # will wake you up at computed time
-            earlier = last_peak - self.sleeptk._offset + cycle
+            earlier = last_peak - self.sleeptk._track_start_time + cycle
         wasp.system.keep_awake()
         return (earlier, cycle)
