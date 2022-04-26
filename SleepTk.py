@@ -270,7 +270,9 @@ class SleepTkApp():
             y = 180
         elif self._page == _TRACKING:
             draw.set_color(_FONT_COLOR)
-            duration = (wasp.watch.rtc.time() - self._track_start_time - _TIME_TO_FALL_ASLEEP) / 60  # time slept
+            duration = (wasp.watch.rtc.time() - self._track_start_time) / 60 - _TIME_TO_FALL_ASLEEP  # time slept
+            if duration <= 0:  # don't print when not yet asleep
+                return
             y = 130
 
         draw.string("Total sleep {:02d}h{:02d}m".format(
