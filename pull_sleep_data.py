@@ -9,6 +9,7 @@ import re
 from tqdm import tqdm
 
 mode = "all"  # download "all" files or only "latest"
+autoreboot = True  # reboot between each download, to avoid memory issues
 
 print("\n\nRunning gc.collect()...")
 mem_cmd = './tools/wasptool --verbose --eval \'wasp.gc.collect()\''
@@ -33,20 +34,20 @@ else:
 print("\n\n")
 for fi in tqdm(to_dl):
     if os.path.exists(f"./logs/sleep/{fi}"):
-        print(f"Skipping file {fi}: already exists")
+        tqdm.write(f"Skipping file {fi}: already exists")
     else:
-        print(f"Downloading file '{fi}'")
+        tqdm.write(f"Downloading file '{fi}'")
         pull_cmd = f'./tools/wasptool --verbose --pull logs/sleep/{fi}'
         try:
             out = subprocess.check_output(shlex.split(pull_cmd))
             if b"Watch reported error" in out:
                 raise Exception("Watch reported error")
-            print(f"Succesfully downloaded to './logs/sleep/{fi}'")
+            tqdm.write(f"Succesfully downloaded to './logs/sleep/{fi}'")
         except Exception as e:
-            print(f"Error happened while downloading {fi}, deleting local incomplete file")
+            tqdm.write(f"Error happened while downloading {fi}, deleting local incomplete file")
             os.system(f"rm ./logs/sleep/{fi}")
-        if mode == "all":
-            print("Restarting watch.")
+        if mode == "all" and autoreboot:
+            tqdm.write("Restarting watch.")
             out = subprocess.check_output(shlex.split(reset_cmd))
             time.sleep(10)
 
