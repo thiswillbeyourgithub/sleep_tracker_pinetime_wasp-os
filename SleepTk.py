@@ -591,7 +591,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             del t
 
             wasp.system.keep_awake()
-            if len(self._hrdata.data) >= 360:  # 15 seconds passed
+            if len(self._hrdata.data) >= 240:  # 10 seconds passed
                 bpm = self._hrdata.get_heart_rate()
                 bpm = int(bpm) if bpm is not None else None
                 if bpm is None:
