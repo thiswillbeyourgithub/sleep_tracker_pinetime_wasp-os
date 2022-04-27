@@ -84,7 +84,8 @@ fname = "./logs/sleep/YOUR_TIME.csv"
 import pandas as pd
 import plotly.express as plt
 
-df = pd.read_csv(fname, names=["motion", "elapsed", "x_avg", "y_avg", "z_avg", "battery"])
+#df = pd.read_csv(fname, names=["motion", "elapsed", "x_avg", "y_avg", "z_avg", "battery"])
+df = pd.read_csv(fname, names=["motion", "elapsed", "heart_rate"])
 start_time = int(fname.split("/")[-1].split(".csv")[0])
 
 df["time"] = pd.to_datetime(df["elapsed"]+start_time, unit='s')
@@ -112,6 +113,11 @@ fig.update_xaxes(type="date",
                  tickformat="%H:%M"
                  )
 fig.show()
+
+df_HR = df.set_index("human_time")["heart_rate"]
+df_HR = df_HR[~df_HR.isna()]
+df_HR.plot()
+
 ```
 
 Now, to play around with the signal processing function:
