@@ -151,7 +151,7 @@ class SleepTkApp():
         if self._stop_trial >= _STOP_LIMIT:
             wasp.system.cancel_alarm(self._WU_t, self._activate_ticks_to_ring)
             self._disable_tracking()
-            self._page = _SETTINGS1
+            self.__init__()
         draw = wasp.watch.drawable
         draw.set_color(_FONT_COLOR)
         draw.string("{} to stop".format(_STOP_LIMIT - self._stop_trial), 0, 70)
