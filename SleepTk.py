@@ -75,7 +75,7 @@ _GRADUAL_WAKE = array("H", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 15])
 # you more gently. (default: array("H", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 15]) )
 _TIME_TO_FALL_ASLEEP = const(14)
 # minutes you take to fall asleep (default: 14, according to https://sleepyti.me/)
-_CYCLE_LENGTH = const(85)
+_CYCLE_LENGTH = const(90)
 # sleep cycle length in minutes. Currently used only to display best wake up
 # time but not to compute smart alarm! (default: 90 or 100, according to
 # https://sleepyti.me/)
