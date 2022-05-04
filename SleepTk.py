@@ -112,6 +112,7 @@ class SleepTkApp():
         self._conf_view = _OFF  # confirmation view
         self._smart_offset = _OFF  # number of seconds between the alarm you set manually and the smart alarm time
         self._buff = array("f", [_OFF, _OFF, _OFF])  # contains accelerometer values
+        self._last_touch = int(wasp.watch.rtc.time())
 
         try:
             shell.mkdir("logs/")
@@ -160,6 +161,7 @@ class SleepTkApp():
         "stop ringing alarm if pressed physical button"
         if not state:
             return
+        self._last_touch = int(wasp.watch.rtc.time())
         mute = wasp.watch.display.mute
         mute(False)
         if self._page == _RINGING:
@@ -174,6 +176,7 @@ class SleepTkApp():
         "navigate between settings page"
         mute = wasp.watch.display.mute
         mute(False)
+        self._last_touch = int(wasp.watch.rtc.time())
         if self._page == _SETTINGS1:
             if event[0] == wasp.EventType.LEFT:
                 self._page = _SETTINGS2
@@ -197,6 +200,7 @@ class SleepTkApp():
         draw = wasp.watch.drawable
         mute = wasp.watch.display.mute
         mute(False)
+        self._last_touch = int(wasp.watch.rtc.time())
         if self._page == _TRACKING:
             if self._conf_view is _OFF:
                 if self.btn_off.touch(event):
@@ -508,10 +512,10 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
                     wasp.watch.rtc.time() - self._last_HR_date > _HR_FREQ and \
                     not self._track_HR_once:
                 self._track_HR_once = _ON
-                mute = wasp.watch.display.mute
-                mute(True)
                 wasp.system.wake()
-                mute(True)
+                if int(wasp.watch.rtc.time()) - self._last_touch > 5:
+                    mute = wasp.watch.display.mute
+                    mute(True)
                 wasp.system.switch(self)
                 wasp.system.request_tick(1000 // 8)
 
@@ -556,8 +560,9 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
         wasp.gc.collect()
         wasp.system.notify_level = self._old_notification_level  # restore notification level
         self._page = _RINGING
-        mute = wasp.watch.display.mute
-        mute(True)
+        if int(wasp.watch.rtc.time()) - self._last_touch > 5:
+            mute = wasp.watch.display.mute
+            mute(True)
         wasp.system.wake()
         wasp.system.switch(self)
         self._draw()
@@ -576,9 +581,10 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
                 self._hrdata = ppg.PPG(wasp.watch.hrs.read_hrs())
             t = wasp.machine.Timer(id=1, period=8000000)
             t.start()
-            mute = wasp.watch.display.mute
             wasp.system.keep_awake()
-            mute(True)
+            if int(wasp.watch.rtc.time()) - self._last_touch > 5:
+                mute = wasp.watch.display.mute
+                mute(True)
             self._subtick(1)
             while t.time() < 41666:
                 pass
@@ -613,7 +619,8 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
                     self._track_HR_once = _OFF
                     self._hrdata = None
                     wasp.watch.hrs.disable()
-                    wasp.system.sleep()
+                    if int(wasp.watch.rtc.time()) - self._last_touch > 5:
+                        wasp.system.sleep()
 
     def _subtick(self, ticks):
         """track heart rate at 24Hz"""
@@ -623,8 +630,9 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
         """vibrate just a tiny bit before waking up, to gradually return
         to consciousness"""
         wasp.gc.collect()
-        mute = wasp.watch.display.mute
-        mute(True)
+        if int(wasp.watch.rtc.time()) - self._last_touch > 5:
+            mute = wasp.watch.display.mute
+            mute(True)
         wasp.system.wake()
         wasp.system.switch(self)
         wasp.watch.vibrator.pulse(duty=60, ms=100)
