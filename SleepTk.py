@@ -421,7 +421,7 @@ class SleepTkApp():
             # to wake up gradually
             if self._state_gradual_wake:
                 for t in _GRADUAL_WAKE:
-                    wasp.system.set_alarm(self._WU_t - t*60, self._tiny_vibration)
+                    wasp.system.set_alarm(self._WU_t - int(t*60), self._tiny_vibration)
 
             # wake up SleepTk 2min before earliest possible wake up
             if self._state_smart_alarm:
@@ -466,7 +466,7 @@ class SleepTkApp():
             if keep_main_alarm is False:  # to keep the alarm when stopping because of low battery
                 wasp.system.cancel_alarm(self._WU_t, self._activate_ticks_to_ring)
                 for t in _GRADUAL_WAKE:
-                    wasp.system.cancel_alarm(self._WU_t - t*60, self._tiny_vibration)
+                    wasp.system.cancel_alarm(self._WU_t - int(t*60), self._tiny_vibration)
             if self._state_smart_alarm:
                 wasp.system.cancel_alarm(self._WU_a, self._smart_alarm_start)
                 self._state_smart_alarm = _OFF
@@ -703,9 +703,9 @@ BY MISTAKE at {:02d}h{:02d}m".format(t[3], t[4])})
             # replace old gentle alarm by another one
             if self.sleeptk._grad_alarm_state:
                 for t in _GRADUAL_WAKE:
-                    wasp.system.cancel_alarm(WU_t - t*60, self.sleeptk._tiny_vibration)
-                    if earlier + t*60 < _ANTICIPATE_ALLOWED:
-                        wasp.system.set_alarm(WU_t - earlier - t*60, self.sleeptk._tiny_vibration)
+                    wasp.system.cancel_alarm(WU_t - int(t*60), self.sleeptk._tiny_vibration)
+                    if earlier + int(t*60) < _ANTICIPATE_ALLOWED:
+                        wasp.system.set_alarm(WU_t - earlier - int(t*60), self.sleeptk._tiny_vibration)
 
             self.sleeptk._earlier = earlier
             self.sleeptk._page = _TRACKING
