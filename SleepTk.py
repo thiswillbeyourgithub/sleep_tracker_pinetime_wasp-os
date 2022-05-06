@@ -167,6 +167,7 @@ class SleepTkApp():
         if self._page == _RINGING:
             self._try_stop_alarm()
         elif self._page == _TRACKING:
+            self._was_touched = 1
             # disable pressing to exit, use swipe up instead
             self._draw()
         else:
@@ -202,6 +203,7 @@ class SleepTkApp():
         mute(False)
         self._last_touch = int(wasp.watch.rtc.time())
         if self._page == _TRACKING:
+            self._was_touched = 1
             if self._conf_view is _OFF:
                 if self.btn_off.touch(event):
                     self._conf_view = widgets.ConfirmationView()
@@ -396,6 +398,7 @@ class SleepTkApp():
         self._last_checkpoint = 0  # to know when to save to file
         self._track_start_time = int(wasp.watch.rtc.time())  # makes output more compact
         self._last_HR_printed = "?"
+        self._was_touched = 0
         wasp.watch.accel.reset()
 
         # create one file per recording session:
@@ -525,7 +528,8 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
         """save data to csv with row order:
             1. average arm angle
             2. elapsed times
-            3. heart rate if present
+            3/4. heart rate if present, and/or -1 if screen was woken up
+                by user during that time
          arm angle formula from https://www.nature.com/articles/s41598-018-31266-z
          note: math.atan() is faster than using a taylor serie
         """
@@ -544,7 +548,8 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             f.write("{:7f},{}{}\n".format(
                 math.atan(buff[2] / (buff[0]**2 + buff[1]**2))*180/3.1415926535,  # estimated arm angle
                 int(wasp.watch.rtc.time() - self._track_start_time),
-                bpm
+                bpm,
+                ",-1" if self._was_touched else ""
                 ).encode())
             f.close()
             del f
@@ -552,6 +557,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             buff[1] = 0
             buff[2] = 0
             self._last_checkpoint = self._data_point_nb
+            self._was_touched = 0
             wasp.gc.collect()
 
     def _activate_ticks_to_ring(self):
