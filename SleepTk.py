@@ -148,15 +148,16 @@ class SleepTkApp():
 
     def _try_stop_alarm(self):
         """If button or swipe more than _STOP_LIMIT, then stop ringing"""
-        self._stop_trial += 1
-        if self._stop_trial >= _STOP_LIMIT:
+        if self._stop_trial + 1 >= _STOP_LIMIT:
             wasp.system.cancel_alarm(self._WU_t, self._activate_ticks_to_ring)
             self._disable_tracking()
             self.__init__()
             self.foreground()
-        draw = wasp.watch.drawable
-        draw.set_color(_FONT_COLOR)
-        draw.string("{} to stop".format(_STOP_LIMIT - self._stop_trial), 0, 70)
+        else:
+            self._stop_trial += 1
+            draw = wasp.watch.drawable
+            draw.set_color(_FONT_COLOR)
+            draw.string("{} to stop".format(_STOP_LIMIT - self._stop_trial), 0, 70)
 
     def press(self, button, state):
         "stop ringing alarm if pressed physical button"
