@@ -153,6 +153,7 @@ class SleepTkApp():
             wasp.system.cancel_alarm(self._WU_t, self._activate_ticks_to_ring)
             self._disable_tracking()
             self.__init__()
+            self.foreground()
         draw = wasp.watch.drawable
         draw.set_color(_FONT_COLOR)
         draw.string("{} to stop".format(_STOP_LIMIT - self._stop_trial), 0, 70)
