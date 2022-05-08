@@ -582,7 +582,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
         wasp.system.switch(self)
         if self._page == _RINGING:
             wasp.system.keep_awake()
-            wasp.watch.vibrator.pulse(duty=50, ms=500)
+            wasp.watch.vibrator.pulse(duty=25, ms=500)
         elif self._track_HR_once:
             wasp.watch.hrs.enable()
             if self._hrdata is None:
