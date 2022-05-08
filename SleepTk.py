@@ -70,9 +70,9 @@ _BATTERY_THRESHOLD = const(15)
 _ANTICIPATE_ALLOWED = const(2400)
 # number of seconds SleepTk can wake you up before the alarm clock you set
 # only relevant if smart_alarm is enabled. (default: 2400)
-_GRADUAL_WAKE = array("H", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 15])
+_GRADUAL_WAKE = array("H", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
 # nb of minutes before alarm to send a tiny vibration, designed to wake
-# you more gently. (default: array("H", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 15]) )
+# you more gently. (default: array("H", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) )
 _TIME_TO_FALL_ASLEEP = const(14)
 # minutes you take to fall asleep (default: 14, according to https://sleepyti.me/)
 _CYCLE_LENGTH = const(90)
