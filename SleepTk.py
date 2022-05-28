@@ -94,9 +94,9 @@ class SleepTkApp():
 
         # default button state
         self._state_alarm = _ON
-        self._state_body_tracking = _ON
-        self._state_HR_tracking = _ON
-        self._state_gradual_wake = _OFF
+        self._state_body_tracking = _OFF
+        self._state_HR_tracking = _OFF
+        self._state_gradual_wake = _ON
         self._state_smart_alarm = _OFF
         self._state_spinval_H = _OFF
         self._state_spinval_M = _OFF
