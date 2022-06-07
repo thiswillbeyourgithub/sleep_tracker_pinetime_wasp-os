@@ -231,10 +231,18 @@ class SleepTkApp():
                 wasp.system.sleep()
         elif self._page == _SETTINGS1:
             if self._state_alarm and (self._spin_H.touch(event) or self._spin_M.touch(event)):
-                self._state_spinval_H = self._spin_H.value
-                self._spin_H.update()
+                if self._state_spinval_M == 0 and self._spin_M.value == 55:
+                    self._spin_H.value -= 1
+                elif self._state_spinval_M == 55 and self._spin_M.value == 0:
+                    self._spin_H.value += 1
+                if self._spin_H.value >= 24:
+                    self._spin_H.value = 0
+                elif self._spin_H.value <= -1:
+                    self._spin_H.value = 23
                 self._state_spinval_M = self._spin_M.value
                 self._spin_M.update()
+                self._state_spinval_H = self._spin_H.value
+                self._spin_H.update()
                 if self._state_alarm:
                     self._draw_duration(draw)
                 return
