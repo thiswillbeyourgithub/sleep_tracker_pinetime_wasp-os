@@ -593,9 +593,9 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
         wasp.system.switch(self)
         if self._page == _RINGING:
             wasp.system.keep_awake()
-            # in 10 vibrations, ramp up from subtle to strong:
-            wasp.watch.vibrator.pulse(duty=max(80 - 6 * self._n_vibration, 20),
-                                      ms=min(100 + 40 * self._n_vibration, 500))
+            # in 60 vibrations, ramp up from subtle to strong:
+            wasp.watch.vibrator.pulse(duty=max(80 - 1 * self._n_vibration, 20),
+                                      ms=min(100 + 6 * self._n_vibration, 500))
             self._n_vibration += 1
         elif self._track_HR_once:
             wasp.watch.hrs.enable()
