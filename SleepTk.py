@@ -149,6 +149,8 @@ class SleepTkApp():
     def _try_stop_alarm(self):
         """If button or swipe more than _STOP_LIMIT, then stop ringing"""
         if self._stop_trial + 1 >= _STOP_LIMIT:
+            self._n_vibration = 0
+            del self._n_vibration
             wasp.system.cancel_alarm(self._WU_t, self._activate_ticks_to_ring)
             self._disable_tracking()
             self.__init__()
@@ -576,6 +578,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
         wasp.gc.collect()
         wasp.system.notify_level = self._old_notification_level  # restore notification level
         self._page = _RINGING
+        self._n_vibration = 0
         if int(wasp.watch.rtc.time()) - self._last_touch > 5:
             mute = wasp.watch.display.mute
             mute(True)
@@ -590,7 +593,10 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
         wasp.system.switch(self)
         if self._page == _RINGING:
             wasp.system.keep_awake()
-            wasp.watch.vibrator.pulse(duty=25, ms=500)
+            # in 10 vibrations, ramp up from subtle to strong:
+            wasp.watch.vibrator.pulse(duty=max(80 - 6 * self._n_vibration, 20),
+                                      ms=min(100 + 40 * self._n_vibration, 500))
+            self._n_vibration += 1
         elif self._track_HR_once:
             wasp.watch.hrs.enable()
             if self._hrdata is None:
