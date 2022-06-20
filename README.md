@@ -44,6 +44,7 @@
 
 ## TODO
 **misc**
+* investigate if the hardware method behind lift to wake can be used to detect motion throughout the night
 * greatly simplify the code by simply adding a large tick function every second instead of managing tons of counters.
 * investigate adding a simple feature to wake you up only after a certain movement threshold was passed
 * add a "nap tracking" mode that records sleep tracking with more precision
