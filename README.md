@@ -34,7 +34,8 @@
 * you can download your sleep data file using the file `pull_sleep_data`. A suggested workflow to load it into [pandas](https://pypi.org/project/pandas/) can be found at the bottom of the page.
 * the notifications are set to "silent" during the tracking session and are restored to the previously used level when the alarm is ringing
 * by default, the Bluetooth is turned off when tracking to save battery. Wasp OS doesn't allow to turn it back on without restarting the watch.
-* it seems the simulator is having a rough time with daylight saving mode or time management. I personnaly have a 1h offset between sleep estimation on the simulator compared to the pinetime, don't worry.
+* it seems the simulator is having a rough time with daylight saving mode or time management. I personally have a 1h offset between sleep estimation on the simulator compared to the pinetime, don't worry.
+* If your watch's storage is full because of all the logging files, follow [these instructions to reset the storage](https://github.com/daniel-thompson/wasp-os/issues/345#issuecomment-1194270674).
 
 # Screenshots:
 ![settings](./screenshots/settings_page.png)
