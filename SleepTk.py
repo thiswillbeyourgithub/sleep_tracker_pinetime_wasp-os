@@ -115,7 +115,7 @@ class SleepTkApp():
         self._last_touch = int(wasp.watch.rtc.time())
 
         try:
-            shell.mkdir("logs/")
+            shell.mkdir("logs")
         except:  # folder already exists
             pass
         try:
