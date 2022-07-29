@@ -28,7 +28,7 @@
 * *optional: delete all the sleep data present in your watch using the script `rm_sleep_data.py`*
 
 ### Note to reader:
-* Note that the watch assumes an average of 14 minutes to fall asleep. You have to take this into account if you feel super sleepy at the time of setting the alarm.
+* Note that the watch assumes that you fall asleep instantly. Previously an average of 14 minutes to fall asleep was taken into account but now you have to adjust yourself depending on how sleepy you are.
 * If you're interested or have any kind of things to say about this, **please** open an issue and tell me all about it :)
 * Status as of end of May 2022: *UI (**done**), regular alarm (**done**), heart tracking (**done** but might be a bit dodgy), smart alarm (**mostly done but untested**)*
 * you can download your sleep data file using the file `pull_sleep_data`. A suggested workflow to load it into [pandas](https://pypi.org/project/pandas/) can be found at the bottom of the page.

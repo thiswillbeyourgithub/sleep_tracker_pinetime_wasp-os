@@ -73,8 +73,6 @@ _ANTICIPATE_ALLOWED = const(2400)
 _GRADUAL_WAKE = array("H", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
 # nb of minutes before alarm to send a tiny vibration, designed to wake
 # you more gently. (default: array("H", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) )
-_MINUTES_TO_FALL_ASLEEP = const(14)
-# time you take to fall asleep (default: 14, according to https://sleepyti.me/)
 _CYCLE_LENGTH = const(90)
 # sleep cycle length in minutes. Currently used only to display best wake up
 # time but not to compute smart alarm! (default: 90 or 100, according to
@@ -283,12 +281,11 @@ class SleepTkApp():
     def _draw_duration(self, draw):
         draw.set_font(_FONT)
         if self._page == _SETTINGS1:
-            duration = (self._read_time(self._state_spinval_H, self._state_spinval_M) - wasp.watch.rtc.time()) / 60 - _MINUTES_TO_FALL_ASLEEP
-            assert duration >= _MINUTES_TO_FALL_ASLEEP
+            duration = (self._read_time(self._state_spinval_H, self._state_spinval_M) - wasp.watch.rtc.time()) / 60
             y = 180
         elif self._page == _TRACKING:
             draw.set_color(_FONT_COLOR)
-            duration = (wasp.watch.rtc.time() - self._track_start_time) / 60 - _MINUTES_TO_FALL_ASLEEP  # time slept
+            duration = (wasp.watch.rtc.time() - self._track_start_time) / 60
             if duration <= 0:  # don't print when not yet asleep
                 return
             y = 130
@@ -356,7 +353,7 @@ class SleepTkApp():
                     (H, M) = wasp.watch.rtc.get_localtime()[3:5]
                     goal_h = _SLEEP_GOAL_CYCLE * _CYCLE_LENGTH // 60
                     goal_m = _SLEEP_GOAL_CYCLE * _CYCLE_LENGTH % 60
-                    M += goal_m + _MINUTES_TO_FALL_ASLEEP
+                    M += goal_m
                     while M % 5 != 0:
                         M += 1
                     self._state_spinval_H = ((H + goal_h) % 24 + (M // 60)) % 24
