@@ -31,7 +31,8 @@
 ### How to add SleepTk as a standalone app without building wasp-os
 *Those steps have not been tested and there might be some typos as I did it from refering to [the official doc](https://wasp-os.readthedocs.io/en/latest/appguide.html) and by memory*
 * `./micropython/mpy-cross/mpy-cross -mno-unicode -march=armv7m SleepTk.py `
-* `./tools/wasptool --binary --upload SleepTk.mpy`
+* Create the right directory if needed: `./tools/wasptool --eval "from shell import mkdir ; mkdir("apps")"`
+* `./tools/wasptool --binary --upload SleepTk.mpy --as apps/SleepTk.mpy`
 * Register the app: `./tools/wasptool --eval "from SleepTk import SleeTkApp ; wasp.system.register(SleepTkApp())"`
 
 ### Note to reader:
