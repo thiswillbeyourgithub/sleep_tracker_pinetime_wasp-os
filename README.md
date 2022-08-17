@@ -14,9 +14,13 @@
 ## Credits:
 * Many thanks to Emanuel Löffler (https://github.com/plan5) who kindly created the logo.
 
-## **How to install**:
-* download the latest [SleepTk.py](./SleepTk.py) and put it in `wasp-os/wasp/apps/SleepTk.py`
-* open `SleepTk.py` to edit the user settings (at the top of the file)
+## **How to add SleepTk to your wasp-os install**:
+* clone the latest [wasp-os](https://github.com/daniel-thompson/wasp-os)
+* download the latest [SleepTk.py](./SleepTk.py)
+* edit the settings of SleepTk (located at the top of SleepTk.py)
+* move `SleepTk.py` as `wasp-os/wasp/apps/SleepTk.py`
+* to enable the app by default: add the line `apps/SleepTk.py` to `wasp/boards/manifest_240x240.py`
+* to make the app accessible from the software app: add the line `db.append(('SleepTk', factory('SleepTk')))` to `wasp/apps/software.py`
 * compile `wasp-os`: `make submodules && make softdevice && make BOARD=pinetime all && echo "SUCCESS"`
 * upload it to your pinetime: `./tools/ota-dfu/dfu.py -z build-pinetime/micropython.zip -a XX:XX:XX:XX:XX:XX --legacy`
 * reboot the watch and enjoy `SleepTk`
