@@ -462,10 +462,10 @@ class SleepTkApp():
         _STORE_FREQ seconds"""
         if self._currently_tracking:
             buff = self._buff
-            xyz = wasp.watch.accel.read_xyz()
+            xyz = wasp.watch.accel.accel_xyz()
             if xyz == (0, 0, 0):
                 wasp.watch.accel.reset()
-                xyz = wasp.watch.accel.read_xyz()
+                xyz = wasp.watch.accel.accel_xyz()
             buff[0] += xyz[0]
             buff[1] += xyz[1]
             buff[2] += xyz[2]
