@@ -19,7 +19,8 @@
 * download the latest [SleepTk.py](./SleepTk.py)
 * edit the settings of SleepTk (located at the top of SleepTk.py)
 * move `SleepTk.py` as `wasp-os/wasp/apps/SleepTk.py`
-* to enable the app by default: add the line `apps/SleepTk.py` to `wasp/boards/manifest_240x240.py`
+* to enable the app by default: add the line `self.register('apps.SleepTk.SleepTkApp', False, no_except=True)` to `wasp/wasp.py`
+* to load the file: add the line `apps/SleepTk.py` to `wasp/boards/manifest_240x240.py`
 * to make the app accessible from the software app: add the line `db.append(('SleepTk', factory('SleepTk')))` to `wasp/apps/software.py`
 * compile `wasp-os`: `make submodules && make softdevice && make BOARD=pinetime all && echo "SUCCESS"`
 * upload it to your pinetime: `./tools/ota-dfu/dfu.py -z build-pinetime/micropython.zip -a XX:XX:XX:XX:XX:XX --legacy`
