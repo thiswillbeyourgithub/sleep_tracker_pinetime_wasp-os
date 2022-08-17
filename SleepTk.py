@@ -619,7 +619,9 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             mute(True)
         wasp.system.wake()
         wasp.system.switch(self)
-        wasp.watch.vibrator.pulse(duty=60, ms=100)
+        wasp.watch.vibrator.pulse(duty=3, ms=50)
+        # time.sleep(0.1)
+        # wasp.watch.vibrator.pulse(duty=3, ms=50)
         if not self._track_HR_once:
             wasp.system.sleep()
 
