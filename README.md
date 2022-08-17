@@ -1,17 +1,15 @@
 # SleepTk : a sleep tracker and smart alarm for wasp-os
-**Goal:** privacy friendly sleep tracker with smart alarm for the [pinetime smartwatch](https://pine64.com/product/pinetime-smartwatch-sealed/) by Pine64, on python, to run on [wasp-os](https://github.com/daniel-thompson/wasp-os).
+**Goal:** privacy friendly sleep tracker with cool alarm features for the [pinetime smartwatch](https://pine64.com/product/pinetime-smartwatch-sealed/) by Pine64, on python, to run on [wasp-os](https://github.com/daniel-thompson/wasp-os).
 
 ## Features:
-* **Sleep tracking**: logs your body movement during the night, infers your sleep cycle and write it all down in a `.csv` file.
-* **Heart tracking**: tracks your heart rate throughout the night.
-* **Flexible (alpha)**: does not make too many assumption regarding time to fall asleep, sleep cycle duration etc. SleepTk tries various data to see what fits best for your profile. If you still want to customize things, all the hardcoded and commented settings are easily accessible at the top of the file.
 * **Privacy friendly**: your data is not sent to anyone, it is stored and analyzed directly on the watch (but you can still download it if needed).
 * **Completely open source**
 * **Best alarm time suggestion**: suggests wake up time according to average sleep cycles length.
 * **Gradual wake**: vibrates the watch a tiny bit a few times before the alarm to lift you gently back to consciousness.
 * **Easy to snooze but hard to stop** You have to swipe several times to make it stop, but can snooze easily.
-* **Smart alarm clock (alpha)**: adaptative alarm that wakes you at the best time of your sleep cycle (up to 40 minutes before the set time) to make sure you wake up feeling refreshed.
 * **Insomnia insights**: if you turn on the screen during the night, SleepTk will tell you how long you slept and in what part of the sleep cycle you are supposed to be.
+* **Sleep tracking**: logs your body movement during the night, infers your sleep cycle and write it all down in a `.csv` file.
+* **Heart tracking**: tracks your heart rate throughout the night.
 
 ## Credits:
 * Many thanks to Emanuel Löffler (https://github.com/plan5) who kindly created the logo.
@@ -30,12 +28,13 @@
 ### Note to reader:
 * Note that the watch assumes that you fall asleep instantly. Previously an average of 14 minutes to fall asleep was taken into account but now you have to adjust yourself depending on how sleepy you are.
 * If you're interested or have any kind of things to say about this, **please** open an issue and tell me all about it :)
-* Status as of end of May 2022: *UI (**done**), regular alarm (**done**), heart tracking (**done** but might be a bit dodgy), smart alarm (**mostly done but untested**)*
+* Status: fully functional
 * you can download your sleep data file using the file `pull_sleep_data`. A suggested workflow to load it into [pandas](https://pypi.org/project/pandas/) can be found at the bottom of the page.
 * the notifications are set to "silent" during the tracking session and are restored to the previously used level when the alarm is ringing
 * by default, the Bluetooth is turned off when tracking to save battery. Wasp OS doesn't allow to turn it back on without restarting the watch.
 * it seems the simulator is having a rough time with daylight saving mode or time management. I personally have a 1h offset between sleep estimation on the simulator compared to the pinetime, don't worry.
 * If your watch's storage is full because of all the logging files, follow [these instructions to reset the storage](https://github.com/daniel-thompson/wasp-os/issues/345#issuecomment-1194270674).
+* Previously, SleepTk included a feature to compute the best alarm best on the estimated sleep cycle from your body movements and heart tracking but counting the cycles is already so much efficient that this ended up removed!
 
 # Screenshots:
 ![settings](./screenshots/settings_page.png)
@@ -46,7 +45,6 @@
 ## TODO
 **misc**
 * print the number of cycle left to sleep when waking up in the middle of the night
-* remove the "smart" features because it is less useful than simply counting the cycles
 * greatly simplify the code by simply adding a large tick function every second instead of managing tons of counters.
 * investigate adding a simple feature to wake you up only after a certain movement threshold was passed
 * add a "nap tracking" mode that records sleep tracking with more precision

@@ -67,16 +67,12 @@ _STORE_FREQ = const(300)
 _BATTERY_THRESHOLD = const(15)
 # under X% of battery, stop tracking and only keep the alarm, set at -200
 # or lower to disable (default: 15)
-_ANTICIPATE_ALLOWED = const(2400)
-# number of seconds SleepTk can wake you up before the alarm clock you set
-# only relevant if smart_alarm is enabled. (default: 2400)
 _GRADUAL_WAKE = array("H", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
 # nb of minutes before alarm to send a tiny vibration, designed to wake
 # you more gently. (default: array("H", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) )
 _CYCLE_LENGTH = const(85)
 # sleep cycle length in minutes. Currently used only to display best wake up
-# time but not to compute smart alarm! (default: 90 or 100, according to
-# https://sleepyti.me/)
+# time! (default should be: 90 or 100, according to https://sleepyti.me/)
 _SLEEP_GOAL_CYCLE = const(5)
 # number of sleep cycle you wish to sleep. With _CYCLE_LENGTH this is used
 # to suggest best wake up time to user when setting the alarm. (default: 5)
@@ -95,7 +91,6 @@ class SleepTkApp():
         self._state_body_tracking = _OFF
         self._state_HR_tracking = _OFF
         self._state_gradual_wake = _ON
-        self._state_smart_alarm = _OFF
         self._state_spinval_H = _OFF
         self._state_spinval_M = _OFF
 
@@ -108,7 +103,6 @@ class SleepTkApp():
         self._page = _SETTINGS1
         self._currently_tracking = _OFF
         self._conf_view = _OFF  # confirmation view
-        self._smart_offset = _OFF  # number of seconds between the alarm you set manually and the smart alarm time
         self._buff = array("f", [_OFF, _OFF, _OFF])  # contains accelerometer values
         self._last_touch = int(wasp.watch.rtc.time())
 
@@ -262,11 +256,6 @@ class SleepTkApp():
                     self._state_gradual_wake = self.check_grad.state
                     self.check_grad.draw()
                     return
-                if self._state_body_tracking:
-                    if self.check_smart.touch(event):
-                        self._state_smart_alarm = self.check_smart.state
-                        self.check_smart.draw()
-                        return
             if self.btn_sta.touch(event):
                 draw.fill()
                 draw.string("Loading", 0, 100)
@@ -275,7 +264,6 @@ class SleepTkApp():
                 self._state_body_tracking = self.check_body_tracking.state
                 self.check_body_tracking.draw()
                 if not self._state_body_tracking:
-                    self._state_smart_alarm = _OFF
                     self._state_HR_tracking = _OFF
         self._draw()
 
@@ -313,11 +301,7 @@ class SleepTkApp():
         draw.set_font(_FONT)
         draw.set_color(_FONT_COLOR)
         if self._page == _RINGING:
-            if self._smart_offset != 0:
-                msg = "WAKE UP ({}m early)".format(str(self._smart_offset//60)[0:2])
-            else:
-                msg = "WAKE UP"
-            draw.string(msg, 0, 50)
+            draw.string("WAKE UP", 0, 50)
             self.btn_snooz = widgets.Button(x=0, y=90, w=240, h=120, label="SNOOZE")
             self.btn_snooz.draw()
             draw.reset()
@@ -326,8 +310,6 @@ class SleepTkApp():
             draw.string('Began at {:02d}:{:02d}'.format(ti[3], ti[4]), 0, 50)
             if self._state_alarm:
                 word = "Alarm at "
-                if self._state_smart_alarm:
-                    word = "Alarm BEFORE "
                 ti = wasp.watch.time.localtime(self._WU_t)
                 draw.string("{}{:02d}:{:02d}".format(word, ti[3], ti[4]), 0, 70)
                 draw.string("Gradual wake: {}".format(True if self._state_gradual_wake else False), 0, 90)
@@ -379,10 +361,6 @@ class SleepTkApp():
                 self.check_grad = widgets.Checkbox(0, 120, "Gradual wake")
                 self.check_grad.state = self._state_gradual_wake
                 self.check_grad.draw()
-                if self._state_body_tracking:
-                    self.check_smart = widgets.Checkbox(x=0, y=160, label="Smart alarm")
-                    self.check_smart.state = self._state_smart_alarm
-                    self.check_smart.draw()
             self.btn_sta = widgets.Button(x=0, y=200, w=240, h=40, label="Start")
             self.btn_sta.draw()
         draw.reset()
@@ -390,7 +368,6 @@ class SleepTkApp():
     def _start_tracking(self):
         # save some memory
         self.check_al = None
-        self.check_smart = None
         self.check_body_tracking = None
         self.check_grad = None
         self.btn_sta = None
@@ -399,7 +376,7 @@ class SleepTkApp():
         self.btn_HR = None
         self._spin_H = None
         self._spin_M = None
-        del self.check_al, self.check_smart, self.check_body_tracking, self.check_grad, self.btn_sta, self.btn_snooz, self.btn_off, self.btn_HR, self._spin_H, self._spin_M
+        del self.check_al, self.check_body_tracking, self.check_grad, self.btn_sta, self.btn_snooz, self.btn_off, self.btn_HR, self._spin_H, self._spin_M
 
         self._currently_tracking = True
 
@@ -440,16 +417,6 @@ class SleepTkApp():
                 for t in _GRADUAL_WAKE:
                     wasp.system.set_alarm(self._WU_t - int(t*60), self._tiny_vibration)
 
-            # wake up SleepTk 2min before earliest possible wake up
-            if self._state_smart_alarm:
-                if not SmartAlarm in locals():
-                    raise Exception("SmartAlarm was removed in previous run to save memory. Restart the watch to use it.")
-                self._WU_a = self._WU_t - _ANTICIPATE_ALLOWED - 120
-                wasp.system.set_alarm(self._WU_a, self._smart_alarm_start)
-            else:
-                SmartAlarm = None
-                del SmartAlarm
-
         # don't track heart rate right away, wait a few seconds
         if self._state_HR_tracking:
             self._last_HR_date = int(wasp.watch.rtc.time()) + 10
@@ -484,9 +451,6 @@ class SleepTkApp():
                 wasp.system.cancel_alarm(self._WU_t, self._activate_ticks_to_ring)
                 for t in _GRADUAL_WAKE:
                     wasp.system.cancel_alarm(self._WU_t - int(t*60), self._tiny_vibration)
-            if self._state_smart_alarm:
-                wasp.system.cancel_alarm(self._WU_a, self._smart_alarm_start)
-                self._state_smart_alarm = _OFF
         wasp.watch.hrs.disable()
         self._periodicSave()
         self._state_HR_tracking = _OFF
@@ -659,187 +623,3 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
         if not self._track_HR_once:
             wasp.system.sleep()
 
-    def _smart_alarm_start(self):
-        SmartAlarm(self)
-
-class SmartAlarm():
-    def __init__(self, sleeptk):
-        self.sleeptk = sleeptk
-        self._smart_alarm_compute()
-
-    def _smart_alarm_compute(self):
-        """computes best wake up time from sleep data"""
-        wasp.gc.collect()
-        if not self.sleeptk._smart_alarm_state:
-            t = wasp.watch.time.localtime(wasp.watch.rtc.time())
-            wasp.system.notify(wasp.watch.rtc.get_uptime_ms(),
-                          {"src": "SleepTk",
-                           "title": "Smart alarm computation",
-                           "body": "Started computation for the smart alarm \
-BY MISTAKE at {:02d}h{:02d}m".format(t[3], t[4])})
-            return
-        mute = wasp.watch.display.mute
-        mute(True)
-        wasp.system.wake()
-        wasp.system.switch(self.sleeptk)
-        t = wasp.watch.time.localtime(wasp.watch.rtc.time())
-        wasp.system.notify(wasp.watch.rtc.get_uptime_ms(),
-                      {"src": "SleepTk",
-                       "title": "Starting smart alarm computation",
-                       "body": "Starting computation for the smart alarm at {:02d}h{:02d}m".format(t[3], t[4])}
-                      )
-        try:
-            start_time = wasp.watch.rtc.time()
-            # stop tracking to save memory, keep the alarm just in case
-            #self.sleeptk._disable_tracking(keep_main_alarm=True)
-
-            # read file one character at a time, to get only the 1st
-            # value of each row, which is the arm angle
-            data = array("f")
-            buff = b""
-            f = open(self.sleeptk.filep, "rb")
-            skip = False
-            while True:
-                char = f.read(1)
-                if char == b",":  # start ignoring after the first col
-                    skip = True
-                    continue
-                if char == b"\n":
-                    skip = False  # stop skipping because reading a new line
-                    data.append(float(buff))
-                    buff = b""
-                    continue
-                if char == b"":  # end of file
-                    data.append(float(buff))
-                    break
-                if not skip:  # digit of arm angle value
-                    buff += char
-
-            f.close()
-            del f, char, buff
-            wasp.gc.collect()
-            wasp.system.keep_awake()
-
-            earlier, cycle = self.sleeptk._signal_processing(data)
-            WU_t = self.sleeptk._WU_t
-            wasp.gc.collect()
-
-            # add new alarm
-            wasp.system.set_alarm(max(WU_t - earlier, int(wasp.watch.rtc.time()) + 3),  # not before right now, to make sure it rings
-                                  self.sleeptk._activate_ticks_to_ring)
-
-            # replace old gentle alarm by another one
-            if self.sleeptk._grad_alarm_state:
-                for t in _GRADUAL_WAKE:
-                    wasp.system.cancel_alarm(WU_t - int(t*60), self.sleeptk._tiny_vibration)
-                    if earlier + int(t*60) < _ANTICIPATE_ALLOWED:
-                        wasp.system.set_alarm(WU_t - earlier - int(t*60), self.sleeptk._tiny_vibration)
-
-            self.sleeptk._earlier = earlier
-            self.sleeptk._page = _TRACKING
-            wasp.system.notify(wasp.watch.rtc.get_uptime_ms(), {"src": "SleepTk",
-                                                      "title": "Finished smart alarm computation",
-                                                      "body": "Finished computing best wake up time in {:2f}s. Sleep cycle: {:.2f}h".format(wasp.watch.rtc.time() - start_time, cycle)
-                                                      })
-            if not self.sleeptk._track_HR_once:
-                wasp.system.sleep()
-        except Exception as e:
-            wasp.gc.collect()
-            h, m = wasp.watch.time.localtime(wasp.watch.rtc.time())[3:5]
-            msg = "Exception occured at {:02d}h{:02d}m: '{}'%".format(h, m, str(e))
-            f = open("smart_alarm_error_{}.txt".format(int(wasp.watch.rtc.time())), "wb")
-            f.write(msg.encode())
-            f.close()
-            wasp.system.notify(wasp.watch.rtc.get_uptime_ms(), {"src": "SleepTk",
-                                                      "title": "Smart alarm error",
-                                                      "body": msg})
-        wasp.gc.collect()
-
-    def _signal_processing(self, data):
-        """signal processing over the data read from the local file"""
-
-        # take absolute rate of change of data
-        for i in range(len(data)-1):
-            mem = data[i+1]
-            data[i] = abs(mem-data[i])
-        del i
-
-        # remove outliers:
-        for x in range(len(data)):
-            data[x] = min(0.005, data[x])
-        del x
-        wasp.gc.collect()
-        wasp.system.keep_awake()
-
-        # smoothen several times
-        for j in range(5):
-            for i in range(1, len(data)-1):
-                data[i] += data[i-1]
-                data[i] /= 2
-        del i, j
-        wasp.gc.collect()
-        wasp.system.keep_awake()
-
-        # center data
-        mean = sum(data) / len(data)
-        for i in range(len(data)):
-            data[i] = data[i] - mean
-        del mean, i
-        wasp.gc.collect()
-        wasp.system.keep_awake()
-
-        # find local maximas
-        x_maximas = array("H", [0])
-        y_maximas = array("f", [0])
-        window = int(60*60/_STORE_FREQ)
-        skip = 1800 // _STORE_FREQ  # skip first 60 minutes of data
-        for start_w in range(skip, len(data) - window + 1):
-            m = max(data[start_w:start_w + window])
-            for i in range(start_w, start_w + window):
-                if data[i] == m and m > 0:
-                    if i not in x_maximas:
-                        if i - x_maximas[-1] <= 2:
-                            # too close to last maximum, keep highest
-                            if y_maximas[-1] < data[i]:
-                                x_maximas[-1] = i
-                                y_maximas[-1] = data[i]
-                        else:
-                            x_maximas.append(i)
-                            y_maximas.append(m)
-        del window, skip, start_w, i, m, x_maximas[0], y_maximas[0], data
-        wasp.gc.collect()
-        wasp.system.keep_awake()
-
-        # merge the closest peaks while there are more than N peaks
-        N = 3
-        while len(x_maximas) > N:
-            diffs = array("f", [x_maximas[int(x)+1] - x_maximas[int(x)] for x in range(len(x_maximas)-1)])
-            ex = False
-            for d_min_idx, d in enumerate(diffs):
-                if ex:
-                    break
-                if d == min(diffs):
-                    y_maximas.remove(y_maximas[d_min_idx+1])
-                    x_maximas.remove(x_maximas[d_min_idx+1])
-                    ex = True
-        del diffs, ex, d_min_idx
-        wasp.gc.collect()
-        wasp.system.keep_awake()
-
-        # sleep cycle duration is the average time distance between those N peaks
-        cycle = sum([x_maximas[i+1] - x_maximas[i] for i in range(len(x_maximas) -1)]) / N * _STORE_FREQ
-
-        last_peak = self.sleeptk._track_start_time + x_maximas[-1] * _STORE_FREQ
-        WU_t = self.sleeptk._WU_t
-
-        # check if too late, already woken up:
-        if last_peak + cycle > WU_t:
-            raise Exception("Took too long to compute!")
-
-        # if smart alarm wants to wake you up too early, limit how early
-        if last_peak + cycle < WU_t - _ANTICIPATE_ALLOWED:
-            earlier = _ANTICIPATE_ALLOWED
-        else:  # will wake you up at computed time
-            earlier = last_peak - self.sleeptk._track_start_time + cycle
-        wasp.system.keep_awake()
-        return (earlier, cycle)
