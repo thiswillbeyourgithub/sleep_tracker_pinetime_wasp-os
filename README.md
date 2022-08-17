@@ -45,15 +45,14 @@
 
 ## TODO
 **misc**
-* investigate if the hardware method behind lift to wake can be used to detect motion throughout the night
+* print the number of cycle left to sleep when waking up in the middle of the night
+* remove the "smart" features because it is less useful than simply counting the cycles
 * greatly simplify the code by simply adding a large tick function every second instead of managing tons of counters.
 * investigate adding a simple feature to wake you up only after a certain movement threshold was passed
 * add a "nap tracking" mode that records sleep tracking with more precision
     * add a "power nap" mode that wakes you as soon as there has been no movement for 5 minutes OR (like steelball) when your heart rate drops
-* implement a simple Neural Network or decision tree to compute best wake up time, using one found in the scientific literature.
-* implement downsampling to 15 minutes precision to compute best wake up time
+* investigate if the hardware method behind lift to wake can be used to detect motion throughout the night
 
-* log smart alarm data to file? log user rating of how well he/she felt fresh at wake?
 * ability to send in real time to Bluetooth device the current sleep stage you're probably in. For use in Targeted Memory Reactivation?
 
 ## Bibliography and related links:
