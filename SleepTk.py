@@ -150,6 +150,7 @@ class SleepTkApp():
         else:
             self._stop_trial += 1
             draw = wasp.watch.drawable
+            draw.set_font(_FONT)
             draw.set_color(_FONT_COLOR)
             draw.string("{} to stop".format(_STOP_LIMIT - self._stop_trial), 0, 70)
 
@@ -195,6 +196,7 @@ class SleepTkApp():
         """either start trackign or disable it, draw the screen in all cases"""
         wasp.gc.collect()
         draw = wasp.watch.drawable
+        draw.set_font(_FONT)
         mute = wasp.watch.display.mute
         mute(False)
         self._last_touch = int(wasp.watch.rtc.time())
