@@ -14,7 +14,8 @@
 ## Credits:
 * Many thanks to Emanuel Löffler (https://github.com/plan5) who kindly created the logo.
 
-## **How to add SleepTk to your wasp-os install**:
+## How to install SleepTk
+### **How to add SleepTk to your wasp-os install**:
 * clone the latest [wasp-os](https://github.com/daniel-thompson/wasp-os)
 * download the latest [SleepTk.py](./SleepTk.py)
 * edit the settings of SleepTk (located at the top of SleepTk.py)
@@ -27,6 +28,11 @@
 * reboot the watch and enjoy `SleepTk`
 * *optional: download your latest sleep data using the script `pull_sleep_data.py`*
 * *optional: delete all the sleep data present in your watch using the script `rm_sleep_data.py`*
+### How to add SleepTk as a standalone app without building wasp-os
+*Those steps have not been tested and there might be some typos as I did it from refering to [the official doc](https://wasp-os.readthedocs.io/en/latest/appguide.html) and by memory*
+* `./micropython/mpy-cross/mpy-cross -mno-unicode -march=armv7m SleepTk.py `
+* `./tools/wasptool --binary --upload SleepTk.mpy`
+* Register the app: `./tools/wasptool --eval "from SleepTk import SleeTkApp ; wasp.system.register(SleepTkApp())"`
 
 ### Note to reader:
 * Note that the watch assumes that you fall asleep instantly. Previously an average of 14 minutes to fall asleep was taken into account but now you have to adjust yourself depending on how sleepy you are.
