@@ -73,7 +73,7 @@ _ANTICIPATE_ALLOWED = const(2400)
 _GRADUAL_WAKE = array("H", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
 # nb of minutes before alarm to send a tiny vibration, designed to wake
 # you more gently. (default: array("H", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) )
-_CYCLE_LENGTH = const(90)
+_CYCLE_LENGTH = const(88)
 # sleep cycle length in minutes. Currently used only to display best wake up
 # time but not to compute smart alarm! (default: 90 or 100, according to
 # https://sleepyti.me/)
