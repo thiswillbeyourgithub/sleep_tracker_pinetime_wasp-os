@@ -15,25 +15,18 @@
 * Many thanks to Emanuel Löffler (https://github.com/plan5) who kindly created the logo.
 
 ## How to install SleepTk
-### **How to add SleepTk to your wasp-os install**:
-* clone the latest [wasp-os](https://github.com/daniel-thompson/wasp-os)
+*Unfortunately SleepTk is too large to fit in RAM and has to be added to the FLASH memory. If you think you can suggest a way around this, please open an issue!*
 * download the latest [SleepTk.py](./SleepTk.py)
 * edit the settings of SleepTk (located at the top of SleepTk.py)
-* move `SleepTk.py` as `wasp-os/wasp/apps/SleepTk.py`
+* move `SleepTk.py` as `wasp/apps/SleepTk.py` (and NOT ./apps directly)
+* to add the file to the firmware: add `apps/SleepTk.py` to `wasp/boards/manifest_240x240.py`
 * to enable the app by default: add the line `self.register('apps.SleepTk.SleepTkApp', False, no_except=True)` to `wasp/wasp.py`
-* to load the file: add the line `apps/SleepTk.py` to `wasp/boards/manifest_240x240.py`
 * to make the app accessible from the software app: add the line `db.append(('SleepTk', factory('SleepTk')))` to `wasp/apps/software.py`
 * compile `wasp-os`: `make submodules && make softdevice && make BOARD=pinetime all && echo "SUCCESS"`
 * upload it to your pinetime: `./tools/ota-dfu/dfu.py -z build-pinetime/micropython.zip -a XX:XX:XX:XX:XX:XX --legacy`
 * reboot the watch and enjoy `SleepTk`
 * *optional: download your latest sleep data using the script `pull_sleep_data.py`*
 * *optional: delete all the sleep data present in your watch using a one liner like `./tools/wasptool --verbose --eval 'from shell import cd, rm ; import os ; cd("logs/sleep") ; for i in os.listdir(): print(i) ; rm(i)'`*
-### How to add SleepTk as a standalone app without building wasp-os
-*Those steps have not been tested and there might be some typos as I did it from refering to [the official doc](https://wasp-os.readthedocs.io/en/latest/appguide.html) and by memory*
-* `./micropython/mpy-cross/mpy-cross -mno-unicode -march=armv7m SleepTk.py `
-* Create the right directory if needed: `./tools/wasptool --eval "from shell import mkdir ; mkdir("apps")"`
-* `./tools/wasptool --binary --upload SleepTk.mpy --as apps/SleepTk.mpy`
-* Register the app: `./tools/wasptool --eval "from SleepTk import SleeTkApp ; wasp.system.register(SleepTkApp())"`
 
 ### Note to reader:
 * Note that the watch assumes that you fall asleep instantly. Previously an average of 14 minutes to fall asleep was taken into account but now you have to adjust yourself depending on how sleepy you are.
