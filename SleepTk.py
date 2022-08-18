@@ -12,7 +12,16 @@ SleepTk is an alarm clock app with several dinstinctive features:
 * heart rate tracking
 
 Still somewhat under developpement, more information at
-https://github.com/thiswillbeyourgithub/sleep_tracker_pinetime_wasp-os
+[the github](https://github.com/thiswillbeyourgithub/sleep_tracker_pinetime_wasp-os)
+
+Icon kindly designed by [Emanuel Löffler](https://github.com/plan5)
+
+..figure:: res/SleepTkApp.png
+    :width: 179
+
+Note: the time might be inaccurate in the simulator (offset by 1 hour passed
+midnight or something) but is fine on the watch.
+
 """
 
 import wasp
@@ -24,7 +33,7 @@ import ppg
 from array import array
 from micropython import const
 
-# 2-bit RLE, 60x60, 225 bytes, kindly designed by Emanuel Löffler (https://github.com/plan5)
+# 2-bit RLE, 60x60, 225 bytes, kindly designed by [Emanuel Löffler](https://github.com/plan5)
 icon = (
     b'\x02'
     b'<<'
