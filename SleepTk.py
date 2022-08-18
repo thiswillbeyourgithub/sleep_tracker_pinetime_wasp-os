@@ -195,12 +195,12 @@ class SleepTkApp():
     def touch(self, event):
         """either start trackign or disable it, draw the screen in all cases"""
         wasp.gc.collect()
+        self.stat_bar.draw()
         draw = wasp.watch.drawable
         draw.set_font(_FONT)
         mute = wasp.watch.display.mute
         mute(False)
         self._last_touch = int(wasp.watch.rtc.time())
-        self.stat_bar.draw()
         if self._page == _TRACKING:
             self._was_touched = 1
             if self._conf_view is _OFF:
