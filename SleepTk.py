@@ -4,8 +4,14 @@
 """Sleep tracker
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-SleepTk is an alarm clock app designed to track body movement throughout
-the night to optimize sleep. Currently a WIP, more information at
+SleepTk is an alarm clock app with several dinstinctive features:
+* sleep cycle suggestion (also useful to troubleshoot insomnia)
+* gradual wake up via vibration
+* easy to snooze, hard to stop
+* body movement tracking
+* heart rate tracking
+
+Still somewhat under developpement, more information at
 https://github.com/thiswillbeyourgithub/sleep_tracker_pinetime_wasp-os
 """
 
