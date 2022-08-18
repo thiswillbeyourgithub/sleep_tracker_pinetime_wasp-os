@@ -27,7 +27,7 @@
 * upload it to your pinetime: `./tools/ota-dfu/dfu.py -z build-pinetime/micropython.zip -a XX:XX:XX:XX:XX:XX --legacy`
 * reboot the watch and enjoy `SleepTk`
 * *optional: download your latest sleep data using the script `pull_sleep_data.py`*
-* *optional: delete all the sleep data present in your watch using the script `rm_sleep_data.py`*
+* *optional: delete all the sleep data present in your watch using a one liner like `./tools/wasptool --verbose --eval 'from shell import cd, rm ; import os ; cd("logs/sleep") ; for i in os.listdir(): print(i) ; rm(i)'`*
 ### How to add SleepTk as a standalone app without building wasp-os
 *Those steps have not been tested and there might be some typos as I did it from refering to [the official doc](https://wasp-os.readthedocs.io/en/latest/appguide.html) and by memory*
 * `./micropython/mpy-cross/mpy-cross -mno-unicode -march=armv7m SleepTk.py `
