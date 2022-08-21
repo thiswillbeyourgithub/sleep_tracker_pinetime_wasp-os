@@ -47,6 +47,7 @@
 
 ## TODO
 **misc**
+* ask someone to move the icon a bit to the right, it is currently not centered
 * print the number of cycle left to sleep when waking up in the middle of the night
 * greatly simplify the code by simply adding a large tick function every second instead of managing tons of counters.
 * investigate adding a simple feature to wake you up only after a certain movement threshold was passed
