@@ -148,6 +148,7 @@ class SleepTkApp():
     def background(self):
         wasp.watch.hrs.disable()
         self._hrdata = None
+        self.stat_bar = None
         wasp.gc.collect()
 
     def _try_stop_alarm(self):
