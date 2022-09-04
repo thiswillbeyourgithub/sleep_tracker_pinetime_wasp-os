@@ -62,9 +62,9 @@ _FONT_COLOR = const(0xf800)  # red font to reduce eye strain at night
 _TIMESTAMP = const(946684800)  # unix time and time used by wasp os don't have the same reference date
 
 ## USER SETTINGS #################################
-_KILL_BT = const(1)
+_KILL_BT = const(0)
 # set to 0 to disable turning off bluetooth while tracking to save battery
-# (you have to reboot the watch to reactivate BT, default: 1)
+# (you have to reboot the watch to reactivate BT, default: 0)
 _STOP_LIMIT = const(10)
 # number of times to swipe or press the button to turn off ringing (default: 10)
 _SNOOZE_TIME = const(300)
