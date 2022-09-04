@@ -403,14 +403,12 @@ class SleepTkApp():
         self._was_touched = 0
         wasp.watch.accel.reset()
 
-        # create one file per recording session:
-        self.filep = "logs/sleep/{}.csv".format(str(self._track_start_time + _TIMESTAMP))
-        f = open(self.filep, "wb")
-        f.write(b"Timestamp,X,Y,Z,BPM,Touched")
-        f.close()
-
         # if enabled, add alarm to log accel data in _FREQ seconds
         if self._state_body_tracking:
+            # create one file per recording session:
+            self.filep = "logs/sleep/{}.csv".format(str(self._track_start_time + _TIMESTAMP))
+            with open(self.filep, "wb") as f:
+                f.write(b"Timestamp,X,Y,Z,BPM,Touched")
             self.next_al = wasp.watch.rtc.time() + _FREQ
             wasp.system.set_alarm(self.next_al, self._trackOnce)
         else:
@@ -533,15 +531,13 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
                 self._last_HR = _OFF
             else:
                 bpm = "?"
-            f = open(self.filep, "ab")
-            f.write("{},{},{},{},{},{}\n".format(
-                int(wasp.watch.rtc.time() - self._track_start_time),
-                buff[0], buff[1], buff[2],
-                bpm,
-                1 if self._was_touched else 0
-                ).encode())
-            f.close()
-            del f
+            with open(self.filep, "ab") as f:
+                f.write("{},{},{},{},{},{}\n".format(
+                    int(wasp.watch.rtc.time() - self._track_start_time),
+                    buff[0], buff[1], buff[2],
+                    bpm,
+                    1 if self._was_touched else 0
+                    ).encode())
             buff[0] = 0  # resets x/y/z to 0
             buff[1] = 0
             buff[2] = 0
