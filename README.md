@@ -10,6 +10,7 @@
 * **Insomnia insights**: if you turn on the screen during the night, SleepTk will tell you how long you slept and in what part of the sleep cycle you are supposed to be.
 * **Sleep tracking**: logs your body movement during the night, infers your sleep cycle and write it all down in a `.csv` file.
 * **Heart tracking**: tracks your heart rate throughout the night.
+* **Status: fully functional**
 
 ## Credits:
 * Many thanks to Emanuel Löffler (https://github.com/plan5) who kindly created the logo.
@@ -25,14 +26,12 @@
 * compile `wasp-os`: `make submodules && make softdevice && make BOARD=pinetime all && echo "SUCCESS"`
 * upload it to your pinetime: `./tools/ota-dfu/dfu.py -z build-pinetime/micropython.zip -a XX:XX:XX:XX:XX:XX --legacy`
 * reboot the watch and enjoy `SleepTk`
-* *optional: download your latest sleep data using the script `pull_sleep_data.py`*
-* *optional: delete all the sleep data present in your watch using a one liner like `./tools/wasptool --verbose --eval 'from shell import cd, rm ; import os ; cd("logs/sleep") ; for i in os.listdir(): print(i) ; rm(i)'`*
+* *optional: download your latest sleep data using the script `pull_sleep_data.py` This script can be run automatically every day for example and will automatically remove recordings from the watch*
 
 ### Note to reader:
 * Note that the watch assumes that you fall asleep instantly. Previously an average of 14 minutes to fall asleep was taken into account but now you have to adjust yourself depending on how sleepy you are.
 * If you're interested or have any kind of things to say about this, **please** open an issue and tell me all about it :)
-* Status: fully functional
-* you can download your sleep data file using the file `pull_sleep_data`. A suggested workflow to load it into [pandas](https://pypi.org/project/pandas/) can be found at the bottom of the page.
+* you can download your sleep data file using the file `pull_sleep_data`. An old workflow to load data into [pandas](https://pypi.org/project/pandas/) can be found at the bottom of this README.
 * the notifications are set to "silent" during the tracking session and are restored to the previously used level when the alarm is ringing
 * in the settings you can tell the Bluetooth to turn off automatically at the beginning of the night. This can save battery but will stop any attempt at downloading the latest data as long as you have not restarted the watch.
 * it seems the simulator is having a rough time with daylight saving mode or time management. I personally have a 1h offset between sleep estimation on the simulator compared to the pinetime, don't worry.
