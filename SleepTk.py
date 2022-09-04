@@ -76,9 +76,9 @@ _HR_FREQ = const(300)
 # how many seconds between heart rate data (default: 300, minimum 120)
 _STORE_FREQ = const(300)
 # process data and store to file every X seconds (default: 300)
-_BATTERY_THRESHOLD = const(15)
+_BATTERY_THRESHOLD = const(30)
 # under X% of battery, stop tracking and only keep the alarm, set at -200
-# or lower to disable (default: 15)
+# or lower to disable (default: 30)
 _GRADUAL_WAKE = array("H", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
 # nb of minutes before alarm to send a tiny vibration, designed to wake
 # you more gently. (default: array("H", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) )
