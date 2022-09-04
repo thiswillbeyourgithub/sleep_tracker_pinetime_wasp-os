@@ -406,7 +406,7 @@ class SleepTkApp():
         # create one file per recording session:
         self.filep = "logs/sleep/{}.csv".format(str(self._track_start_time + _TIMESTAMP))
         f = open(self.filep, "wb")
-        f.write(b"")
+        f.write(b"Timestamp,X,Y,Z,BPM,Touched")
         f.close()
 
         # if enabled, add alarm to log accel data in _FREQ seconds
@@ -529,16 +529,16 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             buff[1] /= n
             buff[2] /= n
             if self._last_HR != _OFF:
-                bpm = ",{}".format(str(self._last_HR))
+                bpm = self._last_HR
                 self._last_HR = _OFF
             else:
-                bpm = ""
+                bpm = "?"
             f = open(self.filep, "ab")
-            f.write("{:7f},{}{}\n".format(
-                math.atan(buff[2] / (buff[0]**2 + buff[1]**2))*180/3.1415926535,  # estimated arm angle
+            f.write("{},{},{},{},{},{}\n".format(
                 int(wasp.watch.rtc.time() - self._track_start_time),
+                buff[0], buff[1], buff[2],
                 bpm,
-                ",-1" if self._was_touched else ""
+                1 if self._was_touched else 0
                 ).encode())
             f.close()
             del f
