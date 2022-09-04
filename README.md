@@ -31,7 +31,7 @@
 ### Note to reader:
 * Note that the watch assumes that you fall asleep instantly. Previously an average of 14 minutes to fall asleep was taken into account but now you have to adjust yourself depending on how sleepy you are.
 * If you're interested or have any kind of things to say about this, **please** open an issue and tell me all about it :)
-* you can download your sleep data file using the file `pull_sleep_data`. An old workflow to load data into [pandas](https://pypi.org/project/pandas/) can be found at the bottom of this README.
+* you can download your sleep data file using the file `pull_sleep_data`. An old workflow to load data into [pandas](https://pypi.org/project/pandas/) can be found at the bottom of this README. A more recent quick and dirty loader can be found in `plotter.py`.
 * the notifications are set to "silent" during the tracking session and are restored to the previously used level when the alarm is ringing
 * in the settings you can tell the Bluetooth to turn off automatically at the beginning of the night. This can save battery but will stop any attempt at downloading the latest data as long as you have not restarted the watch.
 * it seems the simulator is having a rough time with daylight saving mode or time management. I personally have a 1h offset between sleep estimation on the simulator compared to the pinetime, don't worry.
