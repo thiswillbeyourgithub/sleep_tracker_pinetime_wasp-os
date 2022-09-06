@@ -2,6 +2,7 @@ from pathlib import Path
 import pandas as pd
 from tqdm import tqdm
 from numpy import arctan, pi
+from datetime import datetime
 
 local_dir = Path("./remote_files/logs/sleep/")
 
@@ -17,12 +18,15 @@ for file in tqdm(files, desc="Loading files"):
 
     df["arm_angle_approximation"] = arctan(df["Z"].values / (df["X"].values**2 + df["Y"].values**2))*180/pi
 
-    offset = str(file).split("/")[-1].split(".csv")[0]
-    df["UNIX_time"] = df["Timestamp"] + int(offset) * 10e8
-    df["date"] = pd.to_datetime(df["UNIX_time"])
-    df.set_index("UNIX_time")
+    offset = int(str(file).split("/")[-1].split(".csv")[0])
+    df["UNIX_time"] = df["Timestamp"] + int(offset)
+    df["date"] = [datetime.utcfromtimestamp(unix) for unix in df["UNIX_time"].tolist()]
+    df.set_index("Timestamp")
 
-    df_list.append(df)
+    if len(df.index.tolist()) == 0:
+        tqdm.write(f"No data in df '{file}'")
+    else:
+        df_list.append(df)
 
 print("Loaded files as dataframe as element of list 'df_list'. Openning console.")
 import code ;code.interact(local=locals())
