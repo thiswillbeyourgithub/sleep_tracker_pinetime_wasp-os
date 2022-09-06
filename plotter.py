@@ -34,10 +34,9 @@ for file in tqdm(files, desc="Loading files"):
         plt.title(recording_date)
         for ind in df.index:
             if df.loc[ind, "Touched"] == 1:
-                plt.axvline(x=df.loc[ind, "date"])
+                plt.axvline(x=df.loc[ind, "date"], color="red", linestyle="--")
         plt.show()
 
-
-df = recordings[recordings.keys()[-1]]
+df = recordings[list(recordings.keys())[-1]]
 print("Loaded files as dataframe as values of dict 'recordings'. Openning console.")
 import code ;code.interact(local=locals())
