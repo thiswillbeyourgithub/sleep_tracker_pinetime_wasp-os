@@ -114,11 +114,11 @@ class download_sleep_data:
                     if b"Watch reported error" in out:
                         raise Exception("Watch reported error")
                     tqdm.write(f"Succesfully downloaded to './logs/sleep/{fi}'")
-                except Exception as e:
-                    tqdm.write(f"Error happened while downloading {fi}, deleting local incomplete file")
-                    breakpoint()
+                except Exception as err:
+                    tqdm.write(f"Error happened while downloading {fi}, deleting local incomplete file: '{err}'")
                     if lfi.exists():
                         lfi.unlink()
+                    breakpoint()
 
                 remote_size = size_dict[fi]
                 local_size = lfi.stat().st_size
