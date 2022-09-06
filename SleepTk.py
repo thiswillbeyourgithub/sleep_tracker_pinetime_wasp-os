@@ -69,7 +69,7 @@ _STOP_LIMIT = const(10)
 # number of times to swipe or press the button to turn off ringing (default: 10)
 _SNOOZE_TIME = const(300)
 # number of seconds to snooze for (default: 5 minutes)
-_FREQ = const(5)
+_FREQ = const(2)
 # get accelerometer data every X seconds, but process and store them only
 # every _STORE_FREQ seconds (default: 5)
 _HR_FREQ = const(300)
