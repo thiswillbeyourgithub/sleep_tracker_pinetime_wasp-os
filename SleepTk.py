@@ -137,6 +137,9 @@ class SleepTkApp():
         except:  # folder already exists
             pass
 
+        # used to indicate if the app is currently recording
+        wasp._SleepTk_tracking = _OFF
+
     def foreground(self):
         self.stat_bar = widgets.StatusBar()
         self.stat_bar.clock = True
@@ -459,6 +462,7 @@ class SleepTkApp():
 
         self._page = _TRACKING
         self._stop_trial = 0
+        wasp._SleepTk_tracking = _ON
 
     def _read_time(self, HH, MM):
         "convert time from spinners to seconds"
@@ -483,6 +487,7 @@ class SleepTkApp():
         wasp.watch.hrs.disable()
         self._periodicSave()
         self._state_HR_tracking = _OFF
+        wasp._SleepTk_tracking = _OFF
         wasp.gc.collect()
 
     def _trackOnce(self):

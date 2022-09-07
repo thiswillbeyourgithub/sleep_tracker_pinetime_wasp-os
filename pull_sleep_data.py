@@ -50,6 +50,14 @@ class download_sleep_data:
             shlex.split(
                 './tools/wasptool --verbose --eval \'wasp.gc.collect()\'')).decode()
 
+        # checking if SleepTk is running
+        out = subprocess.check_output(
+                shlex.split('./tools/wasptool --verbose --eval \"if hasattr(wasp, \'_SleepTk_tracking\') and wasp._SleepTk_tracking == 1: print(\'SleepTk is tracking\')\"'
+                )).decode()
+        if "SleepTk is tracking" in out.split("\r\r\n"):
+            self.n(f"Watch is currently recording Sleep data. Exiting.")
+            raise SystemExit()
+
         # listing remote files
         self.n("\n\nListing remote files...", do_notify=False)
         out = subprocess.check_output(
