@@ -52,7 +52,7 @@ def plot(show_or_saveimg="show",
             tqdm.write(f"  Not enough data ({len(df.index.tolist())} elems) in df '{file}'. Ignoring this file.")
             continue
 
-        df["motion"] = (df["Xstd"] + df["Ystd"] + df["Zstd"]).astype(float)
+        df["motion"] = (df["X"] + df["Y"] + df["Z"]).astype(float)
 
         # time data correction and loading
         offset = int(str(file).split("/")[-1].split(".csv")[0])

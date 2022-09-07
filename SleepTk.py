@@ -60,6 +60,8 @@ _SETTINGS2 = const(3)
 _FONT = fonts.sans18
 _FONT_COLOR = const(0xf800)  # red font to reduce eye strain at night
 _TIMESTAMP = const(946684800)  # unix time and time used by wasp os don't have the same reference date
+_LARGE_NUMBER = const(100000)  # very large number to initalize the bufer
+_SMALL_NUMBER = const(-100000)
 
 ## USER SETTINGS #################################
 _KILL_BT = const(0)
@@ -115,7 +117,15 @@ class SleepTkApp():
         self._page = _SETTINGS1
         self._currently_tracking = _OFF
         self._conf_view = _OFF  # confirmation view
-        self._buff = array("f", (_OFF, _OFF, _OFF))  # contains accelerometer values
+        self._buff = array("f", (_LARGE_NUMBER,
+                                 _SMALL_NUMBER,
+                                 _LARGE_NUMBER,
+                                 _SMALL_NUMBER,
+                                 _LARGE_NUMBER,
+                                 _SMALL_NUMBER))
+        # contains accelerometer value spread over each axis. The first 2
+        # numbers are the min then max of X, then digit 3 and 4 are for Y, then Z
+        # The values are initialized as extreme values
         self._last_touch = int(wasp.watch.rtc.time())
 
         try:
@@ -485,9 +495,18 @@ class SleepTkApp():
             if xyz == (0, 0, 0):
                 wasp.watch.accel.reset()
                 xyz = wasp.watch.accel.accel_xyz()
-            buff[0] += xyz[0]
-            buff[1] += xyz[1]
-            buff[2] += xyz[2]
+            if buff[0] < xyz[0]:  # X
+                buff[0] = xyz[0]
+            if buff[1] > xyz[0]:
+                buff[1] = xyz[0]
+            if buff[2] < xyz[1]:  # Y
+                buff[2] = xyz[1]
+            if buff[3] > xyz[1]:
+                buff[3] = xyz[1]
+            if buff[4] < xyz[2]:  # Z
+                buff[4] = xyz[2]
+            if buff[5] > xyz[2]:
+                buff[5] = xyz[2]
             self._data_point_nb += 1
 
             # add alarm to log accel data in _FREQ seconds
@@ -519,19 +538,18 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
 
     def _periodicSave(self):
         """save data to csv with row order:
-            1. average arm angle
-            2. elapsed times
-            3/4. heart rate if present, and/or -1 if screen was woken up
-                by user during that time
-         arm angle formula from https://www.nature.com/articles/s41598-018-31266-z
-         note: math.atan() is faster than using a taylor serie
+            1. elapsed time in seconds from start time
+            2/3/4. X/Y/Z values since the last recording. The values are
+                actually the spread of the value along each axis
+            5. BPM value or "?" if failed
+            6. meta: 0 if nothing
+                     1 if pressed or touched (indicating wake state)
+                     2 if gradual vibration happened
+                     3 if pressed or touched after gradual vibration
         """
         buff = self._buff
         n = self._data_point_nb - self._last_checkpoint
         if n >= _STORE_FREQ // _FREQ and not self._track_HR_once:
-            buff[0] /= n
-            buff[1] /= n
-            buff[2] /= n
             if self._last_HR != _OFF:
                 bpm = self._last_HR
                 self._last_HR = _OFF
@@ -540,13 +558,19 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             with open(self.filep, "ab") as f:
                 f.write("\n{},{},{},{},{},{}".format(
                     int(wasp.watch.rtc.time() - self._track_start_time),
-                    buff[0], buff[1], buff[2],
+                    int((buff[1]-buff[0])/n),
+                    int((buff[3]-buff[2])/n),
+                    int((buff[5]-buff[4])/n),
                     bpm,
                     self._meta_state,
                     ).encode())
-            buff[0] = 0  # resets x/y/z to 0
-            buff[1] = 0
-            buff[2] = 0
+            # reset buff
+            buff = array("f", (_LARGE_NUMBER,
+                               _SMALL_NUMBER,
+                               _LARGE_NUMBER,
+                               _SMALL_NUMBER,
+                               _LARGE_NUMBER,
+                               _SMALL_NUMBER))
             self._last_checkpoint = self._data_point_nb
             self._meta_state = _OFF
             wasp.gc.collect()
