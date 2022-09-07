@@ -75,7 +75,7 @@ def plot(show_or_saveimg="show",
             # plot bpm data
             bpm_vals = df.loc[ df["BPM"] != "?"].index.tolist()
             if len(bpm_vals) >= 2:
-                df[bpm_vals, "BPM"] = df[bpm_vals, "BPM"].astype(int)
+                df.loc[bpm_vals, "BPM"] = df.loc[bpm_vals, "BPM"].astype(int)
                 ax_bpm = ax.twinx()
                 ax_bpm.set_ylabel("BPM")
                 max_bpm = int(df.loc[bpm_vals, "BPM"].values.max())
@@ -153,7 +153,7 @@ def plot(show_or_saveimg="show",
 
         except Exception as err:
             tqdm.write(f"Error when plotting '{file}': '{err}'")
-            continue
+            raise
 
     df = recordings[list(recordings.keys())[-1]]
     if open_console:
