@@ -41,6 +41,8 @@ def plot(show_or_saveimg="show",
     for file in tqdm(files, desc="Loading files"):
         # load file
         df = pd.read_csv(file)
+        df["Timestamp"] = df["Timestamp"].astype(int)
+        df["Meta"] = df["Meta"].astype(int)
 
         # ignoring too small files
         if len(df.index.tolist()) == 0:
@@ -50,15 +52,14 @@ def plot(show_or_saveimg="show",
             tqdm.write(f"  Not enough data ({len(df.index.tolist())} elems) in df '{file}'. Ignoring this file.")
             continue
 
-        # compute estimated arm angle
-        # arm angle formula from https://www.nature.com/articles/s41598-018-31266-z
-        df["arm_angle_approximation"] = np.arctan(df["Z"].values / (df["X"].values**2 + df["Y"].values**2))*180/np.pi
+        df["motion"] = (df["Xstd"] + df["Ystd"] + df["Zstd"]).astype(float)
 
         # time data correction and loading
         offset = int(str(file).split("/")[-1].split(".csv")[0])
         df["UNIX_time"] = df["Timestamp"] + int(offset)
         df["date"] = [datetime.utcfromtimestamp(unix) for unix in df["UNIX_time"].tolist()]
         df["clock"] = pd.to_datetime(df["date"]).dt.time
+        df["clock"] = df["clock"].astype(str)
         recording_date = str(datetime.utcfromtimestamp(offset))
 
         # store df
@@ -74,47 +75,48 @@ def plot(show_or_saveimg="show",
             # plot bpm data
             bpm_vals = df.loc[ df["BPM"] != "?"].index.tolist()
             if len(bpm_vals) >= 2:
+                df[bpm_vals, "BPM"] = df[bpm_vals, "BPM"].astype(int)
                 ax_bpm = ax.twinx()
                 ax_bpm.set_ylabel("BPM")
                 max_bpm = int(df.loc[bpm_vals, "BPM"].values.max())
                 min_bpm = int(df.loc[bpm_vals, "BPM"].values.min())
                 print(f"BPM range: {min_bpm}-{max_bpm}")
-                ax_bpm.plot(df.loc[bpm_vals, "Timestamp"].astype(int),
-                            df.loc[bpm_vals, "BPM"].astype(int),
+                ax_bpm.plot(df.loc[bpm_vals, "Timestamp"],
+                            df.loc[bpm_vals, "BPM"],
                             color="red",
                             linewidth=0.5,
                             label="BPM")
 
-            # plot arm angle
-            ax.plot(df["Timestamp"].astype(int),
-                    df["arm_angle_approximation"].astype(float),
+            # plot motion
+            ax.plot(df["Timestamp"],
+                    df["motion"],
                     color="purple",
                     linewidth=1,
-                    label="Arm angle")
+                    label="Motion")
 
             # add hour time as xlabels only every 4 recording
             ax.set_xticks(ticks=df["Timestamp"])
-            partial_clock = df["clock"].astype(str).tolist()
+            partial_clock = df["clock"].tolist()
             for i, pc in enumerate(partial_clock):
                 if i % 4 != 0:
                     partial_clock[i] = ""
             ax.set_xticklabels(partial_clock, rotation=90)
 
             # add vertical lines depending on state
-            ymin = df["arm_angle_approximation"].values.min()
-            ymax = df["arm_angle_approximation"].values.max()
+            ymin = df["motion"].values.min()
+            ymax = df["motion"].values.max()
             touched_ind = []
             gradual_vib = []
             both = []
             for ind in df.index:
-                if df.loc[ind, "Meta"].astype(int) == 1:
+                if df.loc[ind, "Meta"] == 1:
                     touched_ind.append(ind)
-                if df.loc[ind, "Meta"].astype(int) == 2:
+                elif df.loc[ind, "Meta"] == 2:
                     gradual_vib.append(ind)
-                if df.loc[ind, "Meta"].astype(int) == 3:
+                elif df.loc[ind, "Meta"] == 3:
                     both.append(ind)
             if len(touched_ind) > 0:
-                ax.vlines(x=df.loc[touched_ind, "Timestamp"].astype(int),
+                ax.vlines(x=df.loc[touched_ind, "Timestamp"],
                           ymin=ymin,
                           ymax=ymax,
                           color="green",
@@ -122,7 +124,7 @@ def plot(show_or_saveimg="show",
                           linewidth=0.5,
                           label="Touched")
             if len(gradual_vib) > 0:
-                ax.vlines(x=df.loc[gradual_vib, "Timestamp"].astype(int),
+                ax.vlines(x=df.loc[gradual_vib, "Timestamp"],
                           ymin=ymin,
                           ymax=ymax,
                           color="blue",
@@ -130,7 +132,7 @@ def plot(show_or_saveimg="show",
                           linewidth=0.5,
                           label="Small vibration")
             if len(both) > 0:
-                ax.vlines(x=df.loc[both, "Timestamp"].astype(int),
+                ax.vlines(x=df.loc[both, "Timestamp"],
                           ymin=ymin,
                           ymax=ymax,
                           color="black",
