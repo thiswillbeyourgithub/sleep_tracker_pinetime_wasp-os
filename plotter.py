@@ -9,7 +9,7 @@ local_dir = Path("./remote_files/logs/sleep/")
 
 assert local_dir.exists(), "Remote directory does not exist"
 
-files = [f for f in local_dir.iterdir()]
+files = [f for f in local_dir.iterdir() if str(f).endswith(".csv")]
 assert len(files) > 0, "No files found."
 print(f"{len(files)} files found.")
 
@@ -27,15 +27,36 @@ for file in tqdm(files, desc="Loading files"):
     recording_date = str(datetime.fromtimestamp(offset))
 
     if len(df.index.tolist()) == 0:
-        tqdm.write(f"No data in df '{file}'")
+        tqdm.write(f"No data in df '{file}'. Ignoring this file.")
+    elif len(df.index.tolist()) <= 5:
+        tqdm.write(f"Not enough data ({len(df.index.tolist())} elems) in df '{file}'. Ignoring this file.")
     else:
         recordings[recording_date] = df
-        plt.plot(df["date"], df["arm_angle_approximation"])
-        plt.title(recording_date)
-        for ind in df.index:
-            if df.loc[ind, "Touched"] == 1:
-                plt.axvline(x=df.loc[ind, "date"], color="red", linestyle="--")
-        plt.show()
+        try:
+            plt.plot(df["date"], df["arm_angle_approximation"], label="Arm angle")
+            plt.title(recording_date)
+            ymin=df["arm_angle_approximation"].values.min()
+            ymax=df["arm_angle_approximation"].values.max()
+            # add vertical lines when touched
+            vlines = []
+            for ind in df.index:
+                if df.loc[ind, "Touched"] == 1:
+                    vlines.append(ind)
+            if len(vlines) >0:
+                plt.vlines(x=df.loc[vlines, "date"],
+                           ymin=ymin,
+                           ymax=ymax,
+                           color="red",
+                           linestyle="--",
+                           label="Touched")
+            plt.xlabel("Time")
+            plt.legend(fontsize=10)
+            plt.savefig(f"{local_dir}/{offset}.png",
+                        bbox_inches="tight",
+                        dpi=150)
+            #plt.show()
+        except Exception as err:
+            tqdm.write(f"Error when plotting '{file}': '{err}'")
 
 df = recordings[list(recordings.keys())[-1]]
 print("Loaded files as dataframe as values of dict 'recordings'. Openning console.")
