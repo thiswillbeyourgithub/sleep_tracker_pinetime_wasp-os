@@ -500,17 +500,19 @@ class SleepTkApp():
             if xyz == (0, 0, 0):
                 wasp.watch.accel.reset()
                 xyz = wasp.watch.accel.accel_xyz()
-            if buff[0] < xyz[0]:  # X
+            if buff[0] > xyz[0]:  # X
                 buff[0] = xyz[0]
-            if buff[1] > xyz[0]:
+            if buff[1] < xyz[0]:
                 buff[1] = xyz[0]
-            if buff[2] < xyz[1]:  # Y
+
+            if buff[2] > xyz[1]:  # Y
                 buff[2] = xyz[1]
-            if buff[3] > xyz[1]:
+            if buff[3] < xyz[1]:
                 buff[3] = xyz[1]
-            if buff[4] < xyz[2]:  # Z
+
+            if buff[4] > xyz[2]:  # Z
                 buff[4] = xyz[2]
-            if buff[5] > xyz[2]:
+            if buff[5] < xyz[2]:
                 buff[5] = xyz[2]
             self._data_point_nb += 1
 
