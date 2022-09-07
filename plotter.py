@@ -103,18 +103,39 @@ def plot(show_or_saveimg="show",
             ymin = df["arm_angle_approximation"].values.min()
             ymax = df["arm_angle_approximation"].values.max()
             touched_ind = []
+            gradual_vib = []
+            both = []
             for ind in df.index:
-                if df.loc[ind, "Touched"] == 1:
+                if df.loc[ind, "Meta"].astype(int) == 1:
                     touched_ind.append(ind)
+                if df.loc[ind, "Meta"].astype(int) == 2:
+                    gradual_vib.append(ind)
+                if df.loc[ind, "Meta"].astype(int) == 3:
+                    both.append(ind)
             if len(touched_ind) > 0:
                 ax.vlines(x=df.loc[touched_ind, "Timestamp"].astype(int),
                           ymin=ymin,
                           ymax=ymax,
+                          color="green",
+                          linestyle="dotted",
+                          linewidth=0.5,
+                          label="Touched")
+            if len(gradual_vib) > 0:
+                ax.vlines(x=df.loc[gradual_vib, "Timestamp"].astype(int),
+                          ymin=ymin,
+                          ymax=ymax,
+                          color="blue",
+                          linestyle="dotted",
+                          linewidth=0.5,
+                          label="Small vibration")
+            if len(both) > 0:
+                ax.vlines(x=df.loc[both, "Timestamp"].astype(int),
+                          ymin=ymin,
+                          ymax=ymax,
                           color="black",
                           linestyle="dotted",
-                          linewidth=1,
-                          label="Touched")
-
+                          linewidth=0.5,
+                          label="Both")
             # save or show
             fig.legend(fontsize=10,
                        prop={"size": 10},
