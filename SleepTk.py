@@ -79,9 +79,9 @@ _STORE_FREQ = const(300)
 _BATTERY_THRESHOLD = const(30)
 # under X% of battery, stop tracking and only keep the alarm, set at -200
 # or lower to disable (default: 30)
-_GRADUAL_WAKE = array("H", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+_GRADUAL_WAKE = array("H", (1, 2, 3, 4, 5, 6, 7, 8, 9, 10))
 # nb of minutes before alarm to send a tiny vibration, designed to wake
-# you more gently. (default: array("H", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) )
+# you more gently. (default: array("H", (1, 2, 3, 4, 5, 6, 7, 8, 9, 10)) )
 _CYCLE_LENGTH = const(85)
 # sleep cycle length in minutes. Currently used only to display best wake up
 # time! (default should be: 90 or 100, according to https://sleepyti.me/)
@@ -115,7 +115,7 @@ class SleepTkApp():
         self._page = _SETTINGS1
         self._currently_tracking = _OFF
         self._conf_view = _OFF  # confirmation view
-        self._buff = array("f", [_OFF, _OFF, _OFF])  # contains accelerometer values
+        self._buff = array("f", (_OFF, _OFF, _OFF))  # contains accelerometer values
         self._last_touch = int(wasp.watch.rtc.time())
 
         try:
