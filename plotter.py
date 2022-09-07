@@ -2,14 +2,14 @@ from pathlib import Path
 from fire import Fire
 import pandas as pd
 from tqdm import tqdm
-from numpy import arctan, pi
+import numpy as np
 from datetime import datetime
 import matplotlib.pyplot as plt
 
 # SETTINGS ###################################################################
 ##############################################################################
 
-def plot(show_or_saveimg="both",
+def plot(show_or_saveimg="show",
          local_dir="./remote_files/logs/sleep/",
          open_console=False,
          ):
@@ -41,17 +41,6 @@ def plot(show_or_saveimg="both",
     for file in tqdm(files, desc="Loading files"):
         # load file
         df = pd.read_csv(file)
-        fig, ax = plt.subplots()
-
-        # compute estimated arm angle
-        df["arm_angle_approximation"] = arctan(df["Z"].values / (df["X"].values**2 + df["Y"].values**2))*180/pi
-
-        # time data correction and loading
-        offset = int(str(file).split("/")[-1].split(".csv")[0])
-        df["UNIX_time"] = df["Timestamp"] + int(offset)
-        df["date"] = [datetime.utcfromtimestamp(unix) for unix in df["UNIX_time"].tolist()]
-        df.set_index("Timestamp")
-        recording_date = str(datetime.fromtimestamp(offset))
 
         # ignoring too small files
         if len(df.index.tolist()) == 0:
@@ -61,30 +50,75 @@ def plot(show_or_saveimg="both",
             tqdm.write(f"  Not enough data ({len(df.index.tolist())} elems) in df '{file}'. Ignoring this file.")
             continue
 
+        # compute estimated arm angle
+        df["arm_angle_approximation"] = np.arctan(df["Z"].values / (df["X"].values**2 + df["Y"].values**2))*180/np.pi
+
+        # time data correction and loading
+        offset = int(str(file).split("/")[-1].split(".csv")[0])
+        df["UNIX_time"] = df["Timestamp"] + int(offset)
+        df["date"] = [datetime.utcfromtimestamp(unix) for unix in df["UNIX_time"].tolist()]
+        df["clock"] = pd.to_datetime(df["date"]).dt.time
+        recording_date = str(datetime.utcfromtimestamp(offset))
+
         # store df
         recordings[recording_date] = df
 
         # plot data and save to file
         try:
-            ax.plot(df["date"], df["arm_angle_approximation"], label="Arm angle")
+            # init plot
+            fig, ax = plt.subplots()
+            ax.set_xlabel("Time")
             ax.set_title(recording_date)
+
+            # plot bpm data
+            bpm_vals = df.loc[ df["BPM"] != "?"].index.tolist()
+            if len(bpm_vals) >= 2:
+                ax_bpm = ax.twinx()
+                ax_bpm.set_ylabel("BPM")
+                max_bpm = int(df.loc[bpm_vals, "BPM"].values.max())
+                min_bpm = int(df.loc[bpm_vals, "BPM"].values.min())
+                print(f"BPM range: {min_bpm}-{max_bpm}")
+                ax_bpm.plot(df.loc[bpm_vals, "Timestamp"].astype(int),
+                            df.loc[bpm_vals, "BPM"].astype(int),
+                            color="red",
+                            linewidth=0.5,
+                            label="BPM")
+
+            # plot arm angle
+            ax.plot(df["Timestamp"].astype(int),
+                    df["arm_angle_approximation"].astype(float),
+                    color="purple",
+                    linewidth=1,
+                    label="Arm angle")
+
+            # add hour time as xlabels only every 4 recording
+            ax.set_xticks(ticks=df["Timestamp"])
+            partial_clock = df["clock"].astype(str).tolist()
+            for i, pc in enumerate(partial_clock):
+                if i % 4 != 0:
+                    partial_clock[i] = ""
+            ax.set_xticklabels(partial_clock, rotation=90)
+
+            # add vertical lines depending on state
             ymin = df["arm_angle_approximation"].values.min()
             ymax = df["arm_angle_approximation"].values.max()
-
-            # add vertical lines when touched
-            vlines = []
+            touched_ind = []
             for ind in df.index:
                 if df.loc[ind, "Touched"] == 1:
-                    vlines.append(ind)
-            if len(vlines) >0:
-                ax.vlines(x=df.loc[vlines, "date"],
-                           ymin=ymin,
-                           ymax=ymax,
-                           color="red",
-                           linestyle="--",
-                           label="Touched")
-            ax.set_xlabel("Time")
-            fig.legend(fontsize=10)
+                    touched_ind.append(ind)
+            if len(touched_ind) > 0:
+                ax.vlines(x=df.loc[touched_ind, "Timestamp"].astype(int),
+                          ymin=ymin,
+                          ymax=ymax,
+                          color="black",
+                          linestyle="dotted",
+                          linewidth=1,
+                          label="Touched")
+
+            # save or show
+            fig.legend(fontsize=10,
+                       prop={"size": 10},
+                       )
             if show_or_saveimg in ["saveimg", "both"]:
                 fig.savefig(f"{local_dir}/{offset}.png",
                             bbox_inches="tight",
