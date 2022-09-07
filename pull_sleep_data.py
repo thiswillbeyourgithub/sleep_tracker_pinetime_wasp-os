@@ -136,6 +136,11 @@ class download_sleep_data:
                                 )).decode()
                         tqdm.write(f"Deleted remote: '{fi}'")
 
+            self.n("Running gc.collect()...", do_notify=False)
+            subprocess.check_output(
+                shlex.split(
+                    './tools/wasptool --verbose --eval \'wasp.gc.collect()\'')).decode()
+
             print("\n\n")
 
     def n(self, message, do_print=True, do_notify=True):
