@@ -36,6 +36,7 @@ class download_sleep_data:
             subprocess.check_output(
                 shlex.split(
                     'bluetooth on')).decode()
+            time.sleep(3)
             subprocess.check_output(
                 shlex.split(
                     './tools/wasptool --verbose --battery')).decode()
