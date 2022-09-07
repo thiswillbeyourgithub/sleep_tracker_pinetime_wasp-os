@@ -51,6 +51,7 @@ def plot(show_or_saveimg="show",
             continue
 
         # compute estimated arm angle
+        # arm angle formula from https://www.nature.com/articles/s41598-018-31266-z
         df["arm_angle_approximation"] = np.arctan(df["Z"].values / (df["X"].values**2 + df["Y"].values**2))*180/np.pi
 
         # time data correction and loading
