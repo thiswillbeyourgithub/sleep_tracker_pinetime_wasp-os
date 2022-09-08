@@ -565,9 +565,9 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             with open(self.filep, "ab") as f:
                 f.write("\n{},{},{},{},{},{}".format(
                     int(wasp.watch.rtc.time() - self._track_start_time),
-                    int((buff[1]-buff[0])/n),
-                    int((buff[3]-buff[2])/n),
-                    int((buff[5]-buff[4])/n),
+                    abs(buff[1]-buff[0]),
+                    abs(buff[3]-buff[2]),
+                    abs(buff[5]-buff[4]),
                     bpm,
                     self._meta_state,
                     ).encode())
