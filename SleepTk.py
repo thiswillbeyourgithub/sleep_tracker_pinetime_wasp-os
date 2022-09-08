@@ -578,6 +578,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
                                _SMALL_NUMBER,
                                _LARGE_NUMBER,
                                _SMALL_NUMBER))
+            wasp.watch.accel.reset()
             self._last_checkpoint = self._data_point_nb
             self._meta_state = _OFF
             wasp.gc.collect()
