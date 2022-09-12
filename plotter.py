@@ -53,11 +53,12 @@ def plot(show_or_saveimg="show",
             continue
 
         # values are between -1000 and 1000. Converting them to the range -pi +pi
-        df["X"] = df["X"] / 2000 * (2 * np.pi)
-        df["Y"] = df["Y"] / 2000 * (2 * np.pi)
-        df["Z"] = df["Z"] / 2000 * (2 * np.pi)
+        for axis in ["X", "Y", "Z"]:
+            df[axis] = df[axis] / 2000 * (2 * np.pi)
+            df[axis] = df[axis].diff().abs()
+            df.drop(axis=0, labels=df[axis].isna().index)
         df["motion"] = np.arctan(
-                df["Z"].values / np.sqrt(df["X"].values ** 2 + df["Y"].values ** 2)
+                df["Z"].values / np.sqrt(df["X"].values ** 2 + df["Y"].values ** 2 + 0.00001)
                 ) * 180 / np.pi
 
         # time data correction and loading
