@@ -181,9 +181,9 @@ class SleepTkApp():
             self._try_stop_alarm()
         elif self._page == _TRACKING:
             if self._meta_state == 2:  # if gradual vibration
-                self._meta_state += 1  # =3,  also pressed
+                self._meta_state = 3  # also pressed
             else:
-                self._meta_state = _ON  # pressed
+                self._meta_state = 1  # pressed
             # disable pressing to exit, use swipe up instead
             self._draw()
         else:
@@ -222,9 +222,9 @@ class SleepTkApp():
         self._last_touch = int(wasp.watch.rtc.time())
         if self._page == _TRACKING:
             if self._meta_state == 2:  # if gradual vibration
-                self._meta_state += 1  # =3, also touched
+                self._meta_state = 3  # also touched
             else:
-                self._meta_state = _ON  # touched
+                self._meta_state = 1  # touched
             if self._conf_view is _OFF:
                 if self.btn_off.touch(event):
                     self._conf_view = widgets.ConfirmationView()
@@ -411,7 +411,7 @@ class SleepTkApp():
         self._last_checkpoint = 0  # to know when to save to file
         self._track_start_time = int(wasp.watch.rtc.time())  # makes output more compact
         self._last_HR_printed = "?"
-        self._meta_state = _OFF
+        self._meta_state = 0
         wasp.watch.accel.reset()
 
         # if enabled, add alarm to log accel data in _FREQ seconds
@@ -556,7 +556,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             buff = array("f", (_OFF, _OFF, _OFF))
             wasp.watch.accel.reset()
             self._last_checkpoint = self._data_point_nb
-            self._meta_state = _OFF
+            self._meta_state = 0
             wasp.gc.collect()
 
     def _activate_ticks_to_ring(self):
@@ -647,10 +647,10 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
         wasp.watch.vibrator.pulse(duty=3, ms=50)
         # time.sleep(0.1)
         # wasp.watch.vibrator.pulse(duty=3, ms=50)
-        if self._meta_state == _ON:  # if pressed or touched
-            self._meta_state += 2 # =3 because also pressed
+        if self._meta_state == 1:  # if pressed or touched
+            self._meta_state = 3  # because also pressed
         else:
-            self._meta_state = 2  # =2, gradual vibration
+            self._meta_state = 2  # gradual vibration
         if not self._track_HR_once:
             wasp.system.sleep()
 
