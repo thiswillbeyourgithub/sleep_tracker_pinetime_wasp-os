@@ -33,7 +33,7 @@ def plot(show_or_saveimg="show",
     assert show_or_saveimg in ["show", "saveimg", "both"], "Wrong 'show_or_saveimg' value"
 
     # load files
-    files = [f for f in local_dir.iterdir() if str(f).endswith(".csv")]
+    files = sorted([f for f in local_dir.iterdir() if str(f).endswith(".csv")])
     assert len(files) > 0, "No files found."
     print(f"{len(files)} files found.\r")
 
