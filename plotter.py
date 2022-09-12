@@ -110,18 +110,24 @@ def plot(show_or_saveimg="show",
             ax.set_xticklabels(partial_clock, rotation=90)
 
             # add vertical lines depending on state
-            ymin = df["motion"].values.min()
-            ymax = df["motion"].values.max()
+            ymin = df["motion"].min()
+            ymax = df["motion"].max()
+            assert ymin != ymax  # if equal, they are probably both np.nan
+
             touched_ind = []
             gradual_vib = []
             both = []
             for ind in df.index:
+                if df.loc[ind, "Meta"] == 0:
+                    continue
                 if df.loc[ind, "Meta"] == 1:
                     touched_ind.append(ind)
                 elif df.loc[ind, "Meta"] == 2:
                     gradual_vib.append(ind)
                 elif df.loc[ind, "Meta"] == 3:
                     both.append(ind)
+                else:
+                    raise ValueError()
             if len(touched_ind) > 0:
                 ax.vlines(x=df.loc[touched_ind, "Timestamp"],
                           ymin=ymin,
