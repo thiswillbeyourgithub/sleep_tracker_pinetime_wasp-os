@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 # SETTINGS ###################################################################
 ##############################################################################
 
-def plot(show_or_saveimg="show",
+def plot(show_or_saveimg="both",
          local_dir="./remote_files/logs/sleep/",
          open_console=False,
          n_last=3,
@@ -19,7 +19,7 @@ def plot(show_or_saveimg="show",
 
     Parameters
     ----------
-    show_or_saveimg: str, default "show"
+    show_or_saveimg: str, default "both"
         must be in "show", "saveimg" or "both". Determines wether the data will be
         saved as png or shown to the user.
     local_dir: str, default "./remote_files/logs/sleep"
