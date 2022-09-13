@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 def plot(show_or_saveimg="show",
          local_dir="./remote_files/logs/sleep/",
          open_console=False,
+         n_last=3,
          ):
     """
     simple script to import the sleep data into pandas and create plots
@@ -25,6 +26,11 @@ def plot(show_or_saveimg="show",
         path to the dir containing the csv files.
     open_console: bool, default False
         if True, opens a console at the end of the run
+    n_last: int, default 3
+        number of files to actually process. For example '3' will mean 'ignore
+        all files but the recordings of the last 3 nights'. This is useful if
+        you have lots of recordings and want to see only the last few nights.
+        None to disable.
     """
     if isinstance(local_dir, str):
         local_dir = Path(local_dir)
@@ -34,6 +40,10 @@ def plot(show_or_saveimg="show",
 
     # load files
     files = sorted([f for f in local_dir.iterdir() if str(f).endswith(".csv")])
+    if n_last is not None:
+        assert n_last > 0, "Wrong n_last value"
+        files = files[-n_last:]
+        print(f"Processing only {n_last} most recent recordings.")
     assert len(files) > 0, "No files found."
     print(f"{len(files)} files found.\r")
 
