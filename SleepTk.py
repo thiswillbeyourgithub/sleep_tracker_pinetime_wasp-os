@@ -532,7 +532,7 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             1. elapsed time in seconds from start time
             2/3/4. X/Y/Z diff values since the last recording. The values are
                 also averaged since the last recording.
-            5. BPM value or "?" if failed
+            5. BPM value or "?" if unknown
             6. meta: 0 if nothing
                      1 if pressed or touched (indicating wake state)
                      2 if gradual vibration happened
