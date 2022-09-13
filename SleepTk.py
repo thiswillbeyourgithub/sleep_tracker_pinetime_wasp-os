@@ -115,7 +115,7 @@ class SleepTkApp():
         self._page = _SETTINGS1
         self._currently_tracking = _OFF
         self._conf_view = _OFF  # confirmation view
-        self._buff = array("f", (_OFF, _OFF, _OFF))  # contains accelerometer value
+        self._buff = array("f", (_OFF, _OFF, _OFF))  # contains the sum of diff between each accel recordings and the previous recording, along each axis
         self._last_touch = int(wasp.watch.rtc.time())
 
         try:
@@ -413,6 +413,9 @@ class SleepTkApp():
         self._last_HR_printed = "?"
         self._meta_state = 0
         wasp.watch.accel.reset()
+        xyz = wasp.watch.accel.accel_xyz()
+        self._accel_memory = array("f",
+            (xyz[0], xyz[1], xyz[2]))  # contains previous accelerometer value
 
         # if enabled, add alarm to log accel data in _FREQ seconds
         if self._state_body_tracking:
@@ -484,7 +487,7 @@ class SleepTkApp():
 
     def _trackOnce(self):
         """get one data point of accelerometer every _FREQ seconds, keep
-        the average of each axis then store in a file every
+        the diff of each axis then store in a file every
         _STORE_FREQ seconds"""
         if self._currently_tracking:
             buff = self._buff
@@ -492,9 +495,10 @@ class SleepTkApp():
             if xyz == (0, 0, 0):
                 wasp.watch.accel.reset()
                 xyz = wasp.watch.accel.accel_xyz()
-            buff[0] += xyz[0]
-            buff[1] += xyz[1]
-            buff[2] += xyz[2]
+            buff[0] += (abs(self._accel_memory[0]) - abs(xyz[0]))
+            buff[1] += (abs(self._accel_memory[1]) - abs(xyz[1]))
+            buff[2] += (abs(self._accel_memory[2]) - abs(xyz[2]))
+            self._accel_memory = array("f", (xyz[0], xyz[1], xyz[2]))  # contains previous accelerometer value
             self._data_point_nb += 1
 
             # add alarm to log accel data in _FREQ seconds
@@ -527,8 +531,8 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
     def _periodicSave(self):
         """save data to csv with row order:
             1. elapsed time in seconds from start time
-            2/3/4. X/Y/Z values since the last recording. The values are
-                actually averaged since the last recording.
+            2/3/4. X/Y/Z diff values since the last recording. The values are
+                also averaged since the last recording.
             5. BPM value or "?" if failed
             6. meta: 0 if nothing
                      1 if pressed or touched (indicating wake state)
@@ -653,4 +657,3 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             self._meta_state = 2  # gradual vibration
         if not self._track_HR_once:
             wasp.system.sleep()
-
