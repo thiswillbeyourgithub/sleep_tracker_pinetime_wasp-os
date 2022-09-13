@@ -313,7 +313,7 @@ class SleepTkApp():
             if cycl_modulo > 0.10 and cycl_modulo < 0.90:
                 draw.string("Not rested!", 0, y + 40)
             else:
-                draw.reset_color()
+                draw.reset()
                 draw.string("Well rested", 0, y + 40)
                 draw.set_color(_FONT_COLOR)
 
