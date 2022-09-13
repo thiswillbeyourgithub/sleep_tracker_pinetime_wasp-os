@@ -481,7 +481,6 @@ class SleepTkApp():
                     wasp.system.cancel_alarm(self._WU_t - int(t*60), self._tiny_vibration)
         wasp.watch.hrs.disable()
         self._periodicSave()
-        self._state_HR_tracking = _OFF
         wasp._SleepTk_tracking = _OFF
         wasp.gc.collect()
 
