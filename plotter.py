@@ -70,7 +70,7 @@ def plot(show_or_saveimg="both",
                 )
         df["motion"] = df["motion"].diff().abs()
         df.drop(axis=0, labels=df["motion"].isna().index)
-        df["motion"] = df["motion"].rolling(window=10).mean().rolling(window=3).mean()
+        #df["motion"] = df["motion"].rolling(window=10, center=True, closed='both').mean().rolling(window=3, center=True, closed='both').mean()
 
         # time data correction and loading
         offset = int(str(file).split("/")[-1].split(".csv")[0])
@@ -94,7 +94,7 @@ def plot(show_or_saveimg="both",
             bpm_vals = df.loc[ df["BPM"].dropna() != "?"].index.tolist()
             if len(bpm_vals) >= 2:
                 df.loc[bpm_vals, "BPM"] = df.loc[bpm_vals, "BPM"].astype(int)
-                df.loc[bpm_vals, "BPM"] = df.loc[bpm_vals, "BPM"].rolling(window=10).mean().rolling(window=3).mean()
+                #df.loc[bpm_vals, "BPM"] = df.loc[bpm_vals, "BPM"].rolling(window=10, center=True, closed='both').mean().rolling(window=3, center=True, closed='both').mean()
                 ax_bpm = ax.twinx()
                 ax_bpm.set_ylabel("BPM")
                 max_bpm = int(df.loc[bpm_vals, "BPM"].dropna().values.max())
