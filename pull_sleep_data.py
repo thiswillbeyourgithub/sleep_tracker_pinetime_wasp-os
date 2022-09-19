@@ -131,6 +131,8 @@ class download_sleep_data:
                         shlex.split(
                             f'./tools/wasptool --verbose --pull "logs/sleep/{fi}" --as "{local_dir}/{fi}"'
                             ))
+                    if b"MemoryError" in out:
+                        raise Exception("Memory error from watch.")
                     if b"Watch reported error" in out:
                         raise Exception("Watch reported error")
                     tqdm.write(f"Succesfully downloaded to './logs/sleep/{fi}'")
