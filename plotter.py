@@ -91,14 +91,14 @@ def plot(show_or_saveimg="both",
             ax.set_title(recording_date)
 
             # plot bpm data
-            bpm_vals = df.loc[ df["BPM"] != "?"].index.tolist()
+            bpm_vals = df.loc[ df["BPM"].dropna() != "?"].index.tolist()
             if len(bpm_vals) >= 2:
                 df.loc[bpm_vals, "BPM"] = df.loc[bpm_vals, "BPM"].astype(int)
                 df.loc[bpm_vals, "BPM"] = df.loc[bpm_vals, "BPM"].rolling(window=10).mean().rolling(window=3).mean()
                 ax_bpm = ax.twinx()
                 ax_bpm.set_ylabel("BPM")
-                max_bpm = int(df.loc[bpm_vals, "BPM"].values.max())
-                min_bpm = int(df.loc[bpm_vals, "BPM"].values.min())
+                max_bpm = int(df.loc[bpm_vals, "BPM"].dropna().values.max())
+                min_bpm = int(df.loc[bpm_vals, "BPM"].dropna().values.min())
                 print(f"BPM range: {min_bpm}-{max_bpm}")
                 ax_bpm.plot(df.loc[bpm_vals, "Timestamp"],
                             df.loc[bpm_vals, "BPM"],
