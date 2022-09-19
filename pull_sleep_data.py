@@ -17,6 +17,7 @@ class download_sleep_data:
                  local_dir="remote_files/logs/sleep",
                  delete_after_dl=True,
                  delete_empty_remote_files=True,
+                 auto_reboot=False,
                  ):
         """
         Parameters
@@ -29,6 +30,9 @@ class download_sleep_data:
             file will be removed and a notification shown on the computer.
         delete_empty_remote_files: bool, default True
             if True, will remove remote files whose size is 0
+        auto_reboot: bool, default False
+            if True, will reboot the watch before every download to avoid
+            memory errors.
         """
         # checking if watch is nearby and bluetooth is on
         self.n(f"Starting")
@@ -114,6 +118,13 @@ class download_sleep_data:
                 tqdm.write(f"File '{fi}' already exists, openning debugger")
                 breakpoint()
             else:
+                if auto_reboot:
+                    tqdm.write("Restarting watch and waiting 10s...")
+                    out = subprocess.check_output(
+                        shlex.split(
+                            f'./tools/wasptool --verbose --reset'
+                            ))
+                    time.sleep(10)
                 tqdm.write(f"Downloading file '{fi}'")
                 try:
                     out = subprocess.check_output(
