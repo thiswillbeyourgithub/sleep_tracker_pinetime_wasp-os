@@ -96,6 +96,11 @@ class SleepTkApp():
     ICON = icon
 
     def __init__(self):
+        # simple flag to init the variables only when the app is launched and
+        # not as soon as the app is loaded
+        self.was_inited = False
+
+    def _actual_init(self):
         wasp.gc.collect()
 
         # default button state
@@ -129,8 +134,13 @@ class SleepTkApp():
 
         # used to indicate if the app is currently recording
         wasp._SleepTk_tracking = _OFF
+        wasp.gc.collect()
+        return True
 
     def foreground(self):
+        if not self.was_inited:
+            self.was_inited = self._actual_init()
+
         self.stat_bar = widgets.StatusBar()
         self.stat_bar.clock = True
         self._conf_view = _OFF
