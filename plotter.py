@@ -91,7 +91,7 @@ def plot(show_or_saveimg="both",
             # init plot
             fig, ax = plt.subplots()
             ax.set_xlabel("Time")
-            ax.set_title(recording_date)
+            ax.set_title(f"{recording_date}  ({file.name})")
 
             # plot bpm data
             bpm_vals = df.loc[ df["BPM"].dropna() != "?"].index.tolist()
