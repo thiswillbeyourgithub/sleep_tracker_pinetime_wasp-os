@@ -62,7 +62,10 @@ def plot(show_or_saveimg="both",
             continue
         elif len(df.index.tolist()) <= 5:
             tqdm.write(f"  Not enough data ({len(df.index.tolist())} elems) in df '{file}'. Trashing this file.")
-            send2trash(file)
+            try:
+                send2trash(file)
+            except Exception as err:
+                tqdm.write(f"Exception when trashing '{file}': '{err}'")
             continue
 
         # values are between -1000 and 1000. Converting them to the range -pi +pi
