@@ -8,13 +8,14 @@ import matplotlib.pyplot as plt
 import subprocess
 import shlex
 
+
 # SETTINGS ###################################################################
 ##############################################################################
 
 def plot(show_or_saveimg="both",
          local_dir="./remote_files/logs/sleep/",
          open_console=False,
-         n_last=3,
+         n_last=5,
          ):
     """
     simple script to import the sleep data into pandas and create plots
