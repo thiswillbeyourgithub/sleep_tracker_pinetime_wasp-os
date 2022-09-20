@@ -5,8 +5,7 @@ from tqdm import tqdm
 import numpy as np
 from datetime import datetime
 import matplotlib.pyplot as plt
-import subprocess
-import shlex
+from send2trash import send2trash
 
 
 # SETTINGS ###################################################################
@@ -63,7 +62,7 @@ def plot(show_or_saveimg="both",
             continue
         elif len(df.index.tolist()) <= 5:
             tqdm.write(f"  Not enough data ({len(df.index.tolist())} elems) in df '{file}'. Trashing this file.")
-            subprocess.check_output(shlex.split(f"trash {file}")).decode()
+            send2trash(file)
             continue
 
         # values are between -1000 and 1000. Converting them to the range -pi +pi
