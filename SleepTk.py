@@ -185,8 +185,8 @@ class SleepTkApp():
         if not state:
             return
         self._last_touch = int(wasp.watch.rtc.time())
-        mute = wasp.watch.display.mute
-        mute(False)
+        wasp.watch.display.mute(False)
+        wasp.watch.display.poweron()
         if self._page == _RINGING:
             self._try_stop_alarm()
         elif self._page == _TRACKING:
@@ -201,8 +201,8 @@ class SleepTkApp():
 
     def swipe(self, event):
         "navigate between settings page"
-        mute = wasp.watch.display.mute
-        mute(False)
+        wasp.watch.display.mute(False)
+        wasp.watch.display.poweron()
         self._last_touch = int(wasp.watch.rtc.time())
         if self._page == _SETTINGS1:
             if event[0] == wasp.EventType.LEFT:
@@ -227,8 +227,8 @@ class SleepTkApp():
         self.stat_bar.draw()
         draw = wasp.watch.drawable
         draw.set_font(_FONT)
-        mute = wasp.watch.display.mute
-        mute(False)
+        wasp.watch.display.mute(False)
+        wasp.watch.display.poweron()
         self._last_touch = int(wasp.watch.rtc.time())
         if self._page == _TRACKING:
             if self._meta_state == 2:  # if gradual vibration
@@ -329,8 +329,8 @@ class SleepTkApp():
 
     def _draw(self):
         """GUI"""
-        mute = wasp.watch.display.mute
-        mute(False)
+        wasp.watch.display.mute(False)
+        wasp.watch.display.poweron()
         draw = wasp.watch.drawable
         draw.fill(0)
         self.stat_bar.draw()
@@ -530,8 +530,8 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
                 self._track_HR_once = _ON
                 wasp.system.wake()
                 if int(wasp.watch.rtc.time()) - self._last_touch > 5:
-                    mute = wasp.watch.display.mute
-                    mute(True)
+                    wasp.watch.display.mute(True)
+                    wasp.watch.display.poweroff()
                 wasp.system.switch(self)
                 wasp.system.request_tick(1000 // 8)
 
@@ -580,8 +580,8 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
         self._page = _RINGING
         self._n_vibration = 0
         if int(wasp.watch.rtc.time()) - self._last_touch > 5:
-            mute = wasp.watch.display.mute
-            mute(True)
+            wasp.watch.display.mute(True)
+            wasp.watch.display.poweroff()
         wasp.system.wake()
         wasp.system.switch(self)
         self._draw()
@@ -605,8 +605,8 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
             t.start()
             wasp.system.keep_awake()
             if int(wasp.watch.rtc.time()) - self._last_touch > 5:
-                mute = wasp.watch.display.mute
-                mute(True)
+                wasp.watch.display.mute(True)
+                wasp.watch.display.poweroff()
             self._subtick(1)
             while t.time() < 41666:
                 pass
@@ -653,8 +653,8 @@ on.".format(h, m, _BATTERY_THRESHOLD)})
         to consciousness"""
         wasp.gc.collect()
         if int(wasp.watch.rtc.time()) - self._last_touch > 5:
-            mute = wasp.watch.display.mute
-            mute(True)
+            wasp.watch.display.mute(True)
+            wasp.watch.display.poweroff()
         wasp.system.wake()
         wasp.system.switch(self)
         wasp.watch.vibrator.pulse(duty=3, ms=50)
