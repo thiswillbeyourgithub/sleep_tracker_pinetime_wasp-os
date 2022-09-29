@@ -305,20 +305,27 @@ class SleepTkApp():
         draw.set_font(_FONT)
         if self._page == _SETTINGS1:
             duration = (self._read_time(self._state_spinval_H, self._state_spinval_M) - wasp.watch.rtc.time()) / 60
+            percent_str = ""
             y = 180
         elif self._page == _TRACKING:
             draw.set_color(_FONT_COLOR)
             duration = (wasp.watch.rtc.time() - self._track_start_time) / 60
+            if self._state_alarm:
+                percent = (wasp.watch.rtc.time() - self._track_start_time) / (self._WU_t - self._track_start_time)
+                percent_str = " ({:02d}%)".format(int(percent * 100))
+            else:
+                percent_str = ""
             if duration <= 0:  # don't print when not yet asleep
                 return
             y = 130
 
-        draw.string("Total sleep {:02d}h{:02d}m".format(
+        draw.string("Slept {:02d}h{:02d}m{}".format(
             int(duration // 60),
-            int(duration % 60)), 0, y + 20)
+            int(duration % 60),
+            percent_str), 0, y)
         cycl = duration / _CYCLE_LENGTH
         cycl_modulo = cycl % 1
-        draw.string("{} cycles   ".format(str(cycl)[0:4]), 0, y)
+        draw.string("so {} cycles   ".format(str(cycl)[0:4]), 0, y + 20)
         if duration > 30 and not self._track_HR_once:
             if cycl_modulo > 0.10 and cycl_modulo < 0.90:
                 draw.string("Not rested!", 0, y + 40)
@@ -342,16 +349,15 @@ class SleepTkApp():
             self.btn_snooz.draw()
             draw.reset()
         elif self._page == _TRACKING:
-            ti = wasp.watch.time.localtime(self._track_start_time)
-            draw.string('Began at {:02d}:{:02d}'.format(ti[3], ti[4]), 0, 50)
+            ti_start = wasp.watch.time.localtime(self._track_start_time)
             if self._state_alarm:
-                word = "Alarm at "
-                ti = wasp.watch.time.localtime(self._WU_t)
-                draw.string("{}{:02d}:{:02d}".format(word, ti[3], ti[4]), 0, 70)
-                draw.string("Gradual wake: {}".format(True if self._state_gradual_wake else False), 0, 90)
+                ti_stop = wasp.watch.time.localtime(self._WU_t)
+                draw.string('{:02d}:{:02d}  ->|  {:02d}:{:02d}'.format(ti_start[3], ti_start[4], ti_stop[3], ti_stop[4]), 0, 50)
+                if self._state_gradual_wake:
+                    draw.string("(Gradual wake)", 0, 70)
             else:
-                draw.string("No alarm set", 0, 70)
-            draw.string("data points: {} / {}".format(str(self._data_point_nb), str(self._data_point_nb * _FREQ // _STORE_FREQ)), 0, 110)
+                draw.string('{:02d}:{:02d}  ->  ??'.format(ti_start[3], ti_start[4]), 0, 50)
+            #draw.string("data points: {} / {}".format(str(self._data_point_nb), str(self._data_point_nb * _FREQ // _STORE_FREQ)), 0, 110)
             if self._track_HR_once:
                 draw.string("(ongoing)", 0, 170)
             if self._state_HR_tracking:
