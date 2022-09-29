@@ -302,6 +302,9 @@ class SleepTkApp():
         self._draw()
 
     def _draw_duration(self, draw):
+        """draws the part of the screen that displays duration as it is
+        used both when setting the alarm and throughout the night
+        """
         draw.set_font(_FONT)
         if self._page == _SETTINGS1:
             duration = (self._read_time(self._state_spinval_H, self._state_spinval_M) - wasp.watch.rtc.time()) / 60
