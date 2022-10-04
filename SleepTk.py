@@ -79,9 +79,9 @@ _STORE_FREQ = const(120)
 _BATTERY_THRESHOLD = const(20)
 # under X% of battery, stop tracking and only keep the alarm, set at -200
 # or lower to disable (default: 30)
-_GRADUAL_WAKE = array("H", (1, 2, 3, 4, 5, 6, 7, 8, 9, 10))
+_GRADUAL_WAKE = array("f", (0.5, 1, 1.5, 2, 3, 4, 5, 6, 8, 10))
 # nb of minutes before alarm to send a tiny vibration, designed to wake
-# you more gently. (default: array("H", (1, 2, 3, 4, 5, 6, 7, 8, 9, 10)) )
+# you more gently. (default: array("f", (0.5, 1, 1.5, 2, 3, 4, 5, 6, 8, 10)) )
 _CYCLE_LENGTH = const(88)
 # sleep cycle length in minutes. Currently used only to display best wake up
 # time! (default should be: 90 or 100, according to https://sleepyti.me/)
