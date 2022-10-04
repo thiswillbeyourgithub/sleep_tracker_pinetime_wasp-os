@@ -6,6 +6,7 @@
 * **Completely open source**
 * **Best alarm time suggestion**: suggests wake up time according to average sleep cycles length.
 * **Gradual wake**: vibrates the watch a tiny bit a few times before the alarm to lift you gently back to consciousness.
+* **Natural wake**: small vibration every 30s until you wake up, instead of a full blown alarm.
 * **Easy to snooze but hard to stop** You have to swipe several times to make it stop, but can snooze easily.
 * **Insomnia insights**: if you turn on the screen during the night, SleepTk will tell you how long you slept and in what part of the sleep cycle you are supposed to be.
 * **Sleep tracking**: logs your body movement during the night, infers your sleep cycle and write it all down in a `.csv` file.
