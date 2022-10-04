@@ -72,7 +72,7 @@ _SNOOZE_TIME = const(300)
 _FREQ = const(2)
 # get accelerometer data every X seconds, but process and store them only
 # every _STORE_FREQ seconds (default: 5)
-_HR_FREQ = const(120)
+_HR_FREQ = const(300)
 # how many seconds between heart rate data (default: 300, minimum 120)
 _STORE_FREQ = const(120)
 # process data and store to file every X seconds (default: 300)
