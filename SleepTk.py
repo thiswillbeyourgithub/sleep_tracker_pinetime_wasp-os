@@ -358,7 +358,8 @@ class SleepTkApp():
         draw.set_font(_FONT)
         draw.set_color(_FONT_COLOR)
         if self._page == _RINGING:
-            draw.string("WAKE UP", 0, 50)
+            ti = wasp.watch.time.localtime(self._WU_t)
+            draw.string("WAKE UP - {:02d}:{:02d}".format(ti[3], ti[4]), 0, 50)
             self.btn_snooz = widgets.Button(x=0, y=90, w=240, h=120, label="SNOOZE")
             self.btn_snooz.draw()
             draw.reset()
