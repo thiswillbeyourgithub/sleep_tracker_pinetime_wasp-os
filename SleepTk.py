@@ -102,29 +102,31 @@ class SleepTkApp():
         # not as soon as the app is loaded
         self.was_inited = False
 
-    def _actual_init(self):
+    def _actual_init(self, deinit=False):
+        """lots of things to load so only load when the app is started instead
+        of directly when the watch is booted."""
         wasp.gc.collect()
 
         # default button state
-        self._state_alarm = _ON
-        self._state_body_tracking = _ON
-        self._state_HR_tracking = _ON
-        self._state_gradual_wake = _ON
-        self._state_natwake = _OFF
-        self._state_spinval_H = _OFF
-        self._state_spinval_M = _OFF
+        self._state_alarm = _ON if not deinit else None
+        self._state_body_tracking = _ON if not deinit else None
+        self._state_HR_tracking = _ON if not deinit else None
+        self._state_gradual_wake = _ON if not deinit else None
+        self._state_natwake = _OFF if not deinit else None
+        self._state_spinval_H = _OFF if not deinit else None
+        self._state_spinval_M = _OFF if not deinit else None
 
         self._hrdata = None
-        self._last_HR = _OFF  # if _OFF, no HR to write, if "?": error during last HR, else: heart rate
-        self._last_HR_printed = "?"
-        self._last_HR_date = _OFF
-        self._track_HR_once = _OFF
+        self._last_HR = _OFF if not deinit else None  # if _OFF, no HR to write, if "?": error during last HR, else: heart rate
+        self._last_HR_printed = "?" if not deinit else None
+        self._last_HR_date = _OFF if not deinit else None
+        self._track_HR_once = _OFF if not deinit else None
 
-        self._page = _SETTINGS1
-        self._currently_tracking = _OFF
-        self._conf_view = _OFF  # confirmation view
-        self._buff = array("f", (_OFF, _OFF, _OFF))  # contains the sum of diff between each accel recordings and the previous recording, along each axis
-        self._last_touch = int(wasp.watch.rtc.time())
+        self._page = _SETTINGS1 if not deinit else None
+        self._currently_tracking = _OFF if not deinit else None
+        self._conf_view = _OFF if not deinit else None  # confirmation view
+        self._buff = array("f", (_OFF, _OFF, _OFF)) if not deinit else None  # contains the sum of diff between each accel recordings and the previous recording, along each axis
+        self._last_touch = int(wasp.watch.rtc.time()) if not deinit else None
 
         try:
             shell.mkdir("logs")
@@ -136,9 +138,19 @@ class SleepTkApp():
             pass
 
         # used to indicate if the app is currently recording
-        wasp._SleepTk_tracking = _OFF
-        wasp.gc.collect()
-        return True
+        wasp._SleepTk_tracking = _OFF if not deinit else None
+
+        # clean up memory, used when deinitializing value in the morning
+        if deinit:
+            for attr in dir(self):
+                attr = getattr(self, attr)
+                if attr is None and not callable(attr):
+                    del attr
+            wasp.gc.collect()
+            return False
+        else:
+            wasp.gc.collect()
+            return True
 
     def foreground(self):
         if not self.was_inited:
@@ -165,6 +177,9 @@ class SleepTkApp():
         wasp.watch.hrs.disable()
         self._hrdata = None
         self.stat_bar = None
+        if not hasattr(self, "_WU_t"):
+            # remove most variable to clear memory in the morning
+            self.was_inited = self._actual_init(deinit=True)
         wasp.gc.collect()
 
     def _try_stop_alarm(self):
@@ -174,6 +189,8 @@ class SleepTkApp():
             wasp.system.cancel_alarm(self._WU_t, self._activate_ticks_to_ring)
             wasp.system.cancel_alarm(self._WU_t, self._start_natural_wake)
             self._stop_tracking()
+
+            # reload app:
             self.__init__()
             self.foreground()
         else:
