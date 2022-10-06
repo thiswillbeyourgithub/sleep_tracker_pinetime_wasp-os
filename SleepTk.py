@@ -553,11 +553,12 @@ class SleepTkApp():
                 # strop tracking if battery low
                 self._stop_tracking(keep_main_alarm=True)
                 h, m = wasp.watch.time.localtime(wasp.watch.rtc.time())[3:5]
-                wasp.system.notify(wasp.watch.rtc.get_uptime_ms(), {"src": "SleepTk",
-                                                          "title": "Bat low",
-                                                          "body": "Stopped \
-tracking sleep at {}h{}m because your battery went below {}%. Alarm kept \
-on.".format(h, m, _BATTERY_THRESHOLD)})
+                wasp.system.notify(wasp.watch.rtc.get_uptime_ms(), {
+                    "src": "SleepTk",
+                    "title": "Bat low",
+                    "body": "Stopped tracking sleep at {}h{}m because your "
+                            "battery went below {}%. Alarm kept "
+                            "on.".format(h, m, _BATTERY_THRESHOLD)})
             elif self._state_HR_tracking and \
                     wasp.watch.rtc.time() - self._last_HR_date > _HR_FREQ and \
                     not self._track_HR_once:
