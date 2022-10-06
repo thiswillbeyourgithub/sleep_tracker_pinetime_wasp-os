@@ -173,7 +173,7 @@ class SleepTkApp():
             self._n_vibration = 0
             wasp.system.cancel_alarm(self._WU_t, self._activate_ticks_to_ring)
             wasp.system.cancel_alarm(self._WU_t, self._start_natural_wake)
-            self._disable_tracking()
+            self._stop_tracking()
             self.__init__()
             self.foreground()
         else:
@@ -247,7 +247,7 @@ class SleepTkApp():
             else:
                 if self._conf_view.touch(event):
                     if self._conf_view.value:
-                        self._disable_tracking()
+                        self._stop_tracking()
                         self._page = _SETTINGS1
                     self._conf_view = _OFF
                 draw.reset()
@@ -511,7 +511,7 @@ class SleepTkApp():
             d += 1
         return wasp.watch.time.mktime((Y, Mo, d, HH, MM, 0, 0, 0, 0))
 
-    def _disable_tracking(self, keep_main_alarm=False):
+    def _stop_tracking(self, keep_main_alarm=False):
         """called by touching "STOP TRACKING" or when computing best alarm time
         to wake up you disables tracking features and alarms"""
         self._currently_tracking = False
@@ -551,7 +551,7 @@ class SleepTkApp():
             self._periodicSave()
             if wasp.watch.battery.level() <= _BATTERY_THRESHOLD:
                 # strop tracking if battery low
-                self._disable_tracking(keep_main_alarm=True)
+                self._stop_tracking(keep_main_alarm=True)
                 h, m = wasp.watch.time.localtime(wasp.watch.rtc.time())[3:5]
                 wasp.system.notify(wasp.watch.rtc.get_uptime_ms(), {"src": "SleepTk",
                                                           "title": "Bat low",
