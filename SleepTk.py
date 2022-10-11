@@ -143,8 +143,8 @@ class SleepTkApp():
         # clean up memory, used when deinitializing value in the morning
         if deinit:
             for attr in dir(self):
-                attr = getattr(self, attr)
-                if attr is None and not callable(attr):
+                if getattr(self, attr) is None and not callable(getattr(self, attr)):
+                    eval("del self.{}".format(attr))
                     del attr
             wasp.gc.collect()
             return False
@@ -189,8 +189,10 @@ class SleepTkApp():
             wasp.system.cancel_alarm(self._WU_t, self._activate_ticks_to_ring)
             wasp.system.cancel_alarm(self._WU_t, self._start_natural_wake)
             self._stop_tracking()
+            self._WU_t = None
+            del self._WU_t
 
-            # reload app:
+            # reset app:
             self.__init__()
             self.foreground()
         else:
