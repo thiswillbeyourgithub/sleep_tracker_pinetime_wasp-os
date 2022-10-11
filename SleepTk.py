@@ -644,6 +644,7 @@ class SleepTkApp():
         wasp.gc.collect()
         wasp.system.notify_level = self._old_notification_level
         self._page = _RINGING
+        self._n_vibration = 0
         if int(wasp.watch.rtc.time()) - self._last_touch > 5:
             wasp.watch.display.mute(True)
             wasp.watch.display.poweroff()
