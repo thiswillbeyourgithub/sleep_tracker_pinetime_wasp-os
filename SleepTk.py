@@ -107,21 +107,34 @@ class SleepTkApp():
         of directly when the watch is booted."""
         wasp.gc.collect()
 
-        # default button state
-        self._state_alarm = _ON
-        self._state_body_tracking = _ON
-        self._state_HR_tracking = _ON
-        self._state_gradual_wake = _ON
-        self._state_natwake = _OFF
+        # reload previosus ettings
+        previous_settings = wasp.system.get("sleeptk_settings")
+        fallback = False
+        try:
+            if len(previous_settings) == 5:
+                self._state_alarm = previous_settings[0]
+                self._state_body_tracking = previous_settings[1]
+                self._state_HR_tracking = previous_settings[2]
+                self._state_gradual_wake = previous_settings[3]
+                self._state_natwake = previous_settings[4]
+            else:
+                fallback = True
+        except Exception as err:
+            fallback = True
+        if fallback:
+            self._state_alarm = _ON
+            self._state_body_tracking = _ON
+            self._state_HR_tracking = _ON
+            self._state_gradual_wake = _ON
+            self._state_natwake = _OFF
+
         self._state_spinval_H = _OFF
         self._state_spinval_M = _OFF
-
         self._hrdata = None
         self._last_HR = _OFF # if _OFF, no HR to write, if "?": error during last HR, else: heart rate
         self._last_HR_printed = "?"
         self._last_HR_date = _OFF
         self._track_HR_once = _OFF
-
         self._page = _SETTINGS1
         self._currently_tracking = _OFF
         self._conf_view = _OFF # confirmation view
@@ -514,6 +527,18 @@ class SleepTkApp():
         self._page = _TRACKING
         self._stop_trial = 0
         wasp._SleepTk_tracking = _ON
+
+        # save settings as future defaults
+        try:
+            wasp.system.set("sleeptk_settings",
+                    [self._state_alarm,
+                     self._state_body_tracking,
+                     self._state_HR_tracking,
+                     self._state_gradual_wake,
+                     self._state_natwake
+                     ])
+        except:
+            pass
 
     def _read_time(self, HH, MM):
         "convert time from spinners to seconds"
