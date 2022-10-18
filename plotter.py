@@ -14,7 +14,7 @@ from send2trash import send2trash
 def plot(show_or_saveimg="both",
          local_dir="./remote_files/logs/sleep/",
          open_console=False,
-         n_last=5,
+         n_last=3,
          ):
     """
     simple script to import the sleep data into pandas and create plots
@@ -44,7 +44,7 @@ def plot(show_or_saveimg="both",
     files = sorted([f for f in local_dir.iterdir() if str(f).endswith(".csv")])
     if n_last is not None:
         assert n_last > 0, "Wrong n_last value"
-        files = files[-n_last:]
+        files = files[-n_last - 1:]
         print(f"Processing only {n_last} most recent recordings.")
     assert len(files) > 0, "No files found."
     print(f"{len(files)} files found.\r")
