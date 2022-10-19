@@ -596,7 +596,12 @@ class SleepTkApp():
                     "title": "Bat low",
                     "body": "Stopped tracking sleep at {}h{}m because your "
                             "battery went below {}%. Alarm kept "
-                            "on.".format(h, m, _BATTERY_THRESHOLD)})
+                            "on but bluetooth turned off.".format(
+                                h, m, _BATTERY_THRESHOLD)})
+                import ble  # disable bluetooth to save battery
+                if ble.enabled():
+                    ble.disable()
+                del ble
             elif self._state_HR_tracking and \
                     wasp.watch.rtc.time() - self._last_HR_date > _HR_FREQ and \
                     not self._track_HR_once:
