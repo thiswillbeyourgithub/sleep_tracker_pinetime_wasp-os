@@ -107,10 +107,10 @@ class SleepTkApp():
         of directly when the watch is booted."""
         wasp.gc.collect()
 
-        # reload previosus ettings
-        previous_settings = wasp.system.get("sleeptk_settings")
+        # reload previous ettings
         fallback = False
         try:
+            previous_settings = wasp.system.get("sleeptk_settings")
             if len(previous_settings) == 5:
                 self._state_alarm = previous_settings[0]
                 self._state_body_tracking = previous_settings[1]
@@ -119,7 +119,7 @@ class SleepTkApp():
                 self._state_natwake = previous_settings[4]
             else:
                 fallback = True
-        except Exception as err:
+        except Exception:
             fallback = True
         if fallback:
             self._state_alarm = _ON
@@ -131,7 +131,7 @@ class SleepTkApp():
         self._state_spinval_H = _OFF
         self._state_spinval_M = _OFF
         self._hrdata = None
-        self._last_HR = _OFF # if _OFF, no HR to write, if "?": error during last HR, else: heart rate
+        self._last_HR = _OFF  # if _OFF, no HR to write, if "?": error during last HR, else: heart rate
         self._last_HR_printed = "?"
         self._last_HR_date = _OFF
         self._track_HR_once = _OFF
