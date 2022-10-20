@@ -688,6 +688,8 @@ class SleepTkApp():
         self._WU_t = wasp.watch.rtc.time() + _NATURAL_WAKE_IVL
         wasp.system.set_alarm(self._WU_t, self._start_natural_wake)
         if not self._track_HR_once:
+            wasp.watch.display.mute(False)
+            wasp.watch.display.poweron()
             wasp.system.sleep()
 
     def tick(self, ticks):
