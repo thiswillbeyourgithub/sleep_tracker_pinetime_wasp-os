@@ -53,6 +53,16 @@ def plot(show_or_saveimg="both",
     for file in tqdm(files, desc="Loading files"):
         # load file
         df = pd.read_csv(file)
+
+        if "Timestamp_" in " ".join(df.columns):  # new format of timestamp
+            tqdm.write("New timestamp format detected, formating.")
+            for column in df.columns:
+                if column.startswith("Timestamp_"):
+                    recording_freq = int(column.split("_")[1])
+                    df.rename(columns={column: "Timestamp"}, inplace=True)
+                    df["Timestamp"] = df["Timestamp"].astype(float) * recording_freq
+                    break
+
         df["Timestamp"] = df["Timestamp"].astype(int)
         df["Meta"] = df["Meta"].astype(int)
 
