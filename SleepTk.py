@@ -487,7 +487,7 @@ class SleepTkApp():
             # create one file per recording session:
             self.filep = "logs/sleep/{}.csv".format(str(self._track_start_time + _TIMESTAMP))
             with open(self.filep, "wb") as f:
-                f.write(b"Timestamp,X,Y,Z,BPM,Meta")
+                f.write(b"Timestamp_{},X,Y,Z,BPM,Meta".format(_STORE_FREQ))
             self.next_al = wasp.watch.rtc.time() + _FREQ
             wasp.system.set_alarm(self.next_al, self._trackOnce)
         else:
@@ -636,10 +636,12 @@ class SleepTkApp():
                 bpm = "?"
             with open(self.filep, "ab") as f:
                 f.write("\n{},{},{},{},{},{}".format(
-                    int(wasp.watch.rtc.time() - self._track_start_time),
-                    buff[0] / n,
-                    buff[1] / n,
-                    buff[2] / n,
+                    round(
+                        (wasp.watch.rtc.time() - self._track_start_time
+                            ) / _STORE_FREQ, 2),
+                    round(buff[0] / n, 2),
+                    round(buff[1] / n, 2),
+                    round(buff[2] / n, 2),
                     bpm,
                     self._meta_state,
                     ).encode())
