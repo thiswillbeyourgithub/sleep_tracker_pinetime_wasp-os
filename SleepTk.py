@@ -637,13 +637,12 @@ class SleepTkApp():
             else:
                 bpm = "?"
             with open(self.filep, "ab") as f:
-                f.write("\n{},{},{},{},{},{}".format(
-                    round(
-                        (wasp.watch.rtc.time() - self._track_start_time
-                            ) / _STORE_FREQ, 2),
-                    round(buff[0] / n, 2),
-                    round(buff[1] / n, 2),
-                    round(buff[2] / n, 2),
+                f.write("\n{:.2f},{:.2f},{:.2f},{:.2f},{},{}".format(
+                    (wasp.watch.rtc.time() - self._track_start_time
+                        ) / _STORE_FREQ,
+                    buff[0] / n,
+                    buff[1] / n,
+                    buff[2] / n,
                     bpm,
                     self._meta_state,
                     ).encode())
