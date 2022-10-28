@@ -186,8 +186,6 @@ class SleepTkApp():
             for i in range(len(wasp.system.launcher_ring)):
                 if wasp.system.launcher_ring[i].NAME == "SleepTk":
                     wasp.system.launcher_ring[i] = SleepTkApp()
-                    wasp.system.notify("SleepTk", {"title": self.NAME,
-                                                   "body": "App replaced!"})
                     break
         wasp.gc.collect()
 
