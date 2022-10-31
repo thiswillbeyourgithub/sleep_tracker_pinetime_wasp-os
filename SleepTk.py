@@ -487,7 +487,7 @@ class SleepTkApp():
             # create one file per recording session:
             self.filep = "logs/sleep/{}.csv".format(str(self._track_start_time + _TIMESTAMP))
             with open(self.filep, "wb") as f:
-                f.write(b"Timestamp_{},X,Y,Z,BPM,Meta".format(_STORE_FREQ))
+                f.write("Timestamp_{},Motion,BPM,Meta".format(_STORE_FREQ).encode())
             self.next_al = wasp.watch.rtc.time() + _FREQ
             wasp.system.set_alarm(self.next_al, self._trackOnce)
         else:
@@ -619,7 +619,9 @@ class SleepTkApp():
         """save data to csv with row order:
             1. elapsed time in seconds from start time
             2/3/4. X/Y/Z diff values since the last recording. The values are
-                also averaged since the last recording.
+                also averaged since the last recording then converted to
+                grad then into a single motion angle. This saves a lot of
+                space and allows for more frequent file savings.
             5. BPM value or "?" if unknown
             6. meta: 0 if nothing
                      1 if pressed or touched (indicating wake state)
@@ -633,16 +635,24 @@ class SleepTkApp():
                 bpm = self._last_HR
                 self._last_HR = _OFF
             else:
-                bpm = "?"
+                bpm = ""  # save a character if no value to print
+            if self._meta_state == 0:
+                meta = ""
+            else:
+                meta = self._meta_state
+            fac = 2 * math.pi / 2000 / n * 100  # conversion factor
+            motion = math.atan(
+                    (buff[2] * fac) / (
+                        math.sqrt(
+                            (buff[0] * fac) ** 2 + (buff[1] * fac) ** 2 + 0.00001)
+                        ))
             with open(self.filep, "ab") as f:
-                f.write("\n{:.2f},{:.2f},{:.2f},{:.2f},{},{}".format(
+                f.write("\n{:.1f},{:.3f},{},{}".format(
                     (wasp.watch.rtc.time() - self._track_start_time
                         ) / _STORE_FREQ,
-                    buff[0] / n,
-                    buff[1] / n,
-                    buff[2] / n,
+                    motion,
                     bpm,
-                    self._meta_state,
+                    meta,
                     ).encode())
             # reset buffer
             buff = array("f", (_OFF, _OFF, _OFF))

@@ -78,12 +78,15 @@ def plot(show_or_saveimg="both",
                 tqdm.write(f"Exception when trashing '{file}': '{err}'")
             continue
 
-        # values are between -1000 and 1000. Converting them to the range -pi +pi
-        for axis in ["X", "Y", "Z"]:
-            df[axis] = (df[axis] / 2000) * (2 * np.pi)
-        df["motion"] = np.arctan(
-                df["Z"].values / np.sqrt(df["X"].values ** 2 + df["Y"].values ** 2 + 0.00001)
-                )
+        if "Motion" not in df.columns:
+            # values are between -1000 and 1000. Converting them to the range -pi +pi
+            for axis in ["X", "Y", "Z"]:
+                df[axis] = (df[axis] / 2000) * (2 * np.pi)
+            df["motion"] = np.arctan(
+                    df["Z"].values / np.sqrt(df["X"].values ** 2 + df["Y"].values ** 2 + 0.00001)
+                    )
+        else:
+            df["motion"] df["Motion"] / 100
         df["motion"] = df["motion"].diff().abs()
         df.drop(axis=0, labels=df["motion"].isna().index)
         #df["motion"] = df["motion"].rolling(window=10, center=True, closed='both').mean().rolling(window=3, center=True, closed='both').mean()
