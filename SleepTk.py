@@ -74,7 +74,7 @@ _FREQ = const(5)
 # every _STORE_FREQ seconds (default: 5)
 _HR_FREQ = const(300)
 # how many seconds between heart rate data (default: 300, minimum 120)
-_STORE_FREQ = const(120)
+_STORE_FREQ = const(60)
 # process data and store to file every X seconds (default: 300)
 _BATTERY_THRESHOLD = const(20)
 # under X% of battery, stop tracking and only keep the alarm, set at -200
