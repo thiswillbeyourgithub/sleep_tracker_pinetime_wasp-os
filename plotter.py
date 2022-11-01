@@ -88,7 +88,7 @@ def plot(show_or_saveimg="both",
                     df["Z"].values / np.sqrt(df["X"].values ** 2 + df["Y"].values ** 2 + 0.00001)
                     )
         else:
-            df["motion"] =  df["Motion"] / 100
+            df["motion"] =  df["Motion"] / 1000
         df["motion"] = df["motion"].diff().abs()
         df.drop(axis=0, labels=df["motion"].isna().index)
         #df["motion"] = df["motion"].rolling(window=10, center=True, closed='both').mean().rolling(window=3, center=True, closed='both').mean()

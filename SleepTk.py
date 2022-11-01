@@ -640,16 +640,15 @@ class SleepTkApp():
                 meta = ""
             else:
                 meta = self._meta_state
-            fac = 2 * math.pi / 2000 / n * 100  # conversion factor
+            fac = 2 * math.pi / 2000 / n * 1000  # conversion factor
             motion = math.atan(
                     (buff[2] * fac) / (
                         math.sqrt(
                             (buff[0] * fac) ** 2 + (buff[1] * fac) ** 2 + 0.00001)
                         ))
             with open(self.filep, "ab") as f:
-                f.write("\n{:.1f},{:.3f},{},{}".format(
-                    (wasp.watch.rtc.time() - self._track_start_time
-                        ) / _STORE_FREQ,
+                f.write("\n{},{:.3f},{},{}".format(
+                    int((wasp.watch.rtc.time() - self._track_start_time) / _STORE_FREQ),
                     motion,
                     bpm,
                     meta,
