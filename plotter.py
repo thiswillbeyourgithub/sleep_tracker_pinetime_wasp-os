@@ -54,7 +54,7 @@ def plot(show_or_saveimg="both",
         # load file
         df = pd.read_csv(file)
 
-        # ignoring too small files
+        # ignore small files
         if len(df.index.tolist()) == 0:
             tqdm.write(f"  No data in df '{file}'. Ignoring this file.")
             continue
@@ -66,40 +66,48 @@ def plot(show_or_saveimg="both",
                 tqdm.write(f"Exception when trashing '{file}': '{err}'")
             continue
 
-        if "Timestamp_" in " ".join(df.columns):  # new format of timestamp
-            tqdm.write("New timestamp format detected, formating.")
-            for column in df.columns:
-                if column.startswith("Timestamp_"):
-                    recording_freq = int(column.split("_")[1])
-                    df.rename(columns={column: "Timestamp"}, inplace=True)
-                    df["Timestamp"] = df["Timestamp"].astype(float) * recording_freq
-                    break
+        # detect version number and saving interval
+        assert file.name.count("_") >= 2, "invalid filename"
+        version = int(file.name.split("_")[2].replace(".csv", ""))
+        interval = int(file.name.split("_")[1])
 
+        # fill elipsed timestamp value
+        df.iloc[0]["Timestamp"] = 1
+        for i, row in df.iterrows():
+            if i == 0:
+                continue
+            if pd.isna(df.loc[i, "Timestamp"]):
+                assert not pd.isna(df.loc[i - 1, "Timestamp"]), "ERROR"
+                df.loc[i, "Timestamp"] = (df.loc[i - 1, "Timestamp"] + 1)
+        df["Timestamp"] *= interval
         df["Timestamp"] = df["Timestamp"].astype(int)
-        df.loc[ df["Meta"].isna(), "Meta"] = 0
-        df.loc[ df["BPM"].isna(), "BPM"] = "?"
-        df["Meta"] = df["Meta"].astype(int)
-
-        if "Motion" not in df.columns:
-            # values are between -1000 and 1000. Converting them to the range -pi +pi
-            for axis in ["X", "Y", "Z"]:
-                df[axis] = (df[axis] / 2000) * (2 * np.pi)
-            df["motion"] = np.arctan(
-                    df["Z"].values / np.sqrt(df["X"].values ** 2 + df["Y"].values ** 2 + 0.00001)
-                    )
-        else:
-            df["motion"] =  df["Motion"] / 1000
-        df["motion"] = df["motion"].diff().abs()
-        df.drop(axis=0, labels=df["motion"].isna().index)
-        #df["motion"] = df["motion"].rolling(window=10, center=True, closed='both').mean().rolling(window=3, center=True, closed='both').mean()
 
         # time data correction and loading
-        offset = int(str(file).split("/")[-1].split(".csv")[0])
+        offset = int(str(file).split("/")[-1].split("_")[0])
         df["UNIX_time"] = df["Timestamp"] + int(offset)
-        df["date"] = [datetime.utcfromtimestamp(unix) for unix in df["UNIX_time"].tolist()]
+        df["date"] = [datetime.utcfromtimestamp(unix)
+                      for unix in df["UNIX_time"].tolist()]
         df["clock"] = pd.to_datetime(df["date"]).dt.time
         df["clock"] = df["clock"].astype(str)
         recording_date = str(datetime.utcfromtimestamp(offset))
+
+        # cast types and fill ellipsed values
+        df.loc[df["Meta"].isna(), "Meta"] = 0
+        df.loc[df["BPM"].isna(), "BPM"] = "?"
+        df["Meta"] = df["Meta"].astype(int)
+
+        # process motion signal
+        df["Motion"] /= 1000
+        df["Motion"] = df["Motion"].diff().abs()
+
+        # replace first value that got erased by abs()
+        df["Motion"].fillna(0.0, inplace=True)
+
+        # clip values that are too high
+        df["Motion"].clip(lower=0, upper=df["Motion"].quantile(0.95), inplace=True)
+
+        # compute smoothing etc if desired
+        #df["Motion"] = df["Motion"].rolling(window=4, center=True, closed='both').max()
 
         # store df
         recordings[recording_date] = df
@@ -111,7 +119,7 @@ def plot(show_or_saveimg="both",
             ax.set_xlabel("Time")
             ax.set_title(f"{recording_date}  ({file.name})")
 
-            # plot bpm data
+            # plot bpm data if present
             bpm_vals = df.loc[ df["BPM"].dropna() != "?"].index.tolist()
             if len(bpm_vals) >= 2:
                 df.loc[bpm_vals, "BPM"] = df.loc[bpm_vals, "BPM"].astype(int)
@@ -129,7 +137,7 @@ def plot(show_or_saveimg="both",
 
             # plot motion
             ax.plot(df["Timestamp"],
-                    df["motion"],
+                    df["Motion"],
                     color="purple",
                     linewidth=1,
                     label="Motion")
@@ -143,8 +151,8 @@ def plot(show_or_saveimg="both",
             ax.set_xticklabels(partial_clock, rotation=90)
 
             # add vertical lines depending on state
-            ymin = df["motion"].min()
-            ymax = df["motion"].max()
+            ymin = df["Motion"].min()
+            ymax = df["Motion"].max()
             assert ymin != ymax  # if equal, they are probably both np.nan
 
             touched_ind = []
@@ -204,10 +212,13 @@ def plot(show_or_saveimg="both",
     df = recordings[list(recordings.keys())[-1]]
     if open_console:
         print("\rLoaded files as dataframe as values of dict 'recordings'. Opening console.")
-        import code ;code.interact(local=locals())
+        import code
+        code.interact(local=locals())
     else:
         print("\rLoaded files as dataframe as values of dict 'recordings'.")
-    input("Press any key to exit.")
+    if show_or_saveimg in ["show", "both"]:
+        input("Press any key to exit.")  # stops the plots from exiting
+
 
 if __name__ == "__main__":
     Fire(plot)
