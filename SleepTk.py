@@ -589,7 +589,7 @@ class SleepTkApp():
             wasp.system.set_alarm(self.next_al, self._trackOnce)
 
             self._periodicSave()
-            if wasp.watch.battery.level() <= _BATTERY_THRESHOLD:
+            if wasp.watch.battery.level() <= _BATTERY_THRESHOLD and ((not hasattr(wasp, "_is_in_simulation")) or wasp._is_in_simulation is False):
                 # strop tracking if battery low
                 self._stop_tracking(keep_main_alarm=True)
                 h, m = wasp.watch.time.localtime(wasp.watch.rtc.time())[3:5]
