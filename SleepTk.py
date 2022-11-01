@@ -487,9 +487,9 @@ class SleepTkApp():
         # if enabled, add alarm to log accel data in _FREQ seconds
         if self._state_body_tracking:
             # create one file per recording session:
-            self.filep = "logs/sleep/{}_{}.csv".format(str(self._track_start_time + _TIMESTAMP), self.VERSION)
+            self.filep = "logs/sleep/{}_{}_{}.csv".format(str(self._track_start_time + _TIMESTAMP), _STORE_FREQ, self.VERSION)
             with open(self.filep, "wb") as f:
-                f.write("Timestamp_{},Motion,BPM,Meta".format(_STORE_FREQ).encode("ascii"))
+                f.write("Timestamp,Motion,BPM,Meta".encode("ascii"))
             self.next_al = wasp.watch.rtc.time() + _FREQ
             wasp.system.set_alarm(self.next_al, self._trackOnce)
         else:
