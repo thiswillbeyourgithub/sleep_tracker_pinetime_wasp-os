@@ -96,6 +96,7 @@ _SLEEP_GOAL_CYCLE = const(5)
 class SleepTkApp():
     NAME = 'SleepTk'
     ICON = icon
+    VERSION = const(1)
 
     def __init__(self):
         # simple flag to init the variables only when the app is launched and
@@ -485,7 +486,7 @@ class SleepTkApp():
         # if enabled, add alarm to log accel data in _FREQ seconds
         if self._state_body_tracking:
             # create one file per recording session:
-            self.filep = "logs/sleep/{}.csv".format(str(self._track_start_time + _TIMESTAMP))
+            self.filep = "logs/sleep/{}_{}.csv".format(str(self._track_start_time + _TIMESTAMP), self.VERSION)
             with open(self.filep, "wb") as f:
                 f.write("Timestamp_{},Motion,BPM,Meta".format(_STORE_FREQ).encode("ascii"))
             self.next_al = wasp.watch.rtc.time() + _FREQ
