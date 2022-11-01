@@ -54,18 +54,6 @@ def plot(show_or_saveimg="both",
         # load file
         df = pd.read_csv(file)
 
-        if "Timestamp_" in " ".join(df.columns):  # new format of timestamp
-            tqdm.write("New timestamp format detected, formating.")
-            for column in df.columns:
-                if column.startswith("Timestamp_"):
-                    recording_freq = int(column.split("_")[1])
-                    df.rename(columns={column: "Timestamp"}, inplace=True)
-                    df["Timestamp"] = df["Timestamp"].astype(float) * recording_freq
-                    break
-
-        df["Timestamp"] = df["Timestamp"].astype(int)
-        df["Meta"] = df["Meta"].astype(int)
-
         # ignoring too small files
         if len(df.index.tolist()) == 0:
             tqdm.write(f"  No data in df '{file}'. Ignoring this file.")
@@ -78,6 +66,20 @@ def plot(show_or_saveimg="both",
                 tqdm.write(f"Exception when trashing '{file}': '{err}'")
             continue
 
+        if "Timestamp_" in " ".join(df.columns):  # new format of timestamp
+            tqdm.write("New timestamp format detected, formating.")
+            for column in df.columns:
+                if column.startswith("Timestamp_"):
+                    recording_freq = int(column.split("_")[1])
+                    df.rename(columns={column: "Timestamp"}, inplace=True)
+                    df["Timestamp"] = df["Timestamp"].astype(float) * recording_freq
+                    break
+
+        df["Timestamp"] = df["Timestamp"].astype(int)
+        df.loc[ df["Meta"].isna(), "Meta"] = 0
+        df.loc[ df["BPM"].isna(), "BPM"] = "?"
+        df["Meta"] = df["Meta"].astype(int)
+
         if "Motion" not in df.columns:
             # values are between -1000 and 1000. Converting them to the range -pi +pi
             for axis in ["X", "Y", "Z"]:
@@ -86,7 +88,7 @@ def plot(show_or_saveimg="both",
                     df["Z"].values / np.sqrt(df["X"].values ** 2 + df["Y"].values ** 2 + 0.00001)
                     )
         else:
-            df["motion"] df["Motion"] / 100
+            df["motion"] =  df["Motion"] / 100
         df["motion"] = df["motion"].diff().abs()
         df.drop(axis=0, labels=df["motion"].isna().index)
         #df["motion"] = df["motion"].rolling(window=10, center=True, closed='both').mean().rolling(window=3, center=True, closed='both').mean()
