@@ -474,6 +474,7 @@ class SleepTkApp():
 
         # accel data not yet written to disk:
         self._data_point_nb = 0  # total number of data points so far
+        self._latest_save =  -1  # multiple of the saving frequency elapsed since start
         self._last_checkpoint = 0  # to know when to save to file
         self._track_start_time = int(wasp.watch.rtc.time())  # makes output more compact
         self._last_HR_printed = "?"
@@ -618,7 +619,8 @@ class SleepTkApp():
 
     def _periodicSave(self):
         """save data to csv with row order:
-            1. elapsed time in seconds from start time
+            1. multiple from saving frequency from start, if different
+                than a simple increment from previous value
             2/3/4. X/Y/Z diff values since the last recording. The values are
                 also averaged since the last recording then converted to
                 grad then into a single motion angle. This saves a lot of
@@ -647,9 +649,17 @@ class SleepTkApp():
                         math.sqrt(
                             (buff[0] * fac) ** 2 + (buff[1] * fac) ** 2 + 0.00001)
                         ))
+            # only write the number if it's not obvious, meaning saving was
+            # delayed
+            timestamp = int((wasp.watch.rtc.time() - self._track_start_time) / _STORE_FREQ)
+            if timestamp == self._latest_save + 1:
+                self._latest_save = timestamp
+                timestamp = ""
+            else:
+                self._latest_save = timestamp
             with open(self.filep, "ab") as f:
                 f.write("\n{},{:.3f},{},{}".format(
-                    int((wasp.watch.rtc.time() - self._track_start_time) / _STORE_FREQ),
+                    timestamp,
                     motion,
                     bpm,
                     meta,
