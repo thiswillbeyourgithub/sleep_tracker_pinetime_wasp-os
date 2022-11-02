@@ -82,7 +82,7 @@ _BATTERY_THRESHOLD = const(20)
 _GRADUAL_WAKE = array("f", (0.5, 1, 1.5, 2, 3, 4, 5, 6, 8, 10))
 # nb of minutes before alarm to send a tiny vibration, designed to wake
 # you more gently. (default: array("f", (0.5, 1, 1.5, 2, 3, 4, 5, 6, 8, 10)) )
-_NATURAL_WAKE_IVL = const(30)
+_NATURAL_WAKE_IVL = const(15)
 # nb of seconds between vibration when natural wake is on.
 _CYCLE_LENGTH = const(89)
 # sleep cycle length in minutes. Currently used only to display best wake up
