@@ -175,7 +175,7 @@ def plot(show_or_saveimg="both",
                           ymax=ymax,
                           color="green",
                           linestyle="dotted",
-                          linewidth=0.5,
+                          linewidth=2.5,
                           label="Touched")
             if len(gradual_vib) > 0:
                 ax.vlines(x=df.loc[gradual_vib, "Timestamp"],
@@ -183,7 +183,7 @@ def plot(show_or_saveimg="both",
                           ymax=ymax,
                           color="blue",
                           linestyle="dotted",
-                          linewidth=0.5,
+                          linewidth=2.5,
                           label="Small vibration")
             if len(both) > 0:
                 ax.vlines(x=df.loc[both, "Timestamp"],
@@ -191,7 +191,7 @@ def plot(show_or_saveimg="both",
                           ymax=ymax,
                           color="black",
                           linestyle="dotted",
-                          linewidth=0.5,
+                          linewidth=2.5,
                           label="Both")
             # save or show
             fig.legend(fontsize=10,
