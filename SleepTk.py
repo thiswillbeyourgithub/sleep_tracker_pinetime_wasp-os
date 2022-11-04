@@ -194,8 +194,8 @@ class SleepTkApp():
         """If button or swipe more than _STOP_LIMIT, then stop ringing"""
         if self._stop_trial + 1 >= _STOP_LIMIT:
             self._n_vibration = 0
-            wasp.system.cancel_alarm(self._WU_t, self._activate_ticks_to_ring)
-            wasp.system.cancel_alarm(self._WU_t, self._start_natural_wake)
+            wasp.system.cancel_alarm(None, self._activate_ticks_to_ring)
+            wasp.system.cancel_alarm(None, self._start_natural_wake)
             self._stop_tracking()
             self._WU_t = None
             del self._WU_t
@@ -287,10 +287,13 @@ class SleepTkApp():
                 self._page = _TRACKING
                 wasp.system.cancel_alarm(self._WU_t, self._start_natural_wake)
                 self._WU_t = int(wasp.watch.rtc.time()) + _SNOOZE_TIME
-                if self._state_natwake:
-                    wasp.system.set_alarm(self._WU_t, self._start_natural_wake)
-                else:
-                    wasp.system.set_alarm(self._WU_t, self._activate_ticks_to_ring)
+                for offset in range(0, 31, 5):
+                    # the offset's role si to add multiple alamrs to make sure
+                    # the user wakes up, in case one alarm fails to start.
+                    if self._state_natwake:
+                        wasp.system.set_alarm(self._WU_t + offset, self._start_natural_wake)
+                    else:
+                        wasp.system.set_alarm(self._WU_t + offset, self._activate_ticks_to_ring)
                 wasp.system.sleep()
         elif self._page == _SETTINGS1:
             if self._state_alarm and (self._spin_H.touch(event) or self._spin_M.touch(event)):
@@ -609,7 +612,7 @@ class SleepTkApp():
                     not self._track_HR_once:
                 self._track_HR_once = _ON
                 wasp.system.wake()
-                if int(wasp.watch.rtc.time()) - self._last_touch > 5:
+                if abs(int(wasp.watch.rtc.time()) - self._last_touch) > 5:
                     wasp.watch.display.mute(True)
                     wasp.watch.display.poweroff()
                 wasp.system.switch(self)
@@ -674,29 +677,38 @@ class SleepTkApp():
     def _activate_ticks_to_ring(self):
         """listen to ticks every second, telling the watch to vibrate and
         completely wake the user up"""
-        wasp.gc.collect()
-        wasp.system.notify_level = self._old_notification_level  # restore notification level
-        self._page = _RINGING
-        self._n_vibration = 0
-        if int(wasp.watch.rtc.time()) - self._last_touch > 5:
-            wasp.watch.display.mute(True)
-            wasp.watch.display.poweroff()
+        if not hasattr(self, "_WU_t") or self._WU_t is None:
+            # alarm was already started and stopped
+            return
         wasp.system.wake()
         wasp.system.switch(self)
-        self._draw()
+        self._page = _RINGING
+        self._n_vibration = 0
         wasp.system.request_tick(period_ms=1000)
+        wasp.system.notify_level = self._old_notification_level  # restore notification level
+        wasp.gc.collect()
+        if abs(int(wasp.watch.rtc.time()) - self._last_touch) > 5:
+            wasp.watch.display.mute(True)
+            wasp.watch.display.poweroff()
+        self._draw()
 
     def _start_natural_wake(self):
         """do a tiny vibration every 30s until the user wakes up"""
-        wasp.gc.collect()
-        wasp.system.notify_level = self._old_notification_level
-        self._page = _RINGING
-        self._n_vibration = 0
-        if int(wasp.watch.rtc.time()) - self._last_touch > 5:
-            wasp.watch.display.mute(True)
-            wasp.watch.display.poweroff()
+        if not hasattr(self, "_WU_t") or self._WU_t is None:
+            # alarm was already started and stopped
+            return
         wasp.system.wake()
         wasp.system.switch(self)
+        wasp.gc.collect()
+        self._WU_t = wasp.watch.rtc.time() + _NATURAL_WAKE_IVL
+        wasp.system.set_alarm(self._WU_t, self._start_natural_wake)
+
+        self._page = _RINGING
+        wasp.system.notify_level = self._old_notification_level
+        self._n_vibration = 0
+        if abs(int(wasp.watch.rtc.time()) - self._last_touch) > 5:
+            wasp.watch.display.mute(True)
+            wasp.watch.display.poweroff()
         self._draw()
 
         # tiny vibration
@@ -706,8 +718,6 @@ class SleepTkApp():
         else:
             self._meta_state = 2  # gradual vibration
 
-        self._WU_t = wasp.watch.rtc.time() + _NATURAL_WAKE_IVL
-        wasp.system.set_alarm(self._WU_t, self._start_natural_wake)
         if not self._track_HR_once:
             wasp.watch.display.mute(False)
             wasp.watch.display.poweron()
@@ -730,7 +740,7 @@ class SleepTkApp():
             t = wasp.machine.Timer(id=1, period=8000000)
             t.start()
             wasp.system.keep_awake()
-            if int(wasp.watch.rtc.time()) - self._last_touch > 5:
+            if abs(int(wasp.watch.rtc.time()) - self._last_touch) > 5:
                 wasp.watch.display.mute(True)
                 wasp.watch.display.poweroff()
             self._subtick(1)
@@ -767,7 +777,7 @@ class SleepTkApp():
                     self._track_HR_once = _OFF
                     self._hrdata = None
                     wasp.watch.hrs.disable()
-                    if int(wasp.watch.rtc.time()) - self._last_touch > 5:
+                    if abs(int(wasp.watch.rtc.time()) - self._last_touch) > 5:
                         wasp.system.sleep()
 
     def _subtick(self, ticks):
@@ -778,7 +788,7 @@ class SleepTkApp():
         """vibrate just a tiny bit before waking up, to gradually return
         to consciousness"""
         wasp.gc.collect()
-        if int(wasp.watch.rtc.time()) - self._last_touch > 5:
+        if abs(int(wasp.watch.rtc.time()) - self._last_touch) > 5:
             wasp.watch.display.mute(True)
             wasp.watch.display.poweroff()
         wasp.system.wake()
