@@ -288,11 +288,10 @@ class SleepTkApp():
                 wasp.system.cancel_alarm(None, self._start_natural_wake)
                 wasp.system.cancel_alarm(None, self._activate_ticks_to_ring)
                 self._WU_t = int(wasp.watch.rtc.time()) + _SNOOZE_TIME
-                for offset in range(0, 31, 5):
-                    if self._state_natwake:
-                        wasp.system.set_alarm(self._WU_t + offset * 60, self._start_natural_wake)
-                    else:
-                        wasp.system.set_alarm(self._WU_t + offset * 60, self._activate_ticks_to_ring)
+                if self._state_natwake:
+                    wasp.system.set_alarm(self._WU_t, self._start_natural_wake)
+                else:
+                    wasp.system.set_alarm(self._WU_t, self._activate_ticks_to_ring)
                 wasp.system.sleep()
         elif self._page == _SETTINGS1:
             if self._state_alarm and (self._spin_H.touch(event) or self._spin_M.touch(event)):
@@ -506,13 +505,10 @@ class SleepTkApp():
         if self._state_alarm:
             self._old_notification_level = wasp.system.notify_level
             self._WU_t = self._read_time(self._state_spinval_H, self._state_spinval_M)
-            for offset in range(0, 31, 5):
-                # the offset's role si to add multiple alamrs to make sure
-                # the user wakes up, in case one alarm fails to start.
-                if self._state_natwake:
-                    wasp.system.set_alarm(self._WU_t + offset * 60, self._start_natural_wake)
-                else:
-                    wasp.system.set_alarm(self._WU_t + offset * 60, self._activate_ticks_to_ring)
+            if self._state_natwake:
+                wasp.system.set_alarm(self._WU_t, self._start_natural_wake)
+            else:
+                wasp.system.set_alarm(self._WU_t, self._activate_ticks_to_ring)
 
             # also set alarm to vibrate a tiny bit before wake up time
             # to wake up gradually
