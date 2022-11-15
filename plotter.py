@@ -44,7 +44,7 @@ def plot(show_or_saveimg="both",
     files = sorted([f for f in local_dir.iterdir() if str(f).endswith(".csv")])
     if n_last is not None:
         assert n_last > 0, "Wrong n_last value"
-        files = files[-n_last - 1:]
+        files = files[-n_last:]
         print(f"Processing only {n_last} most recent recordings.")
     assert len(files) > 0, "No files found."
     print(f"{len(files)} files found.\r")

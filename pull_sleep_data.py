@@ -43,7 +43,7 @@ class download_sleep_data:
             time.sleep(3)
             subprocess.check_output(
                 shlex.split(
-                    './tools/wasptool --verbose --battery')).decode()
+                    './tools/wasptool --battery')).decode()
         except Exception as err:
             self.n(f"Watch is not nearby?\rException:\r\r'{err}'")
             raise SystemExit()
@@ -52,11 +52,11 @@ class download_sleep_data:
         self.n("\n\nRunning gc.collect()...", do_notify=False)
         subprocess.check_output(
             shlex.split(
-                './tools/wasptool --verbose --eval \'wasp.gc.collect()\'')).decode()
+                './tools/wasptool --eval \'wasp.gc.collect()\'')).decode()
 
         # checking if SleepTk is running
         out = subprocess.check_output(
-                shlex.split('./tools/wasptool --verbose --eval \"if hasattr(wasp, \'_SleepTk_tracking\') and wasp._SleepTk_tracking == 1: print(\'SleepTk is tracking\')\"'
+                shlex.split('./tools/wasptool --eval \"if hasattr(wasp, \'_SleepTk_tracking\') and wasp._SleepTk_tracking == 1: print(\'SleepTk is tracking\')\"'
                 )).decode()
         if "SleepTk is tracking" in out.split("\r\r\n"):
             self.n(f"Watch is currently recording Sleep data. Exiting.")
@@ -66,7 +66,7 @@ class download_sleep_data:
         self.n("\n\nListing remote files...", do_notify=False)
         out = subprocess.check_output(
             shlex.split(
-                './tools/wasptool --verbose --eval \'from shell import ls ; ls(\"/flash/logs/sleep/\")\''
+                './tools/wasptool --eval \'from shell import ls ; ls(\"/flash/logs/sleep/\")\''
                 )).decode()
         flines = [l.strip().split(" ") for l in out.split("\r\r\n") if l.endswith(".csv")]
         if len(flines) <= 0:
@@ -88,7 +88,7 @@ class download_sleep_data:
                     try:
                         out = subprocess.check_output(
                             shlex.split(
-                                f'./tools/wasptool --verbose --eval \'from shell import rm ; rm(\"/flash/logs/sleep/{file}\")\''
+                                f'./tools/wasptool --eval \'from shell import rm ; rm(\"/flash/logs/sleep/{file}\")\''
                                 )).decode()
                     except Exception as err:
                         self.n(f"Watch reported error: '{err}'")
@@ -122,14 +122,14 @@ class download_sleep_data:
                     tqdm.write("Restarting watch and waiting 10s...")
                     out = subprocess.check_output(
                         shlex.split(
-                            f'./tools/wasptool --verbose --reset'
+                            f'./tools/wasptool --reset'
                             ))
                     time.sleep(10)
                 tqdm.write(f"Downloading file '{fi}'")
                 try:
                     out = subprocess.check_output(
                         shlex.split(
-                            f'./tools/wasptool --verbose --pull "logs/sleep/{fi}" --as "{local_dir}/{fi}"'
+                            f'./tools/wasptool --pull "logs/sleep/{fi}" --as "{local_dir}/{fi}"'
                             ))
                     if b"MemoryError" in out:
                         raise Exception("Memory error from watch.")
@@ -153,14 +153,14 @@ class download_sleep_data:
                         tqdm.write(f"Downloaded remote file: '{fi}'")
                         out = subprocess.check_output(
                             shlex.split(
-                                f'./tools/wasptool --verbose --eval \'from shell import rm ; rm(\"/flash/logs/sleep/{fi}\")\''
+                                f'./tools/wasptool --eval \'from shell import rm ; rm(\"/flash/logs/sleep/{fi}\")\''
                                 )).decode()
                         tqdm.write(f"Deleted remote: '{fi}'")
 
             self.n("Running gc.collect()...", do_notify=False)
             subprocess.check_output(
                 shlex.split(
-                    './tools/wasptool --verbose --eval \'wasp.gc.collect()\'')).decode()
+                    './tools/wasptool --eval \'wasp.gc.collect()\'')).decode()
 
             print("\n\n")
 
