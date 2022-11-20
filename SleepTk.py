@@ -113,11 +113,11 @@ class SleepTkApp():
         try:
             previous_settings = wasp.system.get("sleeptk_settings")
             if len(previous_settings) == 5:
-                self._state_alarm = previous_settings[0]
-                self._state_body_tracking = previous_settings[1]
-                self._state_HR_tracking = previous_settings[2]
-                self._state_gradual_wake = previous_settings[3]
-                self._state_natwake = previous_settings[4]
+                self._state_alarm = bool(previous_settings[0])
+                self._state_body_tracking = bool(previous_settings[1])
+                self._state_HR_tracking = bool(previous_settings[2])
+                self._state_gradual_wake = bool(previous_settings[3])
+                self._state_natwake = bool(previous_settings[4])
             else:
                 fallback = True
         except Exception:
