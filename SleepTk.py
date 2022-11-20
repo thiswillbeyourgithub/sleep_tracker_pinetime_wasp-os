@@ -79,7 +79,7 @@ _STORE_FREQ = const(60)
 _BATTERY_THRESHOLD = const(20)
 # under X% of battery, stop tracking and only keep the alarm, set at -200
 # or lower to disable (default: 30)
-_GRADUAL_WAKE = array("f", (0.5, 1, 1.5, 2, 3, 4, 5, 6, 8, 10))
+_GRADUAL_WAKE = array("f", (0.5, 1, 1.5, 2, 3, 4, 5))
 # nb of minutes before alarm to send a tiny vibration, designed to wake
 # you more gently. (default: array("f", (0.5, 1, 1.5, 2, 3, 4, 5, 6, 8, 10)) )
 _NATURAL_WAKE_IVL = const(15)
