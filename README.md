@@ -10,7 +10,7 @@
 * **Easy to snooze but hard to stop** You have to swipe several times to make it stop, but can snooze easily.
 * **Insomnia insights**: if you turn on the screen during the night, SleepTk will tell you how long you slept and in what part of the sleep cycle you are supposed to be.
 * **Sleep tracking**: logs your body movement during the night, infers your sleep cycle and write it all down in a `.csv` file.
-* **Heart tracking**: tracks your heart rate throughout the night.
+* **Heart tracking**: tracks your heart rate throughout the night. *(edit: will be vastly improved when [this issue][https://github.com/daniel-thompson/wasp-os/pull/363#issuecomment-1257055637) gets sorted out)*
 * **Status: fully functional**
 
 ## Credits:
