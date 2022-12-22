@@ -183,7 +183,7 @@ class SleepTkApp():
         self._hrdata = None
         self.stat_bar = None
         if not hasattr(self, "_WU_t"):
-            # remove most variable to clear memory in the morning
+            # reinstanciate class to save memory
             for i in range(len(wasp.system.launcher_ring)):
                 if wasp.system.launcher_ring[i].NAME == "SleepTk":
                     wasp.system.launcher_ring[i] = SleepTkApp()
