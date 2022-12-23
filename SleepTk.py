@@ -188,6 +188,11 @@ class SleepTkApp():
                 if wasp.system.launcher_ring[i].NAME == "SleepTk":
                     wasp.system.launcher_ring[i] = SleepTkApp()
                     break
+            # also removes possible reference to the previous class
+            wasp.system.cancel_alarm(None, self._activate_ticks_to_ring)
+            wasp.system.cancel_alarm(None, self._start_natural_wake)
+            wasp.system.cancel_alarm(None, self._trackOnce)
+            wasp.system.cancel_alarm(None, self._tiny_vibration)
         wasp.gc.collect()
 
     def _try_stop_alarm(self):
