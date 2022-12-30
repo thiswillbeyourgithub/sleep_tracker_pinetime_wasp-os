@@ -520,6 +520,8 @@ class SleepTkApp():
             if self._state_gradual_wake:
                 for t in _GRADUAL_WAKE:
                     wasp.system.set_alarm(self._WU_t - int(t*60), self._tiny_vibration)
+        else:
+            self._WU_t = 0  # this is just to avoid the app overwriting itself when going in the background
 
         # don't track heart rate right away, wait a few seconds
         if self._state_HR_tracking:
