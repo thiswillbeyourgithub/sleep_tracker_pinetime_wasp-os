@@ -523,6 +523,10 @@ class SleepTkApp():
         else:
             self._WU_t = 0  # this is just to avoid the app overwriting itself when going in the background
 
+        # reduce brightness
+        self._old_brightness_level = wasp.system.brightness
+        wasp.system.brightness = 0
+
         # don't track heart rate right away, wait a few seconds
         if self._state_HR_tracking:
             self._last_HR_date = int(wasp.watch.rtc.time()) + 10
@@ -691,6 +695,7 @@ class SleepTkApp():
         self._n_vibration = 0
         wasp.system.request_tick(period_ms=1000)
         wasp.system.notify_level = self._old_notification_level  # restore notification level
+        wasp.system.brightness = self._old_brightness_level
         wasp.gc.collect()
         if abs(int(wasp.watch.rtc.time()) - self._last_touch) > 5:
             wasp.watch.display.mute(True)
@@ -712,6 +717,7 @@ class SleepTkApp():
         self._WU_t = wasp.watch.rtc.time() + _NATURAL_WAKE_IVL
         wasp.system.set_alarm(self._WU_t, self._start_natural_wake)
         wasp.system.notify_level = self._old_notification_level
+        wasp.system.brightness = self._old_brightness_level
         self._n_vibration = 0
         if abs(int(wasp.watch.rtc.time()) - self._last_touch) > 5:
             wasp.watch.display.mute(True)
