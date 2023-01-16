@@ -525,7 +525,7 @@ class SleepTkApp():
 
         # reduce brightness
         self._old_brightness_level = wasp.system.brightness
-        wasp.system.brightness = 0
+        wasp.system.brightness = 1
 
         # don't track heart rate right away, wait a few seconds
         if self._state_HR_tracking:
