@@ -108,21 +108,19 @@ class SleepTkApp():
         of directly when the watch is booted."""
         wasp.gc.collect()
 
-        # reload previous ettings
-        fallback = False
+        # reload previous settings
         try:
-            previous_settings = wasp.system.get("sleeptk_settings")
-            if len(previous_settings) == 5:
-                self._state_alarm = bool(previous_settings[0])
-                self._state_body_tracking = bool(previous_settings[1])
-                self._state_HR_tracking = bool(previous_settings[2])
-                self._state_gradual_wake = bool(previous_settings[3])
-                self._state_natwake = bool(previous_settings[4])
-            else:
-                fallback = True
+            (
+                self._state_alarm,
+                self._state_body_tracking,
+                self._state_HR_tracking,
+                self._state_gradual_wake,
+                self._state_natwake
+                ) = [_ON if int(p) else _OFF
+                     for p in wasp.system.get("sleeptk_settings")]
         except Exception:
-            fallback = True
-        if fallback:
+            raise
+            # fallback solution
             self._state_alarm = _ON
             self._state_body_tracking = _ON
             self._state_HR_tracking = _ON
