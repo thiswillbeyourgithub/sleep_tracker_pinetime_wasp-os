@@ -133,7 +133,8 @@ class SleepTkApp():
         self._last_HR = _OFF  # if _OFF, no HR to write, if "?": error during last HR, else: heart rate
         self._last_HR_printed = "?"
         self._last_HR_date = _OFF
-        self._track_HR_once = _OFF
+        self._track_HR_once = _OFF  # either _OFF or the timestamp of when the
+        # tracking is supposed to start
         self._page = _SETTINGS1
         self._currently_tracking = _OFF
         self._conf_view = _OFF # confirmation view
@@ -617,7 +618,7 @@ class SleepTkApp():
             elif self._state_HR_tracking and \
                     wasp.watch.rtc.time() - self._last_HR_date > _HR_FREQ and \
                     not self._track_HR_once:
-                self._track_HR_once = _ON
+                self._track_HR_once = int(wasp.watch.rtc.time())
                 wasp.system.wake()
                 if abs(int(wasp.watch.rtc.time()) - self._last_touch) > 5:
                     wasp.watch.display.mute(True)
@@ -643,6 +644,11 @@ class SleepTkApp():
         """
         buff = self._buff
         n = self._data_point_nb - self._last_checkpoint
+        if wasp.watch.rtc.time() - self._track_HR_once > 60:
+            # if for some reason we are still trying to compute the
+            # heart rate after 60s, something went wrong and saving motion
+            # data is more important so cancelling this tracking
+            self._track_HR_once = _OFF
         if n >= _STORE_FREQ // _FREQ and not self._track_HR_once:
             if self._last_HR != _OFF:
                 bpm = self._last_HR
