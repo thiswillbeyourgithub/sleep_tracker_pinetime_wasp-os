@@ -454,7 +454,7 @@ class SleepTkApp():
                 self.check_grad = widgets.Checkbox(0, 120, "Gradual wake")
                 self.check_grad.state = self._state_gradual_wake
                 self.check_grad.draw()
-                self.check_natwake = widgets.Checkbox(0, 160, "Natural wake")
+                self.check_natwake = widgets.Checkbox(0, 160, "Natural wake (EXP)")
                 self.check_natwake.state = self._state_natwake
                 self.check_natwake.draw()
             self.btn_sta = widgets.Button(x=0, y=200, w=240, h=40, label="Start")
