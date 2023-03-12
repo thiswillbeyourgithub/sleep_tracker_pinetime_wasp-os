@@ -374,9 +374,11 @@ class SleepTkApp():
         draw.string("so {} cycles   ".format(str(cycl)[0:4]), 0, y + 20)
         if duration > 30 and not self._track_HR_once:
             if cycl_modulo > 0.10 and cycl_modulo < 0.90:
+                draw.set_font(_FONT)
                 draw.string("Not rested!", 0, y + 40)
             else:
                 draw.reset()
+                draw.set_font(_FONT)
                 draw.string("Well rested", 0, y + 39)
                 draw.set_color(_FONT_COLOR)
 
