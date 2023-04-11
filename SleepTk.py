@@ -171,6 +171,7 @@ class SleepTkApp():
 
         self.stat_bar = widgets.StatusBar()
         self.stat_bar.clock = True
+        self.stat_bar.draw()
         self._conf_view = _OFF
         wasp.gc.collect()
         self._draw()
