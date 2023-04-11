@@ -321,12 +321,19 @@ class SleepTkApp():
                 self._spin_M.update()
                 self._state_spinval_H = self._spin_H.value
                 self._spin_H.update()
-                if self._state_alarm:
-                    self._draw_duration(draw)
+                self._draw_duration(draw)
                 return
             elif self.check_al.touch(event):
                 self._state_alarm = self.check_al.state
                 self.check_al.update()
+                if self._state_alarm:
+                    self._state_spinval_M = self._spin_M.value
+                    self._state_spinval_H = self._spin_H.value
+                    self._spin_M.draw()
+                    self._spin_H.draw()
+                    self._draw_duration(draw)
+                else:
+                    self._draw()
             return
         elif self._page == _SETTINGS2:
             if self._state_body_tracking:
