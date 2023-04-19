@@ -741,12 +741,14 @@ class SleepTkApp():
         wasp.system.wake()
         wasp.system.switch(self)
         wasp.gc.collect()
-        self._WU_t = wasp.watch.rtc.time() + _NATURAL_WAKE_IVL
-        wasp.system.set_alarm(self._WU_t, self._start_natural_wake)
 
-        self._page = _RINGING
+        # cancel alarm then set to of them to make sure it does not skip one
         self._WU_t = wasp.watch.rtc.time() + _NATURAL_WAKE_IVL
+        wasp.system.cancel_alarm(None, self._start_natural_wake)
         wasp.system.set_alarm(self._WU_t, self._start_natural_wake)
+        wasp.system.set_alarm(self._WU_t + _NATURAL_WAKE_IVL, self._start_natural_wake)
+        self._page = _RINGING
+
         wasp.system.notify_level = self._old_notification_level
         wasp.system.brightness = self._old_brightness_level
         self._n_vibration = 0
