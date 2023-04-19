@@ -755,7 +755,6 @@ class SleepTkApp():
         if abs(int(wasp.watch.rtc.time()) - self._last_touch) > 5:
             wasp.watch.display.mute(True)
             wasp.watch.display.poweroff()
-        self._draw()
 
         # tiny vibration
         wasp.watch.vibrator.pulse(duty=3, ms=50)
@@ -763,6 +762,7 @@ class SleepTkApp():
             self._meta_state = 3  # because also pressed
         else:
             self._meta_state = 2  # gradual vibration
+        self._draw()
 
         if not self._track_HR_once:
             wasp.watch.display.mute(False)
