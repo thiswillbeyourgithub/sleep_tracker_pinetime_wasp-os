@@ -773,7 +773,7 @@ class SleepTkApp():
         """vibrate to wake you up OR track heart rate using code from heart.py"""
         wasp.gc.collect()
         wasp.system.switch(self)
-        if self._page == _RINGING:
+        if self._page == _RINGING and self._state_natwake == _OFF:
             wasp.system.keep_awake()
             # in 60 vibrations, ramp up from subtle to strong:
             wasp.watch.vibrator.pulse(duty=max(80 - 1 * self._n_vibration, 20),
@@ -839,9 +839,10 @@ class SleepTkApp():
             wasp.watch.display.poweroff()
         wasp.system.wake()
         wasp.system.switch(self)
-        wasp.watch.vibrator.pulse(duty=3, ms=50)
-        # time.sleep(0.1)
-        # wasp.watch.vibrator.pulse(duty=3, ms=50)
+        if self._page != _RINGING:  # safeguard: don't vibrate anymore if already on ringing page
+            wasp.watch.vibrator.pulse(duty=3, ms=50)
+            # time.sleep(0.1)
+            # wasp.watch.vibrator.pulse(duty=3, ms=50)
         if self._meta_state == 1:  # if pressed or touched
             self._meta_state = 3  # because also pressed
         else:
