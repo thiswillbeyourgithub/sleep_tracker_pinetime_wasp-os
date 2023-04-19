@@ -234,6 +234,10 @@ class SleepTkApp():
         if self._page == _RINGING:
             self._try_stop_alarm()
         elif self._page == _TRACKING:
+            self.stat_bar = widgets.StatusBar()
+            self.stat_bar.clock = True
+            self.stat_bar.draw()
+            self.stat_bar.update()
             if self._meta_state == 2:  # if gradual vibration
                 self._meta_state = 3  # also pressed
             else:
@@ -659,6 +663,12 @@ class SleepTkApp():
                      2 if gradual vibration happened or natural wake
                      3 if pressed or touched after gradual vibration
         """
+        # fix the status bar never updating
+        self.stat_bar = widgets.StatusBar()
+        self.stat_bar.clock = True
+        self.stat_bar.draw()
+        self.stat_bar.update()
+
         buff = self._buff
         n = self._data_point_nb - self._last_checkpoint
         if wasp.watch.rtc.time() - self._track_HR_once > 60:
