@@ -283,7 +283,7 @@ class SleepTkApp():
                 self._meta_state = 3  # also touched
             else:
                 self._meta_state = 1  # touched
-            if self._conf_view is _OFF:
+            if self._conf_view == _OFF:
                 if self.btn_off.touch(event):
                     self._conf_view = widgets.ConfirmationView()
                     self._conf_view.draw("Stop tracking?")
