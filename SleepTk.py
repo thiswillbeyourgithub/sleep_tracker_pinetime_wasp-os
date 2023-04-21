@@ -385,7 +385,7 @@ class SleepTkApp():
                 return
             y = 130
 
-        draw.string("Slept {:02d}h{:02d}m{}".format(
+        draw.string("Sleep: {:02d}h{:02d}m{}".format(
             int(duration // 60),
             int(duration % 60),
             percent_str), 0, y)
