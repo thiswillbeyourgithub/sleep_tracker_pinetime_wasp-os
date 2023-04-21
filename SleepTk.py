@@ -584,8 +584,7 @@ class SleepTkApp():
         return wasp.watch.time.mktime((Y, Mo, d, HH, MM, 0, 0, 0, 0))
 
     def _stop_tracking(self, keep_main_alarm=False):
-        """called by touching "STOP TRACKING" or when computing best alarm time
-        to wake up you disables tracking features and alarms"""
+        """called by touching "STOP TRACKING" or when battery is low"""
         self._currently_tracking = False
         if self.next_al:
             wasp.system.cancel_alarm(self.next_al, self._trackOnce)
