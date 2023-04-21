@@ -62,7 +62,7 @@ icon = (
 # HARDCODED VARIABLES:
 _ON = const(1)
 _OFF = const(0)
-_TRACKING = const(0)
+_SLEEPING = const(0)
 _RINGING = const(1)
 _SETTINGS1 = const(2)
 _SETTINGS2 = const(3)
@@ -179,7 +179,7 @@ class SleepTkApp():
                                   wasp.EventMask.SWIPE_LEFTRIGHT |
                                   wasp.EventMask.SWIPE_UPDOWN |
                                   wasp.EventMask.BUTTON)
-        if self._page == _TRACKING and self._track_HR_once:
+        if self._page == _SLEEPING and self._track_HR_once:
             wasp.system.request_tick(1000 // 8)
 
     def sleep(self):
@@ -233,7 +233,7 @@ class SleepTkApp():
         wasp.watch.display.poweron()
         if self._page == _RINGING:
             self._try_stop_alarm()
-        elif self._page == _TRACKING:
+        elif self._page == _SLEEPING:
             self.stat_bar = widgets.StatusBar()
             self.stat_bar.clock = True
             self.stat_bar.draw()
@@ -278,7 +278,7 @@ class SleepTkApp():
         draw.set_font(_FONT)
         self._last_touch = int(wasp.watch.rtc.time())
         self.stat_bar.draw()
-        if self._page == _TRACKING:
+        if self._page == _SLEEPING:
             if self._meta_state == 2:  # if gradual vibration
                 self._meta_state = 3  # also touched
             else:
@@ -309,7 +309,7 @@ class SleepTkApp():
                     wasp.system.set_alarm(self._WU_t, self._start_natural_wake)
                 else:
                     wasp.system.set_alarm(self._WU_t, self._activate_ticks_to_ring)
-                self._page = _TRACKING
+                self._page = _SLEEPING
                 wasp.system.sleep()
         elif self._page == _SETTINGS1:
             if self._state_alarm and (self._spin_H.touch(event) or self._spin_M.touch(event)):
@@ -374,7 +374,7 @@ class SleepTkApp():
             duration = (self._read_time(self._state_spinval_H, self._state_spinval_M) - wasp.watch.rtc.time()) / 60
             percent_str = ""
             y = 180
-        elif self._page == _TRACKING:
+        elif self._page == _SLEEPING:
             draw.set_color(_FONT_COLOR)
             duration = (wasp.watch.rtc.time() - self._track_start_time) / 60
             if self._state_alarm:
@@ -418,7 +418,7 @@ class SleepTkApp():
             self.btn_snooz = widgets.Button(x=0, y=90, w=240, h=120, label="SNOOZE")
             self.btn_snooz.draw()
             draw.reset()
-        elif self._page == _TRACKING:
+        elif self._page == _SLEEPING:
             ti_start = wasp.watch.time.localtime(self._track_start_time)
             if self._state_alarm:
                 ti_stop = wasp.watch.time.localtime(self._WU_t)
@@ -560,7 +560,7 @@ class SleepTkApp():
             if ble.enabled():
                 ble.disable()
 
-        self._page = _TRACKING
+        self._page = _SLEEPING
         self._stop_trial = 0
         wasp._SleepTk_tracking = _ON
 
