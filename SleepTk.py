@@ -518,10 +518,10 @@ class SleepTkApp():
             self.filep = "logs/sleep/{}_{}_{}.csv".format(str(self._track_start_time + _TIMESTAMP), _STORE_FREQ, self.VERSION)
             with open(self.filep, "wb") as f:
                 f.write("Timestamp,Motion,BPM,Meta".encode("ascii"))
-            self.next_al = wasp.watch.rtc.time() + _FREQ
-            wasp.system.set_alarm(self.next_al, self._trackOnce)
+            self.next_track_time = wasp.watch.rtc.time() + _FREQ
+            wasp.system.set_alarm(self.next_track_time, self._trackOnce)
         else:
-            self.next_al = None
+            self.next_track_time = None
 
         if (self._state_gradual_wake or self._state_natwake) and not self._state_alarm:
             # fix incompatible settings
@@ -586,8 +586,8 @@ class SleepTkApp():
     def _stop_tracking(self, keep_main_alarm=False):
         """called by touching "STOP TRACKING" or when battery is low"""
         self._currently_tracking = False
-        if self.next_al:
-            wasp.system.cancel_alarm(self.next_al, self._trackOnce)
+        if self.next_track_time:
+            wasp.system.cancel_alarm(self.next_track_time, self._trackOnce)
         if self._state_alarm and not keep_main_alarm:
             # to keep the alarm when stopping because of low battery
             wasp.system.cancel_alarm(None, self._start_natural_wake)
@@ -615,8 +615,8 @@ class SleepTkApp():
             self._data_point_nb += 1
 
             # add alarm to log accel data in _FREQ seconds
-            self.next_al = wasp.watch.rtc.time() + _FREQ
-            wasp.system.set_alarm(self.next_al, self._trackOnce)
+            self.next_track_time = wasp.watch.rtc.time() + _FREQ
+            wasp.system.set_alarm(self.next_track_time, self._trackOnce)
 
             self._periodicSave()
             if wasp.watch.battery.level() <= _BATTERY_THRESHOLD and ((not hasattr(wasp, "_is_in_simulation")) or wasp._is_in_simulation is False):
