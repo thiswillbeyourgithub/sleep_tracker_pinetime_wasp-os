@@ -302,7 +302,6 @@ class SleepTkApp():
                     self._track_HR_once = _OFF
                     self._hrdata = None
                     wasp.watch.hrs.disable()
-                self._page = _TRACKING
                 wasp.system.cancel_alarm(None, self._start_natural_wake)
                 wasp.system.cancel_alarm(None, self._activate_ticks_to_ring)
                 self._WU_t = int(wasp.watch.rtc.time()) + _SNOOZE_TIME
@@ -310,6 +309,7 @@ class SleepTkApp():
                     wasp.system.set_alarm(self._WU_t, self._start_natural_wake)
                 else:
                     wasp.system.set_alarm(self._WU_t, self._activate_ticks_to_ring)
+                self._page = _TRACKING
                 wasp.system.sleep()
         elif self._page == _SETTINGS1:
             if self._state_alarm and (self._spin_H.touch(event) or self._spin_M.touch(event)):
