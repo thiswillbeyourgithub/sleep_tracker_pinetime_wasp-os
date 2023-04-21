@@ -588,12 +588,11 @@ class SleepTkApp():
         self._currently_tracking = False
         if self.next_al:
             wasp.system.cancel_alarm(self.next_al, self._trackOnce)
-        if self._state_alarm:
-            if keep_main_alarm is False:  # to keep the alarm when stopping because of low battery
-                wasp.system.cancel_alarm(self._WU_t, self._start_natural_wake)
-                wasp.system.cancel_alarm(self._WU_t, self._activate_ticks_to_ring)
-                for t in _GRADUAL_WAKE:
-                    wasp.system.cancel_alarm(self._WU_t - int(t*60), self._tiny_vibration)
+        if self._state_alarm and not keep_main_alarm:
+            # to keep the alarm when stopping because of low battery
+            wasp.system.cancel_alarm(None, self._start_natural_wake)
+            wasp.system.cancel_alarm(None, self._activate_ticks_to_ring)
+            wasp.system.cancel_alarm(None, self._tiny_vibration)
         wasp.watch.hrs.disable()
         self._periodicSave()
         wasp._SleepTk_tracking = _OFF
