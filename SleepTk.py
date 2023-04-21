@@ -587,7 +587,7 @@ class SleepTkApp():
         """called by touching "STOP TRACKING" or when battery is low"""
         self._currently_tracking = False
         if self.next_track_time:
-            wasp.system.cancel_alarm(self.next_track_time, self._trackOnce)
+            wasp.system.cancel_alarm(None, self._trackOnce)
         if self._state_alarm and not keep_main_alarm:
             # to keep the alarm when stopping because of low battery
             wasp.system.cancel_alarm(None, self._start_natural_wake)
