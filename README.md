@@ -2,42 +2,30 @@
 **Goal:** privacy friendly sleep tracker with cool alarm features for the [pinetime smartwatch](https://pine64.com/product/pinetime-smartwatch-sealed/) by Pine64, on python, to run on [wasp-os](https://github.com/daniel-thompson/wasp-os).
 
 ## Features:
-* **Privacy friendly**: your data is not sent to anyone, it is stored and analyzed directly on the watch (but you can still download it if needed).
-* **Completely open source**
-* **Best alarm time suggestion**: suggests wake up time according to average sleep cycles length.
-* **Gradual wake**: vibrates the watch a tiny bit a few times before the alarm to lift you gently back to consciousness.
-* **Natural wake**: small vibration every 30s (customizable) until you wake up, instead of a full blown alarm.
-* **Easy to snooze but hard to stop** You have to swipe several times to make it stop, but can snooze easily.
-* **Insomnia insights**: if you turn on the screen during the night, SleepTk will tell you how long you slept and in what part of the sleep cycle you are supposed to be.
-* **Sleep tracking**: logs your body movement during the night, infers your sleep cycle and write it all down in a `.csv` file.
-* **Heart tracking**: tracks your heart rate throughout the night. *(edit: will be vastly improved when [this issue][https://github.com/daniel-thompson/wasp-os/pull/363#issuecomment-1257055637) gets sorted out)*
-* **Status: fully functional except Natural Wake**
+    * **Privacy friendly**: your data is not sent to anyone, it is stored directly on the watch (but you can still download it if needed).
+    * **Fully open source**
+    * **Easy to snooze but hard to stop** You have to swipe several times to make it stop, but can snooze easily.
+    * **Optimized for waking up refreshed**: suggests wake up time according to average sleep cycles length.
+    * **Gradual wake**: vibrates the watch a tiny bit a few times before the alarm to lift you gently back to consciousness.
+    * **Natural wake**: small vibration every 30s until you wake up, instead of a full blown alarm.
+    * **Insomnia insights**: if you turn on the screen during the night, SleepTk will tell you how long you slept and in what part of the sleep cycle you are supposed to be. Helpful to figure out insomnia patterns.
+    * **Body tracking**: logs your body movement during the night, infers your sleep cycle and write it all down in a `.csv` file.
+    * **Heart tracking**: tracks your heart rate throughout the night. *(edit: will be vastly improved when [this issue][https://github.com/daniel-thompson/wasp-os/pull/363#issuecomment-1257055637) gets sorted out)*
+    * **Status: fully functional**
 
 ## Credits:
 * Many thanks to Emanuel Löffler (https://github.com/plan5) who kindly created the logo.
-
-## How to install SleepTk
-*Unfortunately SleepTk is too large to fit in RAM and has to be added to the FLASH memory. If you think you can suggest a way around this, please open an issue!*
-* download the latest [SleepTk.py](./SleepTk.py)
-* edit the settings of SleepTk (located at the top of SleepTk.py)
-* move `SleepTk.py` as `wasp/apps/SleepTk.py` (and NOT ./apps directly)
-* to add the file to the firmware: add `apps/SleepTk.py` to `wasp/boards/manifest_240x240.py`
-* to enable the app by default: add the line `self.register('apps.SleepTk.SleepTkApp', False, no_except=True)` to `wasp/wasp.py`
-* to make the app accessible from the software app: add the line `db.append(('SleepTk', factory('SleepTk')))` to `wasp/apps/software.py`
-* compile `wasp-os`: `make submodules && make softdevice && make BOARD=pinetime all && echo "SUCCESS"`
-* upload it to your pinetime: `./tools/ota-dfu/dfu.py -z build-pinetime/micropython.zip -a XX:XX:XX:XX:XX:XX --legacy`
-* reboot the watch and enjoy `SleepTk`
-* *optional: download your latest sleep data using the script `pull_sleep_data.py` This script can be run automatically every day for example and will automatically remove recordings from the watch*
 
 ### Note to reader:
 * Note that the watch assumes that you fall asleep instantly. Previously an average of 14 minutes to fall asleep was taken into account but now you have to adjust yourself depending on how sleepy you are.
 * If you're interested or have any kind of things to say about this, **please** open an issue and tell me all about it :)
 * you can download your sleep data file using the file `pull_sleep_data`. An old workflow to load data into [pandas](https://pypi.org/project/pandas/) can be found at the bottom of this README. A more recent quick and dirty loader can be found in `plotter.py`.
-* the notifications are set to "silent" during the tracking session and are restored to the previously used level when the alarm is ringing
-* in the settings you can tell the Bluetooth to turn off automatically at the beginning of the night. This can save battery but will stop any attempt at downloading the latest data as long as you have not restarted the watch.
-* it seems the simulator is having a rough time with daylight saving mode or time management. I personally have a 1h offset between sleep estimation on the simulator compared to the pinetime, don't worry.
+* Notifications are set to "silent" during the tracking session and are restored to the previously used level when the alarm is ringing
+* In the settings you can tell the Bluetooth to turn off automatically at the beginning of the night. This can save battery but will stop any attempt at downloading the latest data as long as you have not restarted the watch.
+* It seems the simulator is having a rough time with daylight saving mode or time management. I personally get a 1h offset between sleep estimation on the simulator compared to the pinetime, don't worry it works fine on the watch.
 * If your watch's storage is full because of all the logging files, follow [these instructions to reset the storage](https://github.com/daniel-thompson/wasp-os/issues/345#issuecomment-1194270674).
 * Previously, SleepTk included a feature to compute the best alarm best on the estimated sleep cycle from your body movements and heart tracking but counting the cycles is already so much efficient that this ended up removed!
+* To download your sleep data: use the script `pull_sleep_data.py`. It can be run automatically every day for example and will automatically remove recordings from the watch*
 
 # Screenshots:
 ![settings](./screenshots/settings_page.png)
