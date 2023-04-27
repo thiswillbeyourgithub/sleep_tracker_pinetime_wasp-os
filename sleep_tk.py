@@ -228,6 +228,7 @@ class SleepTkApp():
             return
         self._last_touch = int(wasp.watch.rtc.time())
         wasp.watch.display.mute(False)
+        wasp.watch.backlight.set(1)
         wasp.watch.display.poweron()
         if self._page == _RINGING:
             self._try_stop_alarm()
@@ -248,6 +249,7 @@ class SleepTkApp():
     def swipe(self, event):
         "navigate between settings page"
         wasp.watch.display.mute(False)
+        wasp.watch.backlight.set(1)
         wasp.watch.display.poweron()
         self._last_touch = int(wasp.watch.rtc.time())
         if self._page == _SETTINGS1:
@@ -272,6 +274,7 @@ class SleepTkApp():
         wasp.gc.collect()
         draw = wasp.watch.drawable
         wasp.watch.display.mute(False)
+        wasp.watch.backlight.set(1)
         wasp.watch.display.poweron()
         draw.set_font(_FONT)
         self._last_touch = int(wasp.watch.rtc.time())
@@ -406,6 +409,7 @@ class SleepTkApp():
     def _draw(self):
         """GUI"""
         wasp.watch.display.mute(False)
+        wasp.watch.backlight.set(1)
         wasp.watch.display.poweron()
         draw = wasp.watch.drawable
         draw.fill(0)
@@ -642,6 +646,7 @@ class SleepTkApp():
                 if abs(int(wasp.watch.rtc.time()) - self._last_touch) > 5:
                     wasp.watch.display.mute(True)
                     wasp.watch.display.poweroff()
+                    wasp.watch.backlight.set(0)
                 wasp.system.switch(self)
                 wasp.system.request_tick(1000 // 8)
 
@@ -729,6 +734,7 @@ class SleepTkApp():
         if abs(int(wasp.watch.rtc.time()) - self._last_touch) > 5:
             wasp.watch.display.mute(True)
             wasp.watch.display.poweroff()
+            wasp.watch.backlight.set(0)
         self._draw()
 
     def _start_natural_wake(self):
@@ -752,6 +758,7 @@ class SleepTkApp():
         if abs(int(wasp.watch.rtc.time()) - self._last_touch) > 5:
             wasp.watch.display.mute(True)
             wasp.watch.display.poweroff()
+            wasp.watch.backlight.set(0)
 
         # tiny vibration
         wasp.watch.vibrator.pulse(duty=3, ms=50)
@@ -763,6 +770,7 @@ class SleepTkApp():
 
         if not self._track_HR_once:
             wasp.watch.display.mute(False)
+            wasp.watch.backlight.set(1)
             wasp.watch.display.poweron()
             wasp.system.sleep()
 
@@ -786,6 +794,7 @@ class SleepTkApp():
             if abs(int(wasp.watch.rtc.time()) - self._last_touch) > 5:
                 wasp.watch.display.mute(True)
                 wasp.watch.display.poweroff()
+                wasp.watch.backlight.set(0)
             self._subtick(1)
             while t.time() < 41666:
                 pass
@@ -834,6 +843,7 @@ class SleepTkApp():
         if abs(int(wasp.watch.rtc.time()) - self._last_touch) > 5:
             wasp.watch.display.mute(True)
             wasp.watch.display.poweroff()
+            wasp.watch.backlight.set(0)
         wasp.system.wake()
         wasp.system.switch(self)
         if self._page != _RINGING:  # safeguard: don't vibrate anymore if already on ringing page
