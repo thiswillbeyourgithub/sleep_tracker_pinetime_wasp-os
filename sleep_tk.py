@@ -795,15 +795,15 @@ class SleepTkApp():
                 wasp.watch.display.mute(True)
                 wasp.watch.display.poweroff()
                 wasp.watch.backlight.set(0)
-            self._subtick(1)
+            self._subtick()
             while t.time() < 41666:
                 pass
             wasp.system.keep_awake()
-            self._subtick(1)
+            self._subtick()
             while t.time() < 83332:
                 pass
             wasp.system.keep_awake()
-            self._subtick(1)
+            self._subtick()
             t.stop()
             del t
 
@@ -832,7 +832,7 @@ class SleepTkApp():
                     if abs(int(wasp.watch.rtc.time()) - self._last_touch) > 5:
                         wasp.system.sleep()
 
-    def _subtick(self, ticks):
+    def _subtick(self):
         """track heart rate at 24Hz"""
         self._hrdata.preprocess(wasp.watch.hrs.read_hrs())
 
