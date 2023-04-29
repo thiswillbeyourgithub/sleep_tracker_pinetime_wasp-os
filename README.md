@@ -26,6 +26,8 @@
 * If your watch's storage is full because of all the logging files, follow [these instructions to reset the storage](https://github.com/daniel-thompson/wasp-os/issues/345#issuecomment-1194270674).
 * Previously, SleepTk included a feature to compute the best alarm best on the estimated sleep cycle from your body movements and heart tracking but counting the cycles is already so much efficient that this ended up removed!
 * To download your sleep data: use the script `pull_sleep_data.py`. It can be run automatically every day for example and will automatically remove recordings from the watch*
+* Button pressing during the night are logged, this can be used for example in lucid dreaming, to figure out details about insomnias, to estimate duration between events during the night, to name a few.
+* The logs are stored in `/logs/sleep/T_F_V.csv`. `T` is the timestamps of the start of the tracking session and `F` the frequency of the savings (this way each line just contains the number of frequency cycle elapsed, saving precious space.) `V` stands for version and is used just in case the naming convention changes.
 
 # Screenshots:
 ![settings](./screenshots/settings_page.png)
