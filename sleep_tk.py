@@ -235,6 +235,7 @@ class SleepTkApp():
         elif self._page == _SLEEPING:
             self.stat_bar = widgets.StatusBar()
             self.stat_bar.clock = True
+            wasp.watch.drawable.set_color(_FONT_COLOR)
             self.stat_bar.draw()
             self.stat_bar.update()
             if self._meta_state == 2:  # if gradual vibration
@@ -278,6 +279,8 @@ class SleepTkApp():
         wasp.watch.display.poweron()
         draw.set_font(_FONT)
         self._last_touch = int(wasp.watch.rtc.time())
+        if self._page == _SLEEPING:
+            wasp.watch.drawable.set_color(_FONT_COLOR)
         self.stat_bar.draw()
         if self._page == _SLEEPING:
             if self._meta_state == 2:  # if gradual vibration
@@ -423,6 +426,7 @@ class SleepTkApp():
             self.btn_snooz.draw()
             draw.reset()
         elif self._page == _SLEEPING:
+            self.stat_bar.draw()  # updates color
             ti_start = wasp.watch.time.localtime(self._track_start_time)
             if self._state_alarm:
                 ti_stop = wasp.watch.time.localtime(self._WU_t)
@@ -669,6 +673,7 @@ class SleepTkApp():
         # fix the status bar never updating
         self.stat_bar = widgets.StatusBar()
         self.stat_bar.clock = True
+        wasp.watch.drawable.set_color(_FONT_COLOR)
         self.stat_bar.draw()
         self.stat_bar.update()
 
