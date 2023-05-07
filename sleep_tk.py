@@ -449,11 +449,14 @@ class SleepTkApp():
             self._draw_duration(draw)
         elif self._page == _SETTINGS1:
             # reset spinval values between runs
+            self._spin_H = widgets.Spinner(30, 70, 0, 23, 2)
+            self._spin_M = widgets.Spinner(150, 70, 0, 59, 2, 5)
             self._state_spinval_H = _OFF
             self._state_spinval_M = _OFF
             self.check_al = widgets.Checkbox(x=0, y=40, label="Wake me up")
             self.check_al.state = self._state_alarm
             self.check_al.draw()
+
             if self._state_alarm:
                 if (self._state_spinval_H, self._state_spinval_M) == (_OFF, _OFF):
                     # suggest wake up time, on the basis of desired sleep goal + time to fall asleep
@@ -465,11 +468,9 @@ class SleepTkApp():
                         M += 1
                     self._state_spinval_H = ((H + goal_h) % 24 + (M // 60)) % 24
                     self._state_spinval_M = M % 60
-                self._spin_H = widgets.Spinner(30, 70, 0, 23, 2)
                 self._spin_H.value = self._state_spinval_H
-                self._spin_H.draw()
-                self._spin_M = widgets.Spinner(150, 70, 0, 59, 2, 5)
                 self._spin_M.value = self._state_spinval_M
+                self._spin_H.draw()
                 self._spin_M.draw()
                 if self._state_alarm:
                     self._draw_duration(draw)
