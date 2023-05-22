@@ -230,6 +230,7 @@ class SleepTkApp():
         wasp.watch.display.mute(False)
         wasp.watch.backlight.set(1)
         wasp.watch.display.poweron()
+        self._conf_view = _OFF
         if self._page == _RINGING:
             self._try_stop_alarm()
         elif self._page == _SLEEPING:
