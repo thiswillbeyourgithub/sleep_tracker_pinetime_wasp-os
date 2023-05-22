@@ -190,16 +190,16 @@ class SleepTkApp():
         self._hrdata = None
         self.stat_bar = None
         if not hasattr(self, "_WU_t"):
-            # reinstanciate class to save memory
-            for i in range(len(wasp.system.launcher_ring)):
-                if wasp.system.launcher_ring[i].NAME == "SleepTk":
-                    wasp.system.launcher_ring[i] = SleepTkApp()
-                    break
             # also removes possible reference to the previous class
             wasp.system.cancel_alarm(None, self._activate_ticks_to_ring)
             wasp.system.cancel_alarm(None, self._start_natural_wake)
             wasp.system.cancel_alarm(None, self._trackOnce)
             wasp.system.cancel_alarm(None, self._tiny_vibration)
+            # reinstanciate class to save memory
+            for i in range(len(wasp.system.launcher_ring)):
+                if wasp.system.launcher_ring[i].NAME == "SleepTk":
+                    wasp.system.launcher_ring[i] = SleepTkApp()
+                    break
         wasp.gc.collect()
 
     def _try_stop_alarm(self):
