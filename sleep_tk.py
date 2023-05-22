@@ -36,6 +36,7 @@ import math
 import ppg
 from array import array
 from micropython import const
+import random
 
 # 1-bit RLE, 64x68, kindly designed by [Emanuel Löffler](https://github.com/plan5), 225 bytes
 icon = (
@@ -91,6 +92,9 @@ _GRADUAL_WAKE = array("f", (0.5, 1, 1.5, 2, 3, 4, 5, 7, 10))
 # you more gently. (default: array("f", (0.5, 1, 1.5, 2, 3, 4, 5, 6, 8, 10)) )
 _NATURAL_WAKE_IVL = const(30)
 # nb of seconds between vibration when natural wake is on.
+_NATURAL_WAKE_RAND = const(30)
+# percent of _NATURAL_WAKE_IVL to be randomized. For example 20 means that
+# the natural wake will happen at x + x * 20 / 100 * (random.random() - 0.5) * 2
 _CYCLE_LENGTH = const(90)
 # sleep cycle length in minutes. Currently used only to display best wake up
 # time! (default should be: 90 or 100, according to https://sleepyti.me/)
@@ -750,7 +754,7 @@ class SleepTkApp():
 
         # cancel alarm then set to of them to make sure it does not skip one
         wasp.system.cancel_alarm(None, self._start_natural_wake)
-        self._WU_t = wasp.watch.rtc.time() + _NATURAL_WAKE_IVL
+        self._WU_t = wasp.watch.rtc.time() + _NATURAL_WAKE_IVL + _NATURAL_WAKE_IVL * _NATURAL_WAKE_RAND / 100 * (random.random() - 0.5) * 2
         wasp.system.set_alarm(self._WU_t, self._start_natural_wake)
         self._page = _RINGING
 
