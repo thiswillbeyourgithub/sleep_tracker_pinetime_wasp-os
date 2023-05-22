@@ -208,6 +208,7 @@ class SleepTkApp():
             self._n_vibration = 0
             wasp.system.cancel_alarm(None, self._activate_ticks_to_ring)
             wasp.system.cancel_alarm(None, self._start_natural_wake)
+            wasp.system.cancel_alarm(None, self._tiny_vibration)
             self._stop_tracking()
             self._WU_t = None
             del self._WU_t
