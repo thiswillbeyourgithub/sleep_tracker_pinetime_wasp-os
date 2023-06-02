@@ -755,7 +755,7 @@ class SleepTkApp():
 
         # cancel alarm then set to of them to make sure it does not skip one
         wasp.system.cancel_alarm(None, self._start_natural_wake)
-        self._WU_t = wasp.watch.rtc.time() + _NATURAL_WAKE_IVL + _NATURAL_WAKE_IVL * _NATURAL_WAKE_RAND / 100 * (random.random() - 0.5) * 2
+        self._WU_t = int(wasp.watch.rtc.time() + _NATURAL_WAKE_IVL + _NATURAL_WAKE_IVL * _NATURAL_WAKE_RAND / 100 * (random.random() - 0.5) * 2)
         wasp.system.set_alarm(self._WU_t, self._start_natural_wake)
         self._page = _RINGING
 
