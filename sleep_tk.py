@@ -854,7 +854,8 @@ class SleepTkApp():
         wasp.system.wake()
         wasp.system.switch(self)
         if self._page != _RINGING:  # safeguard: don't vibrate anymore if already on ringing page
-            wasp.watch.vibrator.pulse(duty=3, ms=50)
+            #wasp.watch.vibrator.pulse(duty=3, ms=50)
+            wasp.watch.vibrator.pulse(duty=80, ms=100)
             # time.sleep(0.1)
             # wasp.watch.vibrator.pulse(duty=3, ms=50)
         if self._meta_state == 1:  # if pressed or touched
