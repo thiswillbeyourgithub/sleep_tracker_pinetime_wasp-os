@@ -115,8 +115,8 @@ class download_sleep_data:
                 lfi.unlink()
 
             if lfi.exists():
-                tqdm.write(f"File '{fi}' already exists, openning debugger")
-                breakpoint()
+                tqdm.write(f"File '{fi}' already exists, you should investigate")
+                continue
             else:
                 if auto_reboot:
                     tqdm.write("Restarting watch and waiting 10s...")
