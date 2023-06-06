@@ -161,9 +161,6 @@ class SleepTkApp():
         except:  # folder already exists
             pass
 
-        # used to indicate if the app is currently recording
-        wasp._SleepTk_tracking = _OFF
-
         wasp.gc.collect()
         return True
 
@@ -567,7 +564,6 @@ class SleepTkApp():
 
         self._page = _SLEEPING
         self._stop_trial = 0
-        wasp._SleepTk_tracking = _ON
 
         # save settings as future defaults
         if hasattr(wasp.system, "set") and callable(wasp.system.set):
@@ -600,7 +596,6 @@ class SleepTkApp():
             wasp.system.cancel_alarm(None, self._tiny_vibration)
         wasp.watch.hrs.disable()
         self._periodicSave()
-        wasp._SleepTk_tracking = _OFF
         wasp.gc.collect()
 
     def _trackOnce(self):
