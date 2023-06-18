@@ -413,7 +413,7 @@ class SleepTkApp():
         draw.set_font(_FONT)
         draw.set_color(_FONT_COLOR)
         if self._page == _RINGING:
-            ti = wasp.watch.time.localtime(self._WU_t)
+            ti = wasp.watch.time.localtime(self._WU_t_orig)
             draw.string("WAKE UP - {:02d}:{:02d}".format(ti[3], ti[4]), 0, 50)
             self.btn_snooz = widgets.Button(x=0, y=90, w=240, h=120, label="SNOOZE")
             self.btn_snooz.draw()
@@ -422,7 +422,7 @@ class SleepTkApp():
             self.stat_bar.draw()  # updates color
             ti_start = wasp.watch.time.localtime(self._track_start_time)
             if self._state_alarm:
-                ti_stop = wasp.watch.time.localtime(self._WU_t)
+                ti_stop = wasp.watch.time.localtime(self._WU_t_orig)
                 draw.string('{:02d}:{:02d}  ->|  {:02d}:{:02d}'.format(ti_start[3], ti_start[4], ti_stop[3], ti_stop[4]), 0, 50)
                 if self._state_gradual_wake and self._state_natwake:
                     draw.string("(Grad&Nat wake)", 0, 70)
@@ -534,6 +534,7 @@ class SleepTkApp():
         if self._state_alarm:
             self._old_notification_level = wasp.system.notify_level
             self._WU_t = self._read_time(self._state_spinval_H, self._state_spinval_M)
+            self._WU_t_orig = self._read_time(self._state_spinval_H, self._state_spinval_M)
             if self._state_natwake:
                 wasp.system.set_alarm(self._WU_t, self._start_natural_wake)
             else:
