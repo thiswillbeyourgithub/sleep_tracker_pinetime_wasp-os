@@ -718,7 +718,7 @@ class SleepTkApp():
     def _activate_ticks_to_ring(self):
         """listen to ticks every second, telling the watch to vibrate and
         completely wake the user up"""
-        if not hasattr(self, "_WU_t") or self._WU_t is None:
+        if not hasattr(self, "_WU_t"):
             # alarm was already started and stopped
             return
         wasp.system.wake()
@@ -737,7 +737,7 @@ class SleepTkApp():
 
     def _start_natural_wake(self):
         """do a tiny vibration every 30s until the user wakes up"""
-        if not hasattr(self, "_WU_t") or self._WU_t is None:
+        if not hasattr(self, "_WU_t"):
             # alarm was already started and stopped
             return
         wasp.system.wake()
