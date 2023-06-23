@@ -95,7 +95,7 @@ _NATURAL_WAKE_IVL = const(30)
 _NATURAL_WAKE_RAND = const(30)
 # percent of _NATURAL_WAKE_IVL to be randomized. For example 20 means that
 # the natural wake will happen at x + x * 20 / 100 * (random.random() - 0.5) * 2
-_CYCLE_LENGTH = const(90)
+_CYCLE_LENGTH = const(100)
 # sleep cycle length in minutes. Currently used only to display best wake up
 # time! (default should be: 90 or 100, according to https://sleepyti.me/)
 _SLEEP_GOAL_CYCLE = const(5)
