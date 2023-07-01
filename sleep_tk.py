@@ -200,7 +200,7 @@ class SleepTkApp():
 
     def _try_stop_alarm(self):
         """If button or swipe more than _STOP_LIMIT, then stop ringing"""
-        if self._stop_trial > _STOP_LIMIT:
+        if self._stop_trial >= _STOP_LIMIT:
             # reset app:
             self._stop_tracking()
             self.__init__()
