@@ -165,7 +165,7 @@ class SleepTkApp():
         return True
 
     def foreground(self):
-        if not self.was_inited:
+        if not hasattr(self, "was_inited") or not self.was_inited:
             self.was_inited = self._actual_init()
 
         self.stat_bar = widgets.StatusBar()
