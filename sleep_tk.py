@@ -291,6 +291,7 @@ class SleepTkApp():
                         self._stop_tracking()
                         self.__init__()
                         self.foreground()
+                        return
                     self._conf_view = _OFF
                 draw.reset()
         elif self._page == _RINGING:
