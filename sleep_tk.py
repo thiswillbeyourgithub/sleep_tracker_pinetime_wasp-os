@@ -309,6 +309,7 @@ class SleepTkApp():
                     wasp.system.set_alarm(self._WU_t, self._activate_ticks_to_ring)
                 self._page = _SLEEPING
                 wasp.system.sleep()
+                return
         elif self._page == _SETTINGS1:
             if self._state_alarm and (self._spin_H.touch(event) or self._spin_M.touch(event)):
                 if self._state_spinval_M == 0 and self._spin_M.value == 55:
