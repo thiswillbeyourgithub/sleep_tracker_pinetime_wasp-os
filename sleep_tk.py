@@ -90,7 +90,7 @@ _BATTERY_THRESHOLD = const(20)
 _GRADUAL_WAKE = array("f", (0.5, 1, 1.5, 2, 3, 4, 5, 7, 10))
 # nb of minutes before alarm to send a tiny vibration, designed to wake
 # you more gently. (default: array("f", (0.5, 1, 1.5, 2, 3, 4, 5, 6, 8, 10)) )
-_NATURAL_WAKE_IVL = const(30)
+_NATURAL_WAKE_IVL = const(60)
 # nb of seconds between vibration when natural wake is on.
 _NATURAL_WAKE_RAND = const(30)
 # percent of _NATURAL_WAKE_IVL to be randomized. For example 20 means that
@@ -767,7 +767,10 @@ class SleepTkApp():
             self._meta_state = 2  # gradual vibration
         self._draw()
 
-        if not self._track_HR_once:
+        if not self._track_HR_once and _NATURAL_WAKE_IVL >= 60:
+            # if the interval is too short, making the watch sleep after
+            # each vibration will actually make it wait too long between
+            # vibrations
             wasp.watch.display.mute(False)
             wasp.watch.backlight.set(1)
             wasp.watch.display.poweron()
