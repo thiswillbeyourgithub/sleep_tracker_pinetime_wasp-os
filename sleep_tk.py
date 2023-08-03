@@ -221,9 +221,10 @@ class SleepTkApp():
         wasp.watch.backlight.set(1)
         wasp.watch.display.poweron()
         self._conf_view = _OFF
-        if self._page == _RINGING:
+        page = self._page
+        if page == _RINGING:
             self._try_stop_alarm()
-        elif self._page == _SLEEPING:
+        elif page == _SLEEPING:
             self.stat_bar = widgets.StatusBar()
             self.stat_bar.clock = True
             wasp.watch.drawable.set_color(_FONT_COLOR)
@@ -244,19 +245,20 @@ class SleepTkApp():
         wasp.watch.backlight.set(1)
         wasp.watch.display.poweron()
         self._last_touch = int(wasp.watch.rtc.time())
-        if self._page == _SETTINGS1:
+        page = self._page
+        if page == _SETTINGS1:
             if event[0] == wasp.EventType.LEFT:
                 self._page = _SETTINGS2
                 self._draw()
             else:
                 return True
-        elif self._page == _SETTINGS2:
+        elif page == _SETTINGS2:
             if event[0] == wasp.EventType.RIGHT:
                 self._page = _SETTINGS1
                 self._draw()
             else:
                 return True
-        elif self._page == _RINGING:
+        elif page == _RINGING:
             self._try_stop_alarm()
         else:
             return True
@@ -270,10 +272,11 @@ class SleepTkApp():
         wasp.watch.display.poweron()
         draw.set_font(_FONT)
         self._last_touch = int(wasp.watch.rtc.time())
-        if self._page == _SLEEPING:
+        page = self._page
+        if page == _SLEEPING:
             wasp.watch.drawable.set_color(_FONT_COLOR)
         self.stat_bar.draw()
-        if self._page == _SLEEPING:
+        if page == _SLEEPING:
             if self._meta_state == 2:  # if gradual vibration
                 self._meta_state = 3  # also touched
             else:
@@ -294,7 +297,7 @@ class SleepTkApp():
                         return
                     self._conf_view = _OFF
                 draw.reset()
-        elif self._page == _RINGING:
+        elif page == _RINGING:
             if self.btn_snooz.touch(event):
                 if self._track_HR_once:  # if currently tracking HR, stop
                     self._track_HR_once = _OFF
@@ -310,7 +313,7 @@ class SleepTkApp():
                 self._page = _SLEEPING
                 wasp.system.sleep()
                 return
-        elif self._page == _SETTINGS1:
+        elif page == _SETTINGS1:
             if self._state_alarm and (self._spin_H.touch(event) or self._spin_M.touch(event)):
                 if self._state_spinval_M == 0 and self._spin_M.value == 55:
                     self._spin_H.value -= 1
@@ -338,7 +341,7 @@ class SleepTkApp():
                 else:
                     self._draw()
             return
-        elif self._page == _SETTINGS2:
+        elif page == _SETTINGS2:
             if self._state_body_tracking:
                 if self.btn_HR.touch(event):
                     self.btn_HR.draw()
@@ -371,11 +374,12 @@ class SleepTkApp():
         if not hasattr(self, "_state_spinval_H"):
             return
         draw.set_font(_FONT)
-        if self._page == _SETTINGS1:
+        page = self._page
+        if page == _SETTINGS1:
             duration = (self._read_time(self._state_spinval_H, self._state_spinval_M) - wasp.watch.rtc.time()) / 60
             percent_str = ""
             y = 180
-        elif self._page == _SLEEPING:
+        elif page == _SLEEPING:
             draw.set_color(_FONT_COLOR)
             duration = (wasp.watch.rtc.time() - self._track_start_time) / 60
             if self._state_alarm:
@@ -414,13 +418,14 @@ class SleepTkApp():
         self.stat_bar.draw()
         draw.set_font(_FONT)
         draw.set_color(_FONT_COLOR)
-        if self._page == _RINGING:
+        page = self._page
+        if page == _RINGING:
             ti = wasp.watch.time.localtime(self._WU_t_orig)
             draw.string("WAKE UP - {:02d}:{:02d}".format(ti[3], ti[4]), 0, 50)
             self.btn_snooz = widgets.Button(x=0, y=90, w=240, h=120, label="SNOOZE")
             self.btn_snooz.draw()
             draw.reset()
-        elif self._page == _SLEEPING:
+        elif page == _SLEEPING:
             self.stat_bar.draw()  # updates color
             ti_start = wasp.watch.time.localtime(self._track_start_time)
             if self._state_alarm:
@@ -442,7 +447,7 @@ class SleepTkApp():
             self.btn_off = widgets.Button(x=0, y=200, w=240, h=40, label="Stop")
             self.btn_off.update(txt=_FONT_COLOR, frame=0, bg=0)
             self._draw_duration(draw)
-        elif self._page == _SETTINGS1:
+        elif page == _SETTINGS1:
             # reset spinval values between runs
             self._spin_H = widgets.Spinner(30, 70, 0, 23, 2)
             self._spin_M = widgets.Spinner(150, 70, 0, 59, 2, 5)
@@ -469,7 +474,7 @@ class SleepTkApp():
                 self._spin_M.draw()
                 if self._state_alarm:
                     self._draw_duration(draw)
-        elif self._page == _SETTINGS2:
+        elif page == _SETTINGS2:
             self.check_body_tracking = widgets.Checkbox(x=0, y=40, label="Movement tracking")
             self.check_body_tracking.state = self._state_body_tracking
             self.check_body_tracking.draw()
