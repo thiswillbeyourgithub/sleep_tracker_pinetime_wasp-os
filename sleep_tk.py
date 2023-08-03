@@ -123,7 +123,7 @@ class SleepTkApp():
         self._state_body_tracking = _ON
         self._state_HR_tracking = _ON
         self._state_gradual_wake = _ON
-        self._state_natwake = _OFF
+        self._state_natwake = None
         # try to reload previous settings
         if hasattr(wasp.system, "get") and callable(wasp.system.get):
             try:
@@ -138,17 +138,17 @@ class SleepTkApp():
             except Exception:
                 pass
 
-        self._state_spinval_H = _OFF
-        self._state_spinval_M = _OFF
+        self._state_spinval_H = None
+        self._state_spinval_M = None
         self._hrdata = None
-        self._last_HR = _OFF  # if _OFF, no HR to write, if "?": error during last HR, else: heart rate
+        self._last_HR = None  # if _OFF, no HR to write, if "?": error during last HR, else: heart rate
         self._last_HR_printed = "?"
-        self._last_HR_date = _OFF
-        self._track_HR_once = _OFF  # either _OFF or the timestamp of when the
+        self._last_HR_date = None
+        self._track_HR_once = None  # either _OFF or the timestamp of when the
         # tracking is supposed to start
         self._page = _SETTINGS1
-        self._currently_tracking = _OFF
-        self._conf_view = _OFF # confirmation view
+        self._currently_tracking = None
+        self._conf_view = None # confirmation view
         self._buff = array("f", (_OFF, _OFF, _OFF)) # contains the sum of diff between each accel recordings and the previous recording, along each axis
         self._last_touch = int(wasp.watch.rtc.time())
 
@@ -171,7 +171,7 @@ class SleepTkApp():
         self.stat_bar = widgets.StatusBar()
         self.stat_bar.clock = True
         self.stat_bar.draw()
-        self._conf_view = _OFF
+        self._conf_view = None
         wasp.gc.collect()
         self._draw()
         wasp.system.request_event(wasp.EventMask.TOUCH |
@@ -220,7 +220,7 @@ class SleepTkApp():
         wasp.watch.display.mute(False)
         wasp.watch.backlight.set(1)
         wasp.watch.display.poweron()
-        self._conf_view = _OFF
+        self._conf_view = None
         page = self._page
         if page == _RINGING:
             self._try_stop_alarm()
@@ -281,7 +281,7 @@ class SleepTkApp():
                 self._meta_state = 3  # also touched
             else:
                 self._meta_state = 1  # touched
-            if self._conf_view == _OFF:
+            if not self._conf_view:
                 if self.btn_off.touch(event):
                     self._conf_view = widgets.ConfirmationView()
                     self._conf_view.draw("Stop tracking?")
@@ -295,12 +295,12 @@ class SleepTkApp():
                         self.__init__()
                         self.foreground()
                         return
-                    self._conf_view = _OFF
+                    self._conf_view = None
                 draw.reset()
         elif page == _RINGING:
             if self.btn_snooz.touch(event):
                 if self._track_HR_once:  # if currently tracking HR, stop
-                    self._track_HR_once = _OFF
+                    self._track_HR_once = None
                     self._hrdata = None
                     wasp.watch.hrs.disable()
                 wasp.system.cancel_alarm(None, self._start_natural_wake)
@@ -364,7 +364,7 @@ class SleepTkApp():
                 self._state_body_tracking = self.check_body_tracking.state
                 self.check_body_tracking.draw()
                 if not self._state_body_tracking:
-                    self._state_HR_tracking = _OFF
+                    self._state_HR_tracking = None
         self._draw()
 
     def _draw_duration(self, draw):
@@ -451,8 +451,8 @@ class SleepTkApp():
             # reset spinval values between runs
             self._spin_H = widgets.Spinner(30, 70, 0, 23, 2)
             self._spin_M = widgets.Spinner(150, 70, 0, 59, 2, 5)
-            self._state_spinval_H = _OFF
-            self._state_spinval_M = _OFF
+            self._state_spinval_H = None
+            self._state_spinval_M = None
             self.check_al = widgets.Checkbox(x=0, y=40, label="Wake me up")
             self.check_al.state = self._state_alarm
             self.check_al.draw()
@@ -534,8 +534,8 @@ class SleepTkApp():
 
         if (self._state_gradual_wake or self._state_natwake) and not self._state_alarm:
             # fix incompatible settings
-            self._state_gradual_wake = _OFF
-            self._state_natwake = _OFF
+            self._state_gradual_wake = None
+            self._state_natwake = None
 
         # setting up alarm
         if self._state_alarm:
@@ -682,11 +682,11 @@ class SleepTkApp():
             # if for some reason we are still trying to compute the
             # heart rate after 60s, something went wrong and saving motion
             # data is more important so cancelling this tracking
-            self._track_HR_once = _OFF
+            self._track_HR_once = None
         if n >= _STORE_FREQ // _FREQ and not self._track_HR_once:
-            if self._last_HR != _OFF:
+            if self._last_HR:
                 bpm = self._last_HR
-                self._last_HR = _OFF
+                self._last_HR = None
             else:
                 bpm = ""  # save a character if no value to print
             if self._meta_state == 0:
@@ -785,7 +785,7 @@ class SleepTkApp():
         """vibrate to wake you up OR track heart rate using code from heart.py"""
         wasp.gc.collect()
         wasp.system.switch(self)
-        if self._page == _RINGING and self._state_natwake == _OFF:
+        if self._page == _RINGING and not self._state_natwake:
             wasp.system.keep_awake()
             # in 60 vibrations, ramp up from subtle to strong:
             wasp.watch.vibrator.pulse(duty=max(80 - 1 * self._n_vibration, 20),
@@ -827,13 +827,13 @@ class SleepTkApp():
                 elif bpm < 100 and bpm > 40:
                     # if HR was already computed since last periodicSave,
                     # then average the two values
-                    if self._last_HR != _OFF and self._last_HR != "?" and isinstance(int, self._last_HR):
+                    if self._last_HR and self._last_HR != "?" and isinstance(int, self._last_HR):
                         self._last_HR = (self._last_HR + bpm) // 2
                     else:
                         self._last_HR = bpm
                     self._last_HR_printed = self._last_HR
                     self._last_HR_date = int(wasp.watch.rtc.time())
-                    self._track_HR_once = _OFF
+                    self._track_HR_once = None
                     self._hrdata = None
                     wasp.watch.hrs.disable()
                     if abs(int(wasp.watch.rtc.time()) - self._last_touch) > 5:
