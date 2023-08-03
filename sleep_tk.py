@@ -187,56 +187,6 @@ class SleepTkApp():
 
         return True
 
-    def _change_page(self, new_page):
-        self._clean_up_page(self._get_shifted_int(_IDX_STATE_2, _PAGE_MASK, _PAGE_SHIFT))
-        self._set_up_page(new_page)
-        self._set_shifted_int(_IDX_STATE_2, _PAGE_MASK, _PAGE_SHIFT, new_page)
-        self._draw()
-
-    def _set_up_page(self, page):
-        if page == _PAGE_SETTINGS1:
-            self._spin_H = widgets.Spinner(30, 70, 0, 23, 2)
-            self._spin_H.value = self._states[_IDX_ALARM_HOUR]
-            self._spin_M = widgets.Spinner(150, 70, 0, 59, 2, 5)
-            self._spin_M.value = self._states[_IDX_ALARM_MIN]
-            self._check_al = widgets.Checkbox(x=0, y=40, label="Wake me up")
-            self._check_al.state = self._states[_IDX_STATE_1] & _ALARM_ENABLED > 0
-        elif page == _PAGE_SETTINGS2:
-            self._check_body_tracking = widgets.Checkbox(x=0, y=40, label="Movement track")
-            self._check_body_tracking.state = self._get_bit_flag(_IDX_STATE_1, _MOVEMENT_ENABLED)
-            self._btn_HR = widgets.Checkbox(x=0, y=80, label="Heart rate track")
-            self._btn_HR.state = self._get_bit_flag(_IDX_STATE_1, _HR_ENABLED)
-            self._check_grad = widgets.Checkbox(0, 120, "Gradual wake")
-            self._check_grad.state = self._get_bit_flag(_IDX_STATE_1, _GRADUAL_WAKE_ENABLED)
-            self._check_natwake = widgets.Checkbox(0, 160, "Natural wake")
-            self._check_natwake.state = self._get_bit_flag(_IDX_STATE_1, _NAT_WAKE_ENABLED)
-            self._btn_sta = widgets.Button(x=0, y=200, w=240, h=40, label="Start")
-        elif page == _PAGE_RINGING:
-            self._btn_snooz = widgets.Button(x=0, y=90, w=240, h=120, label="SNOOZE")
-        elif page == _PAGE_SLEEPING:
-            self._btn_off = widgets.Button(x=0, y=200, w=240, h=40, label="Stop")
-
-    def _clean_up_page(self, page):
-        if page == _PAGE_SETTINGS1:
-            self._spin_H = None
-            self._spin_M = None
-            self._check_al = None
-            del self._spin_H, self._spin_M, self._check_al
-        elif page == _PAGE_SETTINGS2:
-            self._check_body_tracking = None
-            self._btn_HR = None
-            self._check_grad = None
-            self._check_natwake = None
-            self._btn_sta = None
-            del self._check_body_tracking, self._btn_HR, self._check_grad, self._check_natwake, self._btn_sta
-        elif page == _PAGE_RINGING:
-            self._btn_snooz = None
-            del self._btn_snooz
-        elif page == _PAGE_SLEEPING:
-            self._conf_view = None
-            self._btn_off = None
-            del self._btn_off
-
     def foreground(self):
         if not self._states:
             self._actual_init()
@@ -631,14 +581,55 @@ class SleepTkApp():
         # save settings as future defaults
         self._save_settings()
 
-    def _read_time(self, HH, MM):
-        "convert time from spinners to seconds"
-        (Y, Mo, d, h, m) = wasp.watch.rtc.get_localtime()[0:5]
-        HH = self._states[_IDX_ALARM_HOUR]
-        MM = self._states[_IDX_ALARM_MIN]
-        if HH < h or (HH == h and MM <= m):
-            d += 1
-        return wasp.watch.time.mktime((Y, Mo, d, HH, MM, 0, 0, 0, 0))
+    def _change_page(self, new_page):
+        self._clean_up_page(self._get_shifted_int(_IDX_STATE_2, _PAGE_MASK, _PAGE_SHIFT))
+        self._set_up_page(new_page)
+        self._set_shifted_int(_IDX_STATE_2, _PAGE_MASK, _PAGE_SHIFT, new_page)
+        self._draw()
+
+    def _clean_up_page(self, page):
+        if page == _PAGE_SETTINGS1:
+            self._spin_H = None
+            self._spin_M = None
+            self._check_al = None
+            del self._spin_H, self._spin_M, self._check_al
+        elif page == _PAGE_SETTINGS2:
+            self._check_body_tracking = None
+            self._btn_HR = None
+            self._check_grad = None
+            self._check_natwake = None
+            self._btn_sta = None
+            del self._check_body_tracking, self._btn_HR, self._check_grad, self._check_natwake, self._btn_sta
+        elif page == _PAGE_RINGING:
+            self._btn_snooz = None
+            del self._btn_snooz
+        elif page == _PAGE_SLEEPING:
+            self._conf_view = None
+            self._btn_off = None
+            del self._btn_off
+
+    def _set_up_page(self, page):
+        if page == _PAGE_SETTINGS1:
+            self._spin_H = widgets.Spinner(30, 70, 0, 23, 2)
+            self._spin_H.value = self._states[_IDX_ALARM_HOUR]
+            self._spin_M = widgets.Spinner(150, 70, 0, 59, 2, 5)
+            self._spin_M.value = self._states[_IDX_ALARM_MIN]
+            self._check_al = widgets.Checkbox(x=0, y=40, label="Wake me up")
+            self._check_al.state = self._states[_IDX_STATE_1] & _ALARM_ENABLED > 0
+        elif page == _PAGE_SETTINGS2:
+            self._check_body_tracking = widgets.Checkbox(x=0, y=40, label="Movement track")
+            self._check_body_tracking.state = self._get_bit_flag(_IDX_STATE_1, _MOVEMENT_ENABLED)
+            self._btn_HR = widgets.Checkbox(x=0, y=80, label="Heart rate track")
+            self._btn_HR.state = self._get_bit_flag(_IDX_STATE_1, _HR_ENABLED)
+            self._check_grad = widgets.Checkbox(0, 120, "Gradual wake")
+            self._check_grad.state = self._get_bit_flag(_IDX_STATE_1, _GRADUAL_WAKE_ENABLED)
+            self._check_natwake = widgets.Checkbox(0, 160, "Natural wake")
+            self._check_natwake.state = self._get_bit_flag(_IDX_STATE_1, _NAT_WAKE_ENABLED)
+            self._btn_sta = widgets.Button(x=0, y=200, w=240, h=40, label="Start")
+        elif page == _PAGE_RINGING:
+            self._btn_snooz = widgets.Button(x=0, y=90, w=240, h=120, label="SNOOZE")
+        elif page == _PAGE_SLEEPING:
+            self._btn_off = widgets.Button(x=0, y=200, w=240, h=40, label="Stop")
 
     def _stop_tracking(self, keep_main_alarm=False):
         """called by touching "STOP TRACKING" or when battery is low"""
@@ -934,6 +925,15 @@ class SleepTkApp():
         sbar = wasp.system.bar
         sbar.clock = True
         sbar.draw()
+
+    def _read_time(self, HH, MM):
+        "convert time from spinners to seconds"
+        (Y, Mo, d, h, m) = wasp.watch.rtc.get_localtime()[0:5]
+        HH = self._states[_IDX_ALARM_HOUR]
+        MM = self._states[_IDX_ALARM_MIN]
+        if HH < h or (HH == h and MM <= m):
+            d += 1
+        return wasp.watch.time.mktime((Y, Mo, d, HH, MM, 0, 0, 0, 0))
 
     def _get_shifted_int(self, register_idx, bit_mask, bit_shift):
         return (self._states[register_idx] & bit_mask) >> bit_shift
