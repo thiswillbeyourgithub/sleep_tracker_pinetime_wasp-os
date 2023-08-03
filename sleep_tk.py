@@ -193,7 +193,8 @@ class SleepTkApp():
 
         self._draw_system_bar()
         self._conf_view = None
-        self._draw()
+        if self._get_shifted_int(_IDX_STATE_2, _PAGE_MASK, _PAGE_SHIFT) == _PAGE_SLEEPING:
+            self._draw()
         wasp.system.request_event(wasp.EventMask.TOUCH |
                                   wasp.EventMask.SWIPE_LEFTRIGHT |
                                   wasp.EventMask.SWIPE_UPDOWN |
