@@ -14,6 +14,7 @@
 * **Status: fully functional**
 
 ## Credits:
+* Many thanks to @beardeddude for helping me reduce the memory footprint.
 * Many thanks to Emanuel Löffler (https://github.com/plan5) who kindly created the logo.
 
 ### Note to reader:
