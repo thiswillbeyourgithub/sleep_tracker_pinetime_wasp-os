@@ -207,6 +207,7 @@ class SleepTkApp():
         return True
 
     def background(self):
+        print("backgrounded")
         wasp.watch.hrs.disable()
         self._hrdata = None
         # If not tracking de-initialize the app
@@ -270,6 +271,7 @@ class SleepTkApp():
 
     def swipe(self, event):
         "navigate between settings page"
+        print("swipe")
         wasp.watch.display.mute(False)
         wasp.watch.backlight.set(1)
         wasp.watch.display.poweron()
@@ -495,6 +497,7 @@ class SleepTkApp():
                 if self._get_bit_flag(_IDX_STATE_1, _ALARM_ENABLED):
                     self._draw_duration(draw)
         elif page == _PAGE_SETTINGS2:
+            print(str(page))
             self._check_body_tracking.state = self._get_bit_flag(_IDX_STATE_1, _MOVEMENT_ENABLED)
             self._check_body_tracking.draw()
             if self._get_bit_flag(_IDX_STATE_1, _MOVEMENT_ENABLED):
@@ -509,6 +512,7 @@ class SleepTkApp():
         draw.reset()
 
     def _start_tracking(self):
+        print("start tracking")
         self._set_bit_flag(_IDX_STATE_1, _CURRENTLY_TRACKING, True)
 
         # accel data not yet written to disk:
@@ -584,12 +588,17 @@ class SleepTkApp():
         self._change_page(_PAGE_SLEEPING)
 
     def _change_page(self, new_page):
-        self._clean_up_page(self._get_shifted_int(_IDX_STATE_2, _PAGE_MASK, _PAGE_SHIFT))
+        old_page = self._get_shifted_int(_IDX_STATE_2, _PAGE_MASK, _PAGE_SHIFT)
+        print("Changed " + str(old_page) + " to " + str(new_page))
+        if old_page == new_page:
+            raise Exception
+        self._clean_up_page(old_page)
         self._set_up_page(new_page)
         self._set_shifted_int(_IDX_STATE_2, _PAGE_MASK, _PAGE_SHIFT, new_page)
         self._draw()
 
     def _clean_up_page(self, page):
+        print("cleanup " + str(page))
         if page == _PAGE_SETTINGS1:
             self._spin_H = None
             self._spin_M = None
@@ -611,6 +620,7 @@ class SleepTkApp():
             del self._btn_off
 
     def _set_up_page(self, page):
+        print("setup " + str(page))
         if page == _PAGE_SETTINGS1:
             self._spin_H = widgets.Spinner(30, 70, 0, 23, 2)
             self._spin_H.value = self._states[_IDX_ALARM_HOUR]
