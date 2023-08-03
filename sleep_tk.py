@@ -306,6 +306,7 @@ class SleepTkApp():
         if page == _PAGE_RINGING:
             self._try_stop_alarm()
         elif page == _PAGE_SLEEPING:
+            wasp.watch.drawable.set_color(_FONT_COLOR)
             self._draw_system_bar()
             if meta_state == 2:  # if gradual vibration
                 self._set_shifted_int(_IDX_STATE_2, _META_STATE_MASK, _META_STATE_SHIFT, 3) # also pressed
