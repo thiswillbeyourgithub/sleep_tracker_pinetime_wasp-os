@@ -146,6 +146,7 @@ class SleepTkApp():
     VERSION = const(1)
 
     def __init__(self):
+        print("init")
         # simple flag to init the variables only when the app is launched and
         # not as soon as the app is loaded
         self._states = None
@@ -163,6 +164,7 @@ class SleepTkApp():
     def _actual_init(self):
         """lots of things to load so only load when the app is started instead
         of directly when the watch is booted."""
+        print("actual init")
         self._states = bytearray(7)
 
         # Init settings
@@ -188,6 +190,7 @@ class SleepTkApp():
         return True
 
     def foreground(self):
+        print("foreground")
         if not self._states:
             self._actual_init()
 
@@ -203,11 +206,12 @@ class SleepTkApp():
             wasp.system.request_tick(1000 // 8)
 
     def sleep(self):
+        print("sleep")
         self._set_shifted_int(_IDX_STATE_3, _STOP_TRIAL_MASK, _STOP_TRIAL_SHIFT, 0)
         return True
 
     def background(self):
-        print("backgrounded")
+        print("background")
         wasp.watch.hrs.disable()
         self._hrdata = None
         # If not tracking de-initialize the app
@@ -228,6 +232,7 @@ class SleepTkApp():
 
     def _try_stop_alarm(self):
         """If button or swipe more than _STOP_LIMIT, then stop ringing"""
+        print("try stop alarm")
         stop_trial = self._get_shifted_int(_IDX_STATE_3, _STOP_TRIAL_MASK, _STOP_TRIAL_SHIFT)
         if stop_trial + 1 >= _STOP_LIMIT:
             # reset app:
@@ -246,6 +251,7 @@ class SleepTkApp():
 
     def press(self, button, state):
         "stop ringing alarm if pressed physical button"
+        print("press")
         if not state:
             return
         self._last_touch = int(wasp.watch.rtc.time())
@@ -294,6 +300,7 @@ class SleepTkApp():
 
     def touch(self, event):
         """either start trackign or disable it, draw the screen in all cases"""
+        print("touch")
         draw = wasp.watch.drawable
         wasp.watch.display.mute(False)
         wasp.watch.backlight.set(1)
@@ -402,6 +409,7 @@ class SleepTkApp():
         """draws the part of the screen that displays duration as it is
         used both when setting the alarm and throughout the night
         """
+        print("draw duration")
         draw.set_font(_FONT)
 
         page = self._get_shifted_int(_IDX_STATE_2, _PAGE_MASK, _PAGE_SHIFT)
@@ -440,6 +448,7 @@ class SleepTkApp():
 
     def _draw(self):
         """GUI"""
+        print("draw")
         wasp.watch.display.mute(False)
         wasp.watch.backlight.set(1)
         wasp.watch.display.poweron()
@@ -645,6 +654,7 @@ class SleepTkApp():
 
     def _stop_tracking(self, keep_main_alarm=False):
         """called by touching "STOP TRACKING" or when battery is low"""
+        print("stop tracking")
         self._set_bit_flag(_IDX_STATE_1, _CURRENTLY_TRACKING, False)
         if self._next_track_time:
             wasp.system.cancel_alarm(None, self._trackOnce)
@@ -674,6 +684,7 @@ class SleepTkApp():
         """get one data point of accelerometer every _FREQ seconds, keep
         the diff of each axis then store in a file every
         _STORE_FREQ seconds"""
+        print("track once")
         if self._get_bit_flag(_IDX_STATE_1, _CURRENTLY_TRACKING):
             buff = self._buff
             xyz = wasp.watch.accel.accel_xyz()
@@ -732,6 +743,7 @@ class SleepTkApp():
                      2 if gradual vibration happened or natural wake
                      3 if pressed or touched after gradual vibration
         """
+        print("periodic save")
         # fix the status bar never updating
         wasp.watch.drawable.set_color(_FONT_COLOR)
         self._draw_system_bar()
@@ -785,6 +797,7 @@ class SleepTkApp():
     def _activate_ticks_to_ring(self):
         """listen to ticks every second, telling the watch to vibrate and
         completely wake the user up"""
+        print("activate ticks to ring")
         if self._WU_t is None:
             # alarm was already started and stopped
             return
@@ -803,6 +816,7 @@ class SleepTkApp():
 
     def _start_natural_wake(self):
         """do a tiny vibration every 30s until the user wakes up"""
+        print("start natural wake")
         if self._WU_t is None:
             # alarm was already started and stopped
             return
@@ -842,6 +856,7 @@ class SleepTkApp():
 
     def tick(self, ticks):
         """vibrate to wake you up OR track heart rate using code from heart.py"""
+        print("tick")
         wasp.system.switch(self)
         if self._get_shifted_int(_IDX_STATE_2, _PAGE_MASK, _PAGE_SHIFT) == _PAGE_RINGING and not self._get_bit_flag(_IDX_STATE_1, _NAT_WAKE_ENABLED):
             wasp.system.keep_awake()
@@ -904,6 +919,7 @@ class SleepTkApp():
     def _tiny_vibration(self):
         """vibrate just a tiny bit before waking up, to gradually return
         to consciousness"""
+        print("tiny virbation")
         if abs(int(wasp.watch.rtc.time()) - self._last_touch) > 5:
             wasp.watch.display.mute(True)
             wasp.watch.display.poweroff()
