@@ -151,11 +151,6 @@ class SleepTkApp():
         self._states = None
         self._WU_t = None
 
-    def _actual_init(self):
-        """lots of things to load so only load when the app is started instead
-        of directly when the watch is booted."""
-        self._states = bytearray(7)
-
         try:
             shell.mkdir("logs")
         except:  # folder already exists
@@ -164,6 +159,11 @@ class SleepTkApp():
             shell.mkdir("logs/sleep")
         except:  # folder already exists
             pass
+
+    def _actual_init(self):
+        """lots of things to load so only load when the app is started instead
+        of directly when the watch is booted."""
+        self._states = bytearray(7)
 
         # Init settings
         self._set_bit_flag(_IDX_STATE_1, _ALARM_ENABLED, True)
