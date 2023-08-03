@@ -320,8 +320,8 @@ class SleepTkApp():
                     if self._conf_view.value:
                         # reset app:
                         self._stop_tracking()
-                        self._change_page(_PAGE_SETTINGS1)
                         self.foreground()
+                        self._change_page(_PAGE_SETTINGS1)
                         return
                     self._conf_view = None
                 draw.reset()
@@ -575,11 +575,12 @@ class SleepTkApp():
             if ble.enabled():
                 ble.disable()
 
-        self._change_page(_PAGE_SLEEPING)
         self._set_shifted_int(_IDX_STATE_3, _STOP_TRIAL_MASK, _STOP_TRIAL_SHIFT, 0)
 
         # save settings as future defaults
         self._save_settings()
+
+        self._change_page(_PAGE_SLEEPING)
 
     def _change_page(self, new_page):
         self._clean_up_page(self._get_shifted_int(_IDX_STATE_2, _PAGE_MASK, _PAGE_SHIFT))
