@@ -214,12 +214,12 @@ class SleepTkApp():
 
     def press(self, button, state):
         "stop ringing alarm if pressed physical button"
-        if not state:
-            return
-        self._last_touch = int(wasp.watch.rtc.time())
+        # if not state:
+        #     return
         wasp.watch.display.mute(False)
         wasp.watch.backlight.set(1)
         wasp.watch.display.poweron()
+        self._last_touch = int(wasp.watch.rtc.time())
         self._conf_view = _OFF
         if self._page == _RINGING:
             self._try_stop_alarm()
