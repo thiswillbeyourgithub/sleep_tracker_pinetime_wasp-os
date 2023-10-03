@@ -641,7 +641,7 @@ class SleepTkApp():
                     not self._track_HR_once:
                 self._track_HR_once = int(wasp.watch.rtc.time())
                 wasp.system.wake()
-                if abs(int(wasp.watch.rtc.time()) - self._last_touch) > 5:
+                if abs(int(wasp.watch.rtc.time()) - self._last_touch) > 10:
                     wasp.watch.display.mute(True)
                     wasp.watch.display.poweroff()
                     wasp.watch.backlight.set(0)
@@ -730,7 +730,7 @@ class SleepTkApp():
         wasp.system.notify_level = self._old_notification_level  # restore notification level
         wasp.system.brightness = self._old_brightness_level
         wasp.gc.collect()
-        if abs(int(wasp.watch.rtc.time()) - self._last_touch) > 5:
+        if abs(int(wasp.watch.rtc.time()) - self._last_touch) > 10:
             wasp.watch.display.mute(True)
             wasp.watch.display.poweroff()
             wasp.watch.backlight.set(0)
@@ -754,7 +754,7 @@ class SleepTkApp():
         wasp.system.notify_level = self._old_notification_level
         wasp.system.brightness = self._old_brightness_level
         self._n_vibration = 0
-        if abs(int(wasp.watch.rtc.time()) - self._last_touch) > 5:
+        if abs(int(wasp.watch.rtc.time()) - self._last_touch) > 10:
             wasp.watch.display.mute(True)
             wasp.watch.display.poweroff()
             wasp.watch.backlight.set(0)
@@ -793,7 +793,7 @@ class SleepTkApp():
             t = wasp.machine.Timer(id=1, period=8000000)
             t.start()
             wasp.system.keep_awake()
-            if abs(int(wasp.watch.rtc.time()) - self._last_touch) > 5:
+            if abs(int(wasp.watch.rtc.time()) - self._last_touch) > 10:
                 wasp.watch.display.mute(True)
                 wasp.watch.display.poweroff()
                 wasp.watch.backlight.set(0)
@@ -831,7 +831,7 @@ class SleepTkApp():
                     self._track_HR_once = _OFF
                     self._hrdata = None
                     wasp.watch.hrs.disable()
-                    if abs(int(wasp.watch.rtc.time()) - self._last_touch) > 5:
+                    if abs(int(wasp.watch.rtc.time()) - self._last_touch) > 10:
                         wasp.system.sleep()
 
     def _subtick(self):
@@ -842,7 +842,7 @@ class SleepTkApp():
         """vibrate just a tiny bit before waking up, to gradually return
         to consciousness"""
         wasp.gc.collect()
-        if abs(int(wasp.watch.rtc.time()) - self._last_touch) > 5:
+        if abs(int(wasp.watch.rtc.time()) - self._last_touch) > 10:
             wasp.watch.display.mute(True)
             wasp.watch.display.poweroff()
             wasp.watch.backlight.set(0)
