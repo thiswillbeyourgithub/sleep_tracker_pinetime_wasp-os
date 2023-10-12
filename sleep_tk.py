@@ -566,6 +566,7 @@ class SleepTkApp():
             import ble
             if ble.enabled():
                 ble.disable()
+            del ble
 
         self._page = _SLEEPING
         self._stop_trial = 0
