@@ -214,8 +214,7 @@ class SleepTkApp():
 
     def press(self, button, state):
         "stop ringing alarm if pressed physical button"
-        # if not state:
-        #     return
+        wasp.system.wake()
         wasp.watch.display.mute(False)
         wasp.watch.backlight.set(1)
         wasp.watch.display.poweron()
@@ -240,6 +239,7 @@ class SleepTkApp():
 
     def swipe(self, event):
         "navigate between settings page"
+        wasp.system.wake()
         wasp.watch.display.mute(False)
         wasp.watch.backlight.set(1)
         wasp.watch.display.poweron()
@@ -263,6 +263,7 @@ class SleepTkApp():
 
     def touch(self, event):
         """either start trackign or disable it, draw the screen in all cases"""
+        wasp.system.wake()
         wasp.watch.display.mute(False)
         wasp.watch.backlight.set(1)
         wasp.watch.display.poweron()
@@ -406,6 +407,7 @@ class SleepTkApp():
 
     def _draw(self):
         """GUI"""
+        wasp.system.wake()
         wasp.watch.display.mute(False)
         wasp.watch.backlight.set(1)
         wasp.watch.display.poweron()
