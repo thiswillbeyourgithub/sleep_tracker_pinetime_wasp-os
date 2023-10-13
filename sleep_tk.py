@@ -646,8 +646,8 @@ class SleepTkApp():
                 wasp.system.wake()
                 if abs(int(wasp.watch.rtc.time()) - self._last_touch) > 10:
                     wasp.watch.display.mute(True)
-                    wasp.watch.display.poweroff()
                     wasp.watch.backlight.set(0)
+                    wasp.watch.display.poweroff()
                 wasp.system.switch(self)
                 wasp.system.request_tick(1000 // 8)
 
@@ -735,8 +735,8 @@ class SleepTkApp():
         wasp.gc.collect()
         if abs(int(wasp.watch.rtc.time()) - self._last_touch) > 10:
             wasp.watch.display.mute(True)
-            wasp.watch.display.poweroff()
             wasp.watch.backlight.set(0)
+            wasp.watch.display.poweroff()
         self._draw()
 
     def _start_natural_wake(self):
@@ -759,8 +759,8 @@ class SleepTkApp():
         self._n_vibration = 0
         if abs(int(wasp.watch.rtc.time()) - self._last_touch) > 10:
             wasp.watch.display.mute(True)
-            wasp.watch.display.poweroff()
             wasp.watch.backlight.set(0)
+            wasp.watch.display.poweroff()
 
         # tiny vibration
         wasp.watch.vibrator.pulse(duty=3, ms=50)
@@ -798,8 +798,8 @@ class SleepTkApp():
             wasp.system.keep_awake()
             if abs(int(wasp.watch.rtc.time()) - self._last_touch) > 10:
                 wasp.watch.display.mute(True)
-                wasp.watch.display.poweroff()
                 wasp.watch.backlight.set(0)
+                wasp.watch.display.poweroff()
             self._subtick()
             while t.time() < 41666:
                 pass
@@ -847,8 +847,8 @@ class SleepTkApp():
         wasp.gc.collect()
         if abs(int(wasp.watch.rtc.time()) - self._last_touch) > 10:
             wasp.watch.display.mute(True)
-            wasp.watch.display.poweroff()
             wasp.watch.backlight.set(0)
+            wasp.watch.display.poweroff()
         wasp.system.wake()
         wasp.system.switch(self)
         if self._page != _RINGING:  # safeguard: don't vibrate anymore if already on ringing page
