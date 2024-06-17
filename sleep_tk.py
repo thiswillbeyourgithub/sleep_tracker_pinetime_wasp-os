@@ -513,13 +513,14 @@ class SleepTkApp():
         self._track_start_time = int(wasp.watch.rtc.time())  # makes output more compact
         self._last_HR_printed = "?"
         self._meta_state = 0
-        wasp.watch.accel.reset()
-        xyz = wasp.watch.accel.accel_xyz()
-        self._accel_memory = array("f",
-            (xyz[0], xyz[1], xyz[2]))  # contains previous accelerometer value
 
         # if enabled, add alarm to log accel data in _FREQ seconds
         if self._state_body_tracking:
+            wasp.watch.accel.reset()
+            # on one of my semi-broken pinetime watch I get 'comms failure' when trying to use the accelerometer
+            xyz = wasp.watch.accel.accel_xyz()
+            self._accel_memory = array("f",
+            (xyz[0], xyz[1], xyz[2]))  # contains previous accelerometer value
             # create one file per recording session:
             self.filep = "logs/sleep/{}_{}_{}.csv".format(str(self._track_start_time + _TIMESTAMP), _STORE_FREQ, self.VERSION)
             with open(self.filep, "wb") as f:
