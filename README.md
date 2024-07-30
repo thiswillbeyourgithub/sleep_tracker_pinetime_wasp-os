@@ -11,7 +11,7 @@
 * **Insomnia insights**: if you turn on the screen during the night, SleepTk will tell you how long you slept and in what part of the sleep cycle you are supposed to be. Helpful to figure out insomnia patterns.
 * **Body tracking**: logs your body movement during the night, infers your sleep cycle and write it all down in a `.csv` file.
 * **Heart tracking**: tracks your heart rate throughout the night. *(edit: will be vastly improved when [this issue][https://github.com/daniel-thompson/wasp-os/pull/363#issuecomment-1257055637) gets sorted out)*
-* **Status: fully functional**
+* **Status: fully functional**: I've been using it daily for maybe 3 years on the same pinetime now (time of writing, july 2024)
 
 ## Credits:
 * Many thanks to @beardeddude for helping me reduce the memory footprint.
