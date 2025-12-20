@@ -1,5 +1,5 @@
-# SPDX-License-Identifier: LGPL-3.0-or-later
-# Copyright (C) 2021 github.com/thiswillbeyourgithub/
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2025 github.com/thiswillbeyourgithub/
 
 """Sleep tracker
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
