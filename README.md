@@ -7,7 +7,7 @@
 - The wasp os version still works of course and as of December 2024 the features are about the same. It is planned to connect it to gadget bridge to automatically pull the sleep data from each nights.
 
 ## Features:
-* **Status: fully functional**: I've been using it **daily for maybe 3 years** on the same pinetime now (time of writing, october 2024). It's amidst my most useful project health-wise so far.
+* **Status: fully functional**: I've been using it **daily for maybe years** on the same pinetime now (started around 2021, still using it in 2026). It's amidst my most useful project health-wise so far.
 * **Privacy friendly**: your data is not sent to anyone, it is stored directly on the watch (but you can still download it if needed).
 * **Fully open source**
 * **Easy to snooze but hard to stop** You have to swipe several times to make it stop, but can snooze easily.
